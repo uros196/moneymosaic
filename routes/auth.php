@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,22 @@ Route::middleware('auth')->group(function () {
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
         ->middleware('throttle:6,1');
+
+    // Password inactivity check endpoint for client focus checks
+    Route::get('password/needs-confirmation', [ConfirmablePasswordController::class, 'needsConfirmation'])
+        ->name('password.needs-confirmation');
+
+    // Two-Factor Authentication challenge routes
+    Route::get('twofactor/challenge', [TwoFactorChallengeController::class, 'create'])
+        ->name('twofactor.challenge');
+
+    Route::post('twofactor/challenge', [TwoFactorChallengeController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('twofactor.store');
+
+    Route::post('twofactor/resend', [TwoFactorChallengeController::class, 'resend'])
+        ->middleware('throttle:3,1')
+        ->name('twofactor.resend');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

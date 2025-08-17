@@ -90,6 +90,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Session Eloquent Model
+    |--------------------------------------------------------------------------
+    |
+    | You may customize the Eloquent model used to interact with the sessions
+    | table. This is useful if you need to add scopes or override behavior.
+    |
+    */
+
+    'model' => env('SESSION_MODEL', \App\Models\Session::class),
+
+    /*
+    |--------------------------------------------------------------------------
     | Session Cache Store
     |--------------------------------------------------------------------------
     |

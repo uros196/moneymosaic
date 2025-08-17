@@ -10,11 +10,17 @@ class PasswordConfirmationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_confirm_password_screen_can_be_rendered()
+    public function test_confirm_password_screen_can_be_rendered_when_required()
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'password_confirm_minutes' => 5,
+        ]);
 
-        $response = $this->actingAs($user)->get('/confirm-password');
+        $response = $this->actingAs($user)
+            ->withSession([
+                'auth.password_confirmed_at' => time() - (10 * 60),
+            ])
+            ->get('/confirm-password');
 
         $response->assertStatus(200);
     }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureRecentPasswordMiddleware;
+use App\Http\Middleware\EnsureTwoFactorVerified;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -16,9 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
+        // Register route middleware aliases
+        $middleware->alias([
+            '2fa' => EnsureTwoFactorVerified::class,
+            'password.recent' => EnsureRecentPasswordMiddleware::class,
+        ]);
+
         $middleware->web(append: [
             HandleAppearance::class,
+            \App\Http\Middleware\SetLocale::class,
             HandleInertiaRequests::class,
+            \App\Http\Middleware\UpdateSessionMetadata::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
     })

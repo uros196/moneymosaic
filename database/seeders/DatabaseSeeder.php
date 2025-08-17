@@ -13,7 +13,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Seed sample exchange rates for development/testing
+        $this->call([
+            ExchangeRatesSeeder::class,
+        ]);
 
         User::factory()->create([
             'name' => 'Test User',

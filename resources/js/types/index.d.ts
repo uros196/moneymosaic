@@ -35,6 +35,8 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    locale?: 'en' | 'sr';
+    password_confirm_minutes?: number | null;
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;

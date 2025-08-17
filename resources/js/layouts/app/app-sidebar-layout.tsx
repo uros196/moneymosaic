@@ -2,10 +2,56 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
-import { type BreadcrumbItem } from '@/types';
-import { type PropsWithChildren } from 'react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { type PropsWithChildren, useEffect, useRef } from 'react';
+import { router, usePage } from '@inertiajs/react';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
+    const { auth } = usePage<SharedData>().props;
+    const minutes = auth.user.password_confirm_minutes ?? null;
+
+    const ticking = useRef(false);
+    const timeoutId = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!minutes || minutes <= 0) {
+            return;
+        }
+
+        const check = () => {
+            if (ticking.current) return;
+            ticking.current = true;
+            fetch(route('password.needs-confirmation'), { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+                .then((r) => r.json())
+                .then((data) => {
+                    if (data?.required && data?.redirect) {
+                        router.visit(data.redirect, { preserveState: true });
+                    }
+                })
+                .finally(() => {
+                    ticking.current = false;
+                });
+        };
+
+        const onFocus = () => {
+            // small debounce to avoid double firing
+            if (timeoutId.current) {
+                window.clearTimeout(timeoutId.current);
+                timeoutId.current = null;
+            }
+            timeoutId.current = window.setTimeout(() => check(), 150);
+        };
+
+        window.addEventListener('focus', onFocus);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') onFocus();
+        });
+
+        return () => {
+            window.removeEventListener('focus', onFocus);
+        };
+    }, [minutes]);
+
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
