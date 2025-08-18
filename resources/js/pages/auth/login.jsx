@@ -7,7 +7,6 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Login({ status, canResetPassword }) {
@@ -63,8 +62,7 @@ export default function Login({ status, canResetPassword }) {
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>
 
-                            <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                            <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing} isLoading={processing}>
                                 Log in
                             </Button>
                         </div>

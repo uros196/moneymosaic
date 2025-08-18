@@ -5,6 +5,7 @@ namespace App\Services\TwoFactor\Strategies;
 use App\Models\User;
 use App\Services\TwoFactor\Contracts\TwoFactorStrategy;
 use App\Services\TwoFactor\EmailCodeService;
+use App\Services\TwoFactor\TwoFactorSessionService;
 use Illuminate\Contracts\Session\Session as SessionContract;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,7 +18,10 @@ class EmailTwoFactorStrategy implements TwoFactorStrategy
     /**
      * @param  EmailCodeService  $emailService  Service for generating and sending email verification codes
      */
-    public function __construct(public EmailCodeService $emailService) {}
+    public function __construct(
+        protected EmailCodeService $emailService,
+        protected TwoFactorSessionService $sessionService,
+    ) {}
 
     /**
      * Initiates the two-factor authentication challenge by sending a verification code via email.
@@ -32,11 +36,6 @@ class EmailTwoFactorStrategy implements TwoFactorStrategy
 
     /**
      * Verifies the submitted two-factor authentication code.
-     *
-     * @param  User  $user  The user attempting verification
-     * @param  string  $code  The verification code submitted by the user
-     * @param  SessionContract  $session  The current session containing stored verification data
-     * @return bool True if verification succeeds, false otherwise
      */
     public function verify(User $user, string $code, SessionContract $session): bool
     {
@@ -52,5 +51,26 @@ class EmailTwoFactorStrategy implements TwoFactorStrategy
         }
 
         return $hash !== '' && Hash::check($numeric, $hash);
+    }
+
+    /**
+     * Checks if email-based two-factor authentication setup is in progress.
+     */
+    public function isSetupInProgress(User $user, SessionContract $session): bool
+    {
+        if ($user->two_factor_type !== 'email' || $user->two_factor_enabled) {
+            return false;
+        }
+
+        return $this->sessionService->isPending($session);
+    }
+
+    /**
+     * Determines if the two-factor setup modal should be shown.
+     */
+    public function isModalPending(User $user, SessionContract $session): bool
+    {
+        // For email 2FA, modal is pending when a challenge is pending
+        return $this->isSetupInProgress($user, $session);
     }
 }

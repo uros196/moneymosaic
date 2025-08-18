@@ -1,5 +1,6 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Link, usePage } from '@inertiajs/react';
+import ToastManager from '@/components/toast-manager';
 
 export default function AuthSplitLayout({ children, title, description }) {
     const { name, quote } = usePage().props;
@@ -30,6 +31,7 @@ export default function AuthSplitLayout({ children, title, description }) {
                         <h1 className="text-xl font-medium">{title}</h1>
                         <p className="text-sm text-balance text-muted-foreground">{description}</p>
                     </div>
+                    <ToastManager />
                     {children}
                 </div>
             </div>

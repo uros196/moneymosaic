@@ -1,5 +1,4 @@
 import { Form, Head, Link } from '@inertiajs/react'
-import { LoaderCircle } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import InputError from '@/components/input-error'
@@ -160,8 +159,7 @@ export default function TwoFactorChallenge({ method, status }) {
             )}
 
             <div className="flex items-center gap-3">
-              <Button type="submit" disabled={processing} className="min-w-28">
-                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+              <Button type="submit" disabled={processing} className="min-w-28" isLoading={processing}>
                 Verify
               </Button>
               {method === 'email' && (

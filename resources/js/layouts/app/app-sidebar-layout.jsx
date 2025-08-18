@@ -4,6 +4,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { useEffect, useRef } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import ToastManager from '@/components/toast-manager';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }) {
     const { auth } = usePage().props;
@@ -56,6 +57,7 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }) {
             <AppSidebar />
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                <ToastManager />
                 {children}
             </AppContent>
         </AppShell>

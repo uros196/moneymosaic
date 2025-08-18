@@ -1,5 +1,6 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Link } from '@inertiajs/react';
+import ToastManager from '@/components/toast-manager';
 
 export default function AuthSimpleLayout({ children, title, description }) {
     return (
@@ -19,6 +20,7 @@ export default function AuthSimpleLayout({ children, title, description }) {
                             <p className="text-center text-sm text-muted-foreground">{description}</p>
                         </div>
                     </div>
+                    <ToastManager />
                     {children}
                 </div>
             </div>

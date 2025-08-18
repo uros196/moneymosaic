@@ -51,6 +51,25 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => function () use ($request) {
+                $success = $request->session()->get('success');
+                $error = $request->session()->get('error');
+                $warning = $request->session()->get('warning');
+                $info = $request->session()->get('info');
+                $status = $request->session()->get('status');
+
+                $hasFlash = $success !== null || $error !== null || $warning !== null || $info !== null || $status !== null;
+
+                return [
+                    'success' => $success,
+                    'error' => $error,
+                    'warning' => $warning,
+                    'info' => $info,
+                    'status' => $status,
+                    // Unique key so the frontend effect runs even when text is identical across submits
+                    'key' => $hasFlash ? (string) microtime(true) : null,
+                ];
+            },
         ];
     }
 }

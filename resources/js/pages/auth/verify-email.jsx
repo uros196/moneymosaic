@@ -1,5 +1,4 @@
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -19,8 +18,7 @@ export default function VerifyEmail({ status }) {
             <Form method="post" action={route('verification.send')} className="space-y-6 text-center">
                 {({ processing }) => (
                     <>
-                        <Button disabled={processing} variant="secondary">
-                            {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                        <Button disabled={processing} variant="secondary" isLoading={processing}>
                             Resend verification email
                         </Button>
 

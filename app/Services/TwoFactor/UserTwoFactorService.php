@@ -20,6 +20,46 @@ class UserTwoFactorService
     ) {}
 
     /**
+     * Determine if the current user is in a setup/in-progress state for their selected 2FA type.
+     */
+    public function isSetupInProgress(User $user, SessionContract $session): bool
+    {
+        return $this->factory->forUser($user)->isSetupInProgress($user, $session);
+    }
+
+    /**
+     * Compose props for the security page regarding 2FA setup state.
+     * Returns an array with keys: otpAuthUrl, qrUrl, setupJustBegan, emailPending.
+     *
+     * @return array{
+     *   otpAuthUrl: string|null,
+     *   qrUrl: string|null,
+     *   setupJustBegan: bool,
+     *   emailPending: bool
+     * }
+     */
+    public function getSecurityProps(User $user, SessionContract $session): array
+    {
+        $otpAuthUrl = null;
+        if ($user->two_factor_type === 'totp' && ! $user->two_factor_enabled && $user->two_factor_secret) {
+            $label = config('app.name') . ':' . $user->email;
+            $otpAuthUrl = $this->totp->getOtpAuthUri($label, $user->two_factor_secret, config('app.name'));
+        }
+
+        $qrUrl = $otpAuthUrl ? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($otpAuthUrl) : null;
+
+        $emailStrategy = $this->factory->forType('email');
+        $totpStrategy = $this->factory->forType('totp');
+
+        return [
+            'otpAuthUrl' => $otpAuthUrl,
+            'qrUrl' => $qrUrl,
+            'setupJustBegan' => $totpStrategy->isModalPending($user, $session),
+            'emailPending' => $emailStrategy->isModalPending($user, $session),
+        ];
+    }
+
+    /**
      * Generate a new TOTP secret and mark TOTP setup as begun (still disabled).
      */
     public function beginTotp(User $user): void

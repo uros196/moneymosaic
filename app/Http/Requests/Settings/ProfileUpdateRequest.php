@@ -23,7 +23,7 @@ class ProfileUpdateRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if ($this->has('password_confirm_minutes') && $this->string('password_confirm_minutes')->value() === '') {
+        if ($this->has('password_confirm_minutes') && $this->string('password_confirm_minutes')->value() === '0') {
             $this->merge(['password_confirm_minutes' => null]);
         }
     }
@@ -49,7 +49,7 @@ class ProfileUpdateRequest extends FormRequest
 
             'locale' => ['required', 'string', 'in:en,sr'],
 
-            'password_confirm_minutes' => ['nullable', Rule::in([5, 10, 15, 30, 60, 240])],
+            'password_confirm_minutes' => ['nullable', Rule::in([30, 60, 240, 600])],
         ];
     }
 }

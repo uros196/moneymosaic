@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { Loader } from "@/components/ui/loader"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -39,16 +40,46 @@ function Button({
   variant,
   size,
   asChild = false,
+  isLoading = false,
+  disabled,
+  children,
   ...props
 }) {
   const Comp = asChild ? Slot : "button"
+  const computedDisabled = Boolean(disabled || isLoading)
+
+  // When using asChild, Radix Slot requires exactly one React element child.
+  // We must not render extra siblings or wrappers inside Slot.
+  if (asChild) {
+    return (
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }), isLoading && "relative")}
+        aria-busy={isLoading || undefined}
+        data-loading={isLoading ? "" : undefined}
+        {...props}
+      >
+        {children}
+      </Comp>
+    )
+  }
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, className }), isLoading && "relative")}
+      aria-busy={isLoading || undefined}
+      data-loading={isLoading ? "" : undefined}
+      disabled={computedDisabled}
       {...props}
-    />
+    >
+      {isLoading && (
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true">
+          <Loader className="size-4 text-current" />
+        </span>
+      )}
+      <span className={isLoading ? "opacity-0" : ""}>{children}</span>
+    </Comp>
   )
 }
 

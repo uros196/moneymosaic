@@ -77,7 +77,7 @@ export default function Sessions({ sessions }) {
                       <div className="shrink-0">
                         <Form method="delete" action={route('settings.sessions.destroy', s.id)}>
                           {({ processing }) => (
-                            <Button type="submit" variant="secondary" disabled={processing || s.is_current}>Log out</Button>
+                            <Button type="submit" variant="secondary" disabled={processing || s.is_current} isLoading={processing}>Log out</Button>
                           )}
                         </Form>
                       </div>
@@ -91,12 +91,12 @@ export default function Sessions({ sessions }) {
           <div className="flex flex-wrap items-center gap-3">
             <Form method="post" action={route('settings.sessions.others')}>
               {({ processing }) => (
-                <Button type="submit" variant="secondary" disabled={processing}>Log out other sessions</Button>
+                <Button type="submit" variant="secondary" disabled={processing} isLoading={processing}>Log out other sessions</Button>
               )}
             </Form>
             <Form method="post" action={route('settings.sessions.all')}>
               {({ processing }) => (
-                <Button type="submit" variant="destructive" disabled={processing}>Log out all sessions</Button>
+                <Button type="submit" variant="destructive" disabled={processing} isLoading={processing}>Log out all sessions</Button>
               )}
             </Form>
           </div>

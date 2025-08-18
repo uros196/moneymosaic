@@ -20,12 +20,19 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
   const tfType = auth.user.two_factor_type
   const enabled = Boolean(auth.user.two_factor_enabled)
 
-  const [open, setOpen] = useState(Boolean(setupJustBegan))
+  const [open, setOpen] = useState(Boolean(setupJustBegan || qrUrl))
   const [emailOpen, setEmailOpen] = useState(Boolean(emailPending))
 
   useEffect(() => {
     setEmailOpen(Boolean(emailPending))
   }, [emailPending])
+
+  // Automatically open the TOTP setup modal when a QR becomes available
+  useEffect(() => {
+    if (qrUrl) {
+      setOpen(true)
+    }
+  }, [qrUrl])
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -44,7 +51,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                 <p className="mb-2 text-sm text-muted-foreground">2FA is enabled using <span className="font-medium">{String(tfType || '').toUpperCase()}</span>.</p>
                 <Form method="post" action={route('settings.security.disable')}>
                   {({ processing }) => (
-                    <Button type="submit" variant="secondary" disabled={processing}>Disable 2FA</Button>
+                    <Button type="submit" variant="secondary" disabled={processing} isLoading={processing}>Disable 2FA</Button>
                   )}
                 </Form>
               </div>
@@ -55,7 +62,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                   <p className="mb-4 text-sm text-muted-foreground">Receive a 6-digit code to your email address when signing in.</p>
                   <Form method="post" action={route('settings.security.email.enable')}>
                     {({ processing }) => (
-                      <Button type="submit" disabled={processing}>Enable Email 2FA</Button>
+                      <Button type="submit" disabled={processing} isLoading={processing}>Enable Email 2FA</Button>
                     )}
                   </Form>
                 </div>
@@ -69,7 +76,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                   ) : (
                     <Form method="post" action={route('settings.security.totp.begin')}>
                       {({ processing }) => (
-                        <Button type="submit" disabled={processing}>Begin setup</Button>
+                        <Button type="submit" disabled={processing} isLoading={processing}>Begin setup</Button>
                       )}
                     </Form>
                   )}
@@ -134,7 +141,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                             <InputError message={errors.code} />
                           </div>
                           <div className="flex items-center gap-3">
-                            <Button type="submit" disabled={processing}>Confirm and enable</Button>
+                            <Button type="submit" disabled={processing} isLoading={processing}>Confirm and enable</Button>
                           </div>
                         </>
                       )}
@@ -145,7 +152,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                       </Link>
                       <Form method="post" action={route('settings.security.disable')}>
                         {({ processing: disabling }) => (
-                          <Button type="submit" variant="secondary" disabled={disabling}>Cancel</Button>
+                          <Button type="submit" variant="secondary" disabled={disabling} isLoading={disabling}>Cancel</Button>
                         )}
                       </Form>
                     </div>
@@ -198,22 +205,28 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                                 <InputError message={errors.code} />
                               </div>
                               <div className="flex items-center gap-3">
-                                <Button type="submit" disabled={processing}>Confirm and enable</Button>
-                                <Link as="button" href={route('settings.security.totp.begin')} method="post" className="text-sm underline">
-                                  Regenerate QR
-                                </Link>
-                                <Button type="button" variant="secondary" onClick={() => setOpen(false)}>Close</Button>
+                                <Button type="submit" disabled={processing} isLoading={processing}>Confirm and enable</Button>
                               </div>
                             </>
                           )}
                         </Form>
+                        <div className="flex items-center gap-3">
+                          <Link as="button" href={route('settings.security.totp.begin')} method="post" className="text-sm underline">
+                            Regenerate QR
+                          </Link>
+                          <Form method="post" action={route('settings.security.disable')}>
+                            {({ processing: disabling }) => (
+                              <Button type="submit" variant="secondary" disabled={disabling} isLoading={disabling}>Cancel</Button>
+                            )}
+                          </Form>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <p className="text-sm text-muted-foreground">Click the button below to begin setup and generate your QR code.</p>
                         <Form method="post" action={route('settings.security.totp.begin')}>
                           {({ processing }) => (
-                            <Button type="submit" disabled={processing}>Begin setup</Button>
+                            <Button type="submit" disabled={processing} isLoading={processing}>Begin setup</Button>
                           )}
                         </Form>
                       </div>

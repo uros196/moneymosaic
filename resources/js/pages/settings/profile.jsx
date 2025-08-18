@@ -1,4 +1,3 @@
-import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 
 import DeleteUser from '@/components/delete-user';
@@ -9,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx';
 
 const breadcrumbs = [
     {
@@ -17,10 +18,12 @@ const breadcrumbs = [
     },
 ];
 
-export default function Profile({ mustVerifyEmail, status }) {
+export default function Profile({ mustVerifyEmail, status, twoFactorSetupInProgress }) {
     const { auth } = usePage().props;
     const enabled = Boolean(auth.user.two_factor_enabled);
     const tfType = auth.user.two_factor_type;
+    const [locale, setLocale] = useState(auth.user.locale ?? 'en');
+    const [passwordConfirmMinutes, setPasswordConfirmMinutes] = useState(String(auth.user.password_confirm_minutes ?? '0'));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -38,7 +41,7 @@ export default function Profile({ mustVerifyEmail, status }) {
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, errors }) => (
                             <>
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Name</Label>
@@ -76,35 +79,35 @@ export default function Profile({ mustVerifyEmail, status }) {
                                 <div className="grid gap-2">
                                     <Label htmlFor="locale">Language</Label>
 
-                                    <select
-                                        id="locale"
-                                        name="locale"
-                                        defaultValue={auth.user.locale ?? 'en'}
-                                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px]"
-                                        aria-invalid={!!errors.locale}
-                                    >
-                                        <option value="en">English</option>
-                                        <option value="sr">Srpski</option>
-                                    </select>
+                                    <input type="hidden" name="locale" value={locale} />
+                                    <Select value={locale} onValueChange={setLocale}>
+                                        <SelectTrigger id="locale" aria-invalid={!!errors.locale}>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="en">English</SelectItem>
+                                            <SelectItem value="sr">Srpski</SelectItem>
+                                        </SelectContent>
+                                    </Select>
 
                                     <InputError className="mt-2" message={errors.locale} />
                                 </div>
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="password_confirm_minutes">Require password after inactivity</Label>
-                                    <select
-                                        id="password_confirm_minutes"
-                                        name="password_confirm_minutes"
-                                        defaultValue={String(auth.user.password_confirm_minutes ?? '')}
-                                        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-9 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-[3px]"
-                                        aria-invalid={!!errors.password_confirm_minutes}
-                                    >
-                                        <option value="">Off</option>
-                                        <option value="30">After 30 minutes</option>
-                                        <option value="60">After 1 hour</option>
-                                        <option value="240">After 4 hours</option>
-                                        <option value="600">After 10 hours</option>
-                                    </select>
+                                    <input type="hidden" name="password_confirm_minutes" value={passwordConfirmMinutes} />
+                                    <Select value={passwordConfirmMinutes} onValueChange={setPasswordConfirmMinutes}>
+                                        <SelectTrigger id="password_confirm_minutes" aria-invalid={!!errors.password_confirm_minutes}>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="0">Off</SelectItem>
+                                            <SelectItem value="30">After 30 minutes</SelectItem>
+                                            <SelectItem value="60">After 1 hour</SelectItem>
+                                            <SelectItem value="240">After 4 hours</SelectItem>
+                                            <SelectItem value="600">After 10 hours</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <p className="text-xs text-muted-foreground">You will be asked to confirm your password after being inactive for the selected time.</p>
                                     <InputError className="mt-2" message={errors.password_confirm_minutes} />
                                 </div>
@@ -132,17 +135,7 @@ export default function Profile({ mustVerifyEmail, status }) {
                                 )}
 
                                 <div className="flex items-center gap-4">
-                                    <Button disabled={processing}>Save</Button>
-
-                                    <Transition
-                                        show={recentlySuccessful}
-                                        enter="transition ease-in-out"
-                                        enterFrom="opacity-0"
-                                        leave="transition ease-in-out"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <p className="text-sm text-neutral-600">Saved</p>
-                                    </Transition>
+                                    <Button disabled={processing} isLoading={processing}>Save</Button>
                                 </div>
                             </>
                         )}
@@ -159,6 +152,11 @@ export default function Profile({ mustVerifyEmail, status }) {
                                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
                                         Enabled{tfType ? ` (${String(tfType).toUpperCase()})` : ''}
+                                    </span>
+                                ) : twoFactorSetupInProgress ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true"></span>
+                                        Setting up{tfType ? ` (${String(tfType).toUpperCase()})` : ''}
                                     </span>
                                 ) : (
                                     <span className="inline-flex items-center gap-1 rounded-full bg-neutral-500/10 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400">

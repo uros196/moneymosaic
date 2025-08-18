@@ -1,5 +1,4 @@
 import { Form, Head } from '@inertiajs/react'
-import { LoaderCircle } from 'lucide-react'
 
 import InputError from '@/components/input-error'
 import TextLink from '@/components/text-link'
@@ -26,8 +25,7 @@ export default function ConfirmPassword({ logout }) {
                 <InputError message={errors.password} />
               </div>
 
-              <Button type="submit" className="mt-2 w-full" disabled={processing}>
-                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+              <Button type="submit" className="mt-2 w-full" disabled={processing} isLoading={processing}>
                 Confirm
               </Button>
             </div>

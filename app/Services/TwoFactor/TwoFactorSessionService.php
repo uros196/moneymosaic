@@ -63,6 +63,30 @@ class TwoFactorSessionService
      */
     public function clearAll(SessionContract $session): void
     {
-        $session->forget(['2fa_passed', '2fa_code_hash', '2fa_expires_at', '2fa_pending']);
+        $session->forget(['2fa_passed', '2fa_code_hash', '2fa_expires_at', '2fa_pending', 'totp_setup_begun']);
+    }
+
+    /**
+     * Mark that TOTP setup has begun so the UI can auto-open the setup modal.
+     */
+    public function markTotpSetupBegan(SessionContract $session): void
+    {
+        $session->put('totp_setup_begun', true);
+    }
+
+    /**
+     * Whether TOTP setup has been started in this session.
+     */
+    public function isTotpSetupBegan(SessionContract $session): bool
+    {
+        return (bool) $session->get('totp_setup_begun', false);
+    }
+
+    /**
+     * Clear any in-progress TOTP setup flag.
+     */
+    public function clearTotpSetup(SessionContract $session): void
+    {
+        $session->forget('totp_setup_begun');
     }
 }

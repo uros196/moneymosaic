@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\DeleteAccountRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\TwoFactor\UserTwoFactorService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,11 +18,16 @@ class ProfileController extends Controller
     /**
      * Show the user's profile settings page.
      */
-    public function edit(Request $request): Response
+    public function edit(Request $request, UserTwoFactorService $user2fa): Response
     {
+        $user = $request->user();
+
+        $inProgress = $user !== null && $user2fa->isSetupInProgress($user, $request->session());
+
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'twoFactorSetupInProgress' => $inProgress,
         ]);
     }
 
@@ -38,7 +44,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit');
+        return to_route('profile.edit')->with('success', 'Profile information updated.');
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Services\TwoFactor\Strategies;
 use App\Models\User;
 use App\Services\TwoFactor\Contracts\TwoFactorStrategy;
 use App\Services\TwoFactor\TotpService;
+use App\Services\TwoFactor\TwoFactorSessionService;
 use Illuminate\Contracts\Session\Session as SessionContract;
 
 /**
@@ -15,7 +16,7 @@ use Illuminate\Contracts\Session\Session as SessionContract;
  */
 class TotpTwoFactorStrategy implements TwoFactorStrategy
 {
-    public function __construct(public TotpService $totp) {}
+    public function __construct(protected TotpService $totp, protected TwoFactorSessionService $sessionService) {}
 
     /**
      * Begin the TOTP challenge for the user.
@@ -30,14 +31,42 @@ class TotpTwoFactorStrategy implements TwoFactorStrategy
 
     /**
      * Verify the provided TOTP code against the user's secret.
-     *
-     * @param  User  $user  The user attempting verification
-     * @param  string  $code  The TOTP code provided by the user
-     * @param  SessionContract  $session  The current session
-     * @return bool True if the code is valid, false otherwise
      */
     public function verify(User $user, string $code, SessionContract $session): bool
     {
         return $this->totp->verify($user->two_factor_secret, $code);
+    }
+
+    /**
+     * Check if TOTP setup is in progress for the user.
+     *
+     * Setup is considered in progress if:
+     * - User has selected TOTP as their 2FA type
+     * - 2FA is not yet enabled
+     * - Either setup was initiated in the current session, OR a secret exists
+     */
+    public function isSetupInProgress(User $user, SessionContract $session): bool
+    {
+        if ($user->two_factor_type !== 'totp' || $user->two_factor_enabled) {
+            return false;
+        }
+
+        return $this->sessionService->isTotpSetupBegan($session) || ! empty($user->two_factor_secret);
+    }
+
+    /**
+     * Check if the TOTP setup modal should be automatically displayed.
+     *
+     * The modal is considered pending if:
+     * - User has selected TOTP as their 2FA type
+     * - 2FA is not yet enabled
+     * - Setup was initiated in the current session
+     */
+    public function isModalPending(User $user, SessionContract $session): bool
+    {
+        // For TOTP, modal shows automatically when setup has just begun in this session
+        return $user->two_factor_type === 'totp'
+            && ! $user->two_factor_enabled
+            && $this->sessionService->isTotpSetupBegan($session);
     }
 }
