@@ -1,6 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react'
 import { Dialog, Transition } from '@headlessui/react'
-import { useState, Fragment } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 
 import HeadingSmall from '@/components/heading-small'
 import InputError from '@/components/input-error'
@@ -15,12 +15,17 @@ const breadcrumbs = [
   { title: 'Security settings', href: '/settings/security' },
 ]
 
-export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBegan }) {
+export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBegan, emailPending }) {
   const { auth } = usePage().props
   const tfType = auth.user.two_factor_type
   const enabled = Boolean(auth.user.two_factor_enabled)
 
   const [open, setOpen] = useState(Boolean(setupJustBegan))
+  const [emailOpen, setEmailOpen] = useState(Boolean(emailPending))
+
+  useEffect(() => {
+    setEmailOpen(Boolean(emailPending))
+  }, [emailPending])
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -90,6 +95,67 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
           </div>
         </div>
       </SettingsLayout>
+
+      <Transition appear show={emailOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={setEmailOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/40" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-background p-6 text-left align-middle shadow-lg">
+                  <Dialog.Title className="text-lg font-medium">Confirm Email 2FA</Dialog.Title>
+                  <div className="mt-3 space-y-3">
+                    <p className="text-sm text-muted-foreground">We've sent a 6-digit code to your email address. Enter it below to enable Email two-factor authentication.</p>
+                    <Form method="post" action={route('settings.security.email.confirm')} className="space-y-3">
+                      {({ processing, errors }) => (
+                        <>
+                          <div className="grid gap-2">
+                            <Label htmlFor="email_code">Authentication code</Label>
+                            <Input id="email_code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} />
+                            <InputError message={errors.code} />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button type="submit" disabled={processing}>Confirm and enable</Button>
+                          </div>
+                        </>
+                      )}
+                    </Form>
+                    <div className="flex items-center gap-3">
+                      <Link as="button" href={route('settings.security.email.resend')} method="post" className="text-sm underline">
+                        Resend code
+                      </Link>
+                      <Form method="post" action={route('settings.security.disable')}>
+                        {({ processing: disabling }) => (
+                          <Button type="submit" variant="secondary" disabled={disabling}>Cancel</Button>
+                        )}
+                      </Form>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
 
       <Transition appear show={open && Boolean(qrUrl)} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={setOpen}>

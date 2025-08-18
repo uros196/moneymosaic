@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\TwoFactor\TwoFactorSessionService;
+
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,9 +34,9 @@ class EnsureTwoFactorVerified
                 return $next($request);
             }
 
-            if (! (bool) $request->session()->get('2fa_passed', false)) {
-                // Mark pending if not set, used for flow detection
-                $request->session()->put('2fa_pending', true);
+            if (! app(TwoFactorSessionService::class)->hasPassed($request->session())) {
+                // Mark pending using centralized session service
+                app(TwoFactorSessionService::class)->beginChallenge($request->session());
 
                 return redirect()->route('twofactor.challenge');
             }

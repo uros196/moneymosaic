@@ -138,4 +138,16 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    /* Pointer cursor for clickable elements on hover */
+    :where(
+        a[href],
+        button:not(:disabled):not([aria-disabled="true"]),
+        [role="button"],
+        input[type="button"],
+        input[type="submit"],
+        input[type="reset"]
+    ):hover {
+        cursor: pointer;
+    }
 }

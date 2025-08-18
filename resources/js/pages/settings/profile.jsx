@@ -19,6 +19,8 @@ const breadcrumbs = [
 
 export default function Profile({ mustVerifyEmail, status }) {
     const { auth } = usePage().props;
+    const enabled = Boolean(auth.user.two_factor_enabled);
+    const tfType = auth.user.two_factor_type;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -152,6 +154,19 @@ export default function Profile({ mustVerifyEmail, status }) {
                         <div>
                             <p className="font-medium">Two-factor authentication</p>
                             <p className="text-sm text-muted-foreground">Add an extra layer of security to your account.</p>
+                            <div className="mt-1">
+                                {enabled ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+                                        Enabled{tfType ? ` (${String(tfType).toUpperCase()})` : ''}
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-neutral-500/10 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" aria-hidden="true"></span>
+                                        Disabled
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <Link href={route('settings.security')} className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500">
                             Manage

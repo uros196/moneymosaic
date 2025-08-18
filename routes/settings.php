@@ -32,6 +32,10 @@ Route::middleware(['auth', 'verified', '2fa', 'password.recent'])
         // Security / Two-Factor
         Route::get('security', [TwoFactorController::class, 'edit'])->name('settings.security');
         Route::post('security/email/enable', [TwoFactorController::class, 'enableEmail'])->name('settings.security.email.enable');
+        Route::post('security/email/confirm', [TwoFactorController::class, 'confirmEmail'])->name('settings.security.email.confirm')
+            ->middleware('throttle:6,1');
+        Route::post('security/email/resend', [TwoFactorController::class, 'resendEmail'])->name('settings.security.email.resend')
+            ->middleware('throttle:3,1');
         Route::post('security/totp/begin', [TwoFactorController::class, 'beginTotp'])->name('settings.security.totp.begin');
         Route::post('security/totp/confirm', [TwoFactorController::class, 'confirmTotp'])->name('settings.security.totp.confirm')
             ->middleware('throttle:6,1');

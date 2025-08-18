@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\TwoFactorChallengeRequest;
 use App\Services\TwoFactor\TwoFactorChallengeService;
 use App\Services\TwoFactor\TwoFactorStrategyFactory;
+use App\Services\TwoFactor\TwoFactorSessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -28,12 +29,12 @@ class TwoFactorChallengeController extends Controller
      * @param  Request  $request  Current request instance.
      * @return Response|RedirectResponse Inertia response with challenge page or redirect if already verified.
      */
-    public function create(Request $request): Response|RedirectResponse
+    public function create(Request $request, TwoFactorSessionService $tfSession): Response|RedirectResponse
     {
         $user = $request->user();
 
         // If user already passed 2FA or doesn't require it, redirect away
-        if (! $user || ! $user->two_factor_enabled || (bool) $request->session()->get('2fa_passed', false)) {
+        if (! $user || ! $user->two_factor_enabled || $tfSession->hasPassed($request->session())) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
 

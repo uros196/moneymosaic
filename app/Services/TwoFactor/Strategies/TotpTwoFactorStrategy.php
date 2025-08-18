@@ -38,10 +38,6 @@ class TotpTwoFactorStrategy implements TwoFactorStrategy
      */
     public function verify(User $user, string $code, SessionContract $session): bool
     {
-        if (! $user->two_factor_secret) {
-            return false;
-        }
-
         return $this->totp->verify($user->two_factor_secret, $code);
     }
 }

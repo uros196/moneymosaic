@@ -34,7 +34,7 @@ class EmailCodeService
         $session->put('2fa_code_hash', Hash::make($code));
         $session->put('2fa_expires_at', now()->addMinutes($this->ttlMinutes)->timestamp);
 
-        // Send via Notification while keeping the Mailable class in the codebase
+        // Send it via Notification while keeping the Mailable class in the codebase
         $user->notify(new TwoFactorCodeNotification($code));
     }
 }

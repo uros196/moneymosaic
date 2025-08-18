@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Settings\ConfirmEmailTwoFactorRequest;
 use App\Http\Requests\Settings\ConfirmTotpRequest;
-use App\Services\TwoFactor\RecoveryCodeService;
 use App\Services\TwoFactor\TotpService;
+use App\Services\TwoFactor\TwoFactorSessionService;
+use App\Services\TwoFactor\UserTwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,12 +26,8 @@ class TwoFactorController extends Controller
 {
     /**
      * Display the Two-Factor Authentication settings page.
-     *
-     * @param  Request  $request  Current request instance.
-     * @param  TotpService  $totp  Service for TOTP operations.
-     * @return Response Inertia response with 2FA settings data.
      */
-    public function edit(Request $request, TotpService $totp): Response
+    public function edit(Request $request, TotpService $totp, TwoFactorSessionService $tfSession): Response
     {
         $user = $request->user();
 
@@ -47,95 +45,89 @@ class TwoFactorController extends Controller
             'qrUrl' => $qrUrl,
             'recoveryCodes' => $request->session()->get('recoveryCodes'),
             'setupJustBegan' => (bool) $request->session()->get('totp_setup_begun', false),
+            'emailPending' => $user->two_factor_type === 'email'
+                && ! $user->two_factor_enabled
+                && $tfSession->isPending($request->session()),
         ]);
     }
 
     /**
-     * Enable Two-Factor Authentication using email codes.
-     *
-     * @param  Request  $request  Current request instance.
-     * @return RedirectResponse Redirects back to the settings page.
+     * Start enabling Email-based 2FA by sending a verification code.
+     * Does NOT enable until the code is confirmed.
      */
-    public function enableEmail(Request $request): RedirectResponse
+    public function enableEmail(Request $request, UserTwoFactorService $user2fa): RedirectResponse
     {
-        $user = $request->user();
-        $user->forceFill([
-            'two_factor_type' => 'email',
-            'two_factor_enabled' => true,
-            'two_factor_secret' => null,
-        ])->save();
+        $user2fa->startEmailTwoFactorSetup($request->user(), $request->session());
 
         return back();
     }
 
     /**
      * Begin TOTP setup by generating a new secret and saving it on the user (disabled until confirmed).
-     *
-     * @param  Request  $request  Current request instance.
-     * @param  TotpService  $totp  Service for generating TOTP secrets.
-     * @return RedirectResponse Redirects back to the security settings with setup flag.
      */
-    public function beginTotp(Request $request, TotpService $totp): RedirectResponse
+    public function beginTotp(Request $request, UserTwoFactorService $user2fa): RedirectResponse
     {
-        $user = $request->user();
-
-        // Generate new secret and set type to totp, but don't enable until confirmed
-        $secret = $totp->generateSecret();
-        $user->forceFill([
-            'two_factor_type' => 'totp',
-            'two_factor_enabled' => false,
-            'two_factor_secret' => $secret,
-        ])->save();
+        $user2fa->beginTotp($request->user());
 
         return to_route('settings.security')->with('totp_setup_begun', true);
     }
 
-    public function confirmTotp(ConfirmTotpRequest $request, TotpService $totp, RecoveryCodeService $recovery): RedirectResponse
+    /**
+     * Confirm TOTP setup by verifying the provided code and enabling 2FA.
+     * On success, generates recovery codes and clears setup session flags.
+     */
+    public function confirmTotp(ConfirmTotpRequest $request, UserTwoFactorService $user2fa): RedirectResponse
     {
-        $validated = $request->validated();
-
         $user = $request->user();
         if (! $user->two_factor_secret) {
             return back()->withErrors(['code' => __('No TOTP secret to confirm. Please start setup again.')]);
         }
 
-        if (! $totp->verify($user->two_factor_secret, (string) $request->string('code'))) {
+        $codes = $user2fa->confirmTotp($user, (string) $request->string('code'), $request->session());
+        if ($codes === null) {
             return back()->withErrors(['code' => __('Invalid code. Try again.')]);
         }
 
-        $user->forceFill([
-            'two_factor_enabled' => true,
-        ])->save();
-
-        // Generate recovery codes and flash them to the session
-        $codes = $recovery->generateAndStore($user);
-
-        // Consider the user as passed 2FA now to avoid redirecting to the challenge
-        $request->session()->put('2fa_passed', true);
-        $request->session()->forget(['2fa_pending']);
-        // Ensure setup flag is cleared so modal does not auto-open again
+        // Ensure a setup flag is cleared so modal does not auto-open again
         $request->session()->forget('totp_setup_begun');
 
         return to_route('settings.security')->with('recoveryCodes', $codes);
     }
 
     /**
-     * Disable Two-Factor Authentication and clear related user/session data.
-     *
-     * @param  Request  $request  Current request instance.
-     * @return RedirectResponse Redirects back to the settings page.
+     * Confirm Email-based 2FA by verifying a 6-digit code that was sent.
      */
-    public function disable(Request $request): RedirectResponse
+    public function confirmEmail(ConfirmEmailTwoFactorRequest $request, UserTwoFactorService $user2fa): RedirectResponse
     {
         $user = $request->user();
-        $user->forceFill([
-            'two_factor_enabled' => false,
-            'two_factor_type' => null,
-            'two_factor_secret' => null,
-        ])->save();
+        if ($user->two_factor_type !== 'email' || $user->two_factor_enabled) {
+            return back();
+        }
 
-        // Clear session flags
-        $request->session()->forget(['2fa_passed', '2fa_code_hash', '2fa_expires_at', '2fa_pending']);
+        $ok = $user2fa->confirmEmail($user, (string) $request->string('code'), $request->session());
+        if (! $ok) {
+            return back()->withErrors(['code' => __('Invalid code. Try again.')]);
+        }
+
+        return back();
+    }
+
+    /**
+     * Resend Email-based 2FA verification code during enable flow.
+     */
+    public function resendEmail(Request $request, UserTwoFactorService $user2fa): RedirectResponse
+    {
+        $user2fa->resendEmail($request->user(), $request->session());
+
+        return back()->with('status', __('A new authentication code has been sent to your email address.'));
+    }
+
+    /**
+     * Disable Two-Factor Authentication and clear related user/session data.
+     */
+    public function disable(Request $request, UserTwoFactorService $user2fa): RedirectResponse
+    {
+        $user2fa->disable($request->user(), $request->session());
 
         return back();
     }

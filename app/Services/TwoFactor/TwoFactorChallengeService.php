@@ -14,6 +14,7 @@ class TwoFactorChallengeService
     public function __construct(
         public TwoFactorStrategyFactory $factory,
         public RecoveryCodeService $recoveryCodes,
+        public TwoFactorSessionService $sessionService,
     ) {}
 
     /**
@@ -25,14 +26,14 @@ class TwoFactorChallengeService
     {
         $strategy = $this->factory->forUser($user);
         if ($this->verifyWithStrategy($strategy, $user, $code, $session)) {
-            $this->finalizeSuccess($session);
+            $this->sessionService->finalizeSuccess($session);
 
             return true;
         }
 
         // Fallback to recovery codes
         if ($this->recoveryCodes->verifyAndConsume($user, $code)) {
-            $this->finalizeSuccess($session);
+            $this->sessionService->finalizeSuccess($session);
 
             return true;
         }
@@ -54,15 +55,4 @@ class TwoFactorChallengeService
         return $strategy->verify($user, $code, $session);
     }
 
-    /**
-     * Mark the two-factor authentication as successful in the session.
-     * Clears temporary verification state and sets the success flag.
-     *
-     * @param  SessionContract  $session  The current session
-     */
-    protected function finalizeSuccess(SessionContract $session): void
-    {
-        $session->put('2fa_passed', true);
-        $session->forget(['2fa_code_hash', '2fa_expires_at', '2fa_pending']);
-    }
 }
