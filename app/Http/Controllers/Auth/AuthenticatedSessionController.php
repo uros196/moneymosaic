@@ -51,6 +51,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Still within window: refresh last interaction
+        $request->session()->put('auth.password_confirmed_at', time());
+
         // If the user has 2FA enabled, redirect to the 2FA challenge
         $user = $request->user();
         if ($user && $user->two_factor_enabled) {

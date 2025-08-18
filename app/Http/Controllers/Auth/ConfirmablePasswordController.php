@@ -43,7 +43,9 @@ class ConfirmablePasswordController extends Controller
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        return Inertia::render('auth/confirm-password');
+        return Inertia::render('auth/confirm-password', [
+            'logout' => route('logout', absolute: false),
+        ]);
     }
 
     /**
