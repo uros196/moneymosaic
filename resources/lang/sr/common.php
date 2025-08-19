@@ -1,0 +1,21 @@
+<?php
+
+return [
+    'back_to_profile' => 'Nazad na profil',
+    'confirm_and_enable' => 'Potvrdi i omogući',
+    'begin_setup' => 'Započni podešavanje',
+    'open_setup' => 'Otvori podešavanje',
+    'cancel' => 'Otkaži',
+    'resend_code' => 'Ponovo pošalji kod',
+    'disable_2fa' => 'Onemogući 2FA',
+    'enable_email_2fa' => 'Omogući email 2FA',
+    'regenerate_qr' => 'Regeneriši QR',
+    'log_out' => 'Odjavi se',
+    'log_out_other_sessions' => 'Odjavi ostale sesije',
+    'log_out_all_sessions' => 'Odjavi sve sesije',
+
+    // Common UI actions
+    'save' => 'Sačuvaj',
+    'saved' => 'Sačuvano',
+    'manage' => 'Upravljaj',
+];

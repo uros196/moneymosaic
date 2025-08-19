@@ -1,14 +1,16 @@
 import { useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 import { Monitor, Moon, Sun } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 export default function AppearanceToggleTab({ className = '', ...props }) {
     const { appearance, updateAppearance } = useAppearance();
+    const { __ } = useI18n();
 
     const tabs = [
-        { value: 'light', icon: Sun, label: 'Light' },
-        { value: 'dark', icon: Moon, label: 'Dark' },
-        { value: 'system', icon: Monitor, label: 'System' },
+        { value: 'light', icon: Sun, label: __('appearance.light') },
+        { value: 'dark', icon: Moon, label: __('appearance.dark') },
+        { value: 'system', icon: Monitor, label: __('appearance.system') },
     ];
 
     return (

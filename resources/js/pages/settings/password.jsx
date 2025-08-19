@@ -9,15 +9,17 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
-
-const breadcrumbs = [
-    {
-        title: 'Password settings',
-        href: '/settings/password',
-    },
-];
+import { useI18n } from '@/i18n';
 
 export default function Password() {
+    const { __ } = useI18n();
+
+    const breadcrumbs = [
+        {
+            title: __('password.title'),
+            href: route('password.edit'),
+        },
+    ];
     const passwordInput = useRef(null);
     const currentPasswordInput = useRef(null);
 
@@ -49,15 +51,15 @@ export default function Password() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Password settings" />
+            <Head title={__('password.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
+                    <HeadingSmall title={__('password.update_password')} description={__('password.update_password_desc')} />
 
                     <form method="POST" onSubmit={updatePassword} className="space-y-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="current_password">Current password</Label>
+                            <Label htmlFor="current_password">{__('password.current_password')}</Label>
 
                             <PasswordInput
                                 id="current_password"
@@ -65,7 +67,7 @@ export default function Password() {
                                 value={data.current_password}
                                 onChange={(e) => setData('current_password', e.target.value)}
                                 autoComplete="current-password"
-                                placeholder="Current password"
+                                placeholder={__('password.placeholder_current')}
                                 required
                                 aria-invalid={!!errors.current_password}
                                 resetKey={JSON.stringify(errors)}
@@ -75,7 +77,7 @@ export default function Password() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">New password</Label>
+                            <Label htmlFor="password">{__('password.new_password')}</Label>
 
                             <PasswordInput
                                 id="password"
@@ -83,7 +85,7 @@ export default function Password() {
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
                                 autoComplete="new-password"
-                                placeholder="New password"
+                                placeholder={__('password.placeholder_new')}
                                 required
                                 aria-invalid={!!errors.password}
                                 resetKey={JSON.stringify(errors)}
@@ -93,14 +95,14 @@ export default function Password() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">Confirm password</Label>
+                            <Label htmlFor="password_confirmation">{__('password.confirm_password')}</Label>
 
                             <PasswordInput
                                 id="password_confirmation"
                                 value={data.password_confirmation}
                                 onChange={(e) => setData('password_confirmation', e.target.value)}
                                 autoComplete="new-password"
-                                placeholder="Confirm password"
+                                placeholder={__('password.placeholder_confirm')}
                                 required
                                 aria-invalid={!!errors.password_confirmation}
                                 resetKey={JSON.stringify(errors)}
@@ -110,7 +112,7 @@ export default function Password() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing} isLoading={processing}>Save password</Button>
+                            <Button disabled={processing} isLoading={processing}>{__('password.save_password')}</Button>
 
                             <Transition
                                 show={recentlySuccessful}
@@ -119,7 +121,7 @@ export default function Password() {
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-neutral-600">Saved</p>
+                                <p className="text-sm text-neutral-600">{__('common.saved')}</p>
                             </Transition>
                         </div>
                     </form>

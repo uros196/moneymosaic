@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { useI18n } from '@/i18n';
 
 export default function Register() {
     const [errorNonce, setErrorNonce] = useState(0);
+    const { __ } = useI18n();
     return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
-            <Head title="Register" />
+        <AuthLayout title={__('auth.register_title')} description={__('auth.register_description')}>
+            <Head title={__('auth.register')} />
             <Form
                 method="post"
                 action={route('register')}
@@ -26,7 +28,7 @@ export default function Register() {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">{__('profile.name')}</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -35,14 +37,14 @@ export default function Register() {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Full name"
+                                    placeholder={__('profile.full_name')}
                                     aria-invalid={!!errors.name}
                                 />
                                 <InputError message={errors.name} className="mt-2" />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">{__('auth.email')}</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -50,21 +52,21 @@ export default function Register() {
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@example.com"
+                                    placeholder={__('auth.email')}
                                     aria-invalid={!!errors.email}
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password">{__('auth.password')}</Label>
                                 <PasswordInput
                                     id="password"
                                     required
                                     tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder={__('auth.password')}
                                     aria-invalid={!!errors.password}
                                     resetKey={errorNonce}
                                 />
@@ -72,14 +74,14 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">Confirm password</Label>
+                                <Label htmlFor="password_confirmation">{__('auth.confirm_password')}</Label>
                                 <PasswordInput
                                     id="password_confirmation"
                                     required
                                     tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    placeholder={__('auth.confirm_password')}
                                     aria-invalid={!!errors.password_confirmation}
                                     resetKey={errorNonce}
                                 />
@@ -87,14 +89,14 @@ export default function Register() {
                             </div>
 
                             <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing} isLoading={processing}>
-                                Create account
+                                {__('auth.create_account')}
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
+                            {__('auth.already_have_account')}{' '}
                             <TextLink href={route('login')} tabIndex={6}>
-                                Log in
+                                {__('auth.log_in')}
                             </TextLink>
                         </div>
                     </>

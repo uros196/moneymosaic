@@ -5,22 +5,23 @@ import HeadingSmall from '@/components/heading-small';
 
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-
-const breadcrumbs = [
-    {
-        title: 'Appearance settings',
-        href: '/settings/appearance',
-    },
-];
+import { useI18n } from '@/i18n';
 
 export default function Appearance() {
+    const { __ } = useI18n();
+    const breadcrumbs = [
+        {
+            title: __('appearance.title'),
+            href: route('appearance'),
+        },
+    ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appearance settings" />
+            <Head title={__('appearance.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Appearance settings" description="Update your account's appearance settings" />
+                    <HeadingSmall title={__('appearance.title')} description={__('appearance.description')} />
                     <AppearanceTabs />
                 </div>
             </SettingsLayout>

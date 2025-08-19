@@ -4,25 +4,27 @@ import SettingsLayout from '@/layouts/settings/layout'
 import HeadingSmall from '@/components/heading-small'
 import { Button } from '@/components/ui/button'
 import { Laptop, Smartphone, Tablet } from 'lucide-react'
+import { useI18n } from '@/i18n'
 
-function getDeviceInfo(uaRaw) {
+function getDeviceInfo(uaRaw, __) {
   const ua = (uaRaw ?? '').toLowerCase()
   const isAndroid = /android/.test(ua)
   const isTablet = /ipad|tablet/.test(ua) || (isAndroid && !/mobile/.test(ua))
   const isPhone = /iphone|ipod/.test(ua) || (isAndroid && /mobile/.test(ua))
 
   if (isPhone) {
-    return { Icon: Smartphone, label: 'Phone' }
+    return { Icon: Smartphone, label: __('sessions.phone') }
   }
   if (isTablet) {
-    return { Icon: Tablet, label: 'Tablet' }
+    return { Icon: Tablet, label: __('sessions.tablet') }
   }
-  return { Icon: Laptop, label: 'Computer' }
+  return { Icon: Laptop, label: __('sessions.computer') }
 }
 
 export default function Sessions({ sessions }) {
+  const { __ } = useI18n()
   const breadcrumbs = [
-    { title: 'Active sessions', href: '/settings/sessions' },
+    { title: __('sessions.title'), href: route('settings.sessions') },
   ]
 
   const formatDateTime = (epochSeconds) => {
@@ -36,22 +38,22 @@ export default function Sessions({ sessions }) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Active sessions" />
+      <Head title={__('sessions.title')} />
 
       <SettingsLayout>
         <div className="space-y-6">
           <div className="flex items-start justify-between gap-4">
-            <HeadingSmall title="Active sessions" description="Review devices currently signed in to your account." />
-            <Link href={route('profile.edit')} className="mt-1 text-sm underline">Back to profile</Link>
+            <HeadingSmall title={__('sessions.title')} description={__('sessions.description')} />
+            <Link href={route('profile.edit')} className="mt-1 text-sm underline">{__('common.back_to_profile')}</Link>
           </div>
 
           <div className="rounded-lg border">
             <div className="divide-y">
               {(!sessions || sessions.length === 0) ? (
-                <div className="p-4 text-sm text-muted-foreground">No active sessions.</div>
+                <div className="p-4 text-sm text-muted-foreground">{__('sessions.no_active')}</div>
               ) : (
                 sessions.map((s) => {
-                  const d = getDeviceInfo(s.user_agent)
+                  const d = getDeviceInfo(s.user_agent, __)
                   const Icon = d.Icon
 
                   return (
@@ -63,21 +65,21 @@ export default function Sessions({ sessions }) {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{s.ip_address ?? 'Unknown IP'}</span>
+                            <span className="font-medium">{s.ip_address ?? __('sessions.unknown_ip')}</span>
                             {s.is_current && (
-                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">Current</span>
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{__('sessions.current')}</span>
                             )}
                           </div>
                           <div className="mt-1 truncate text-xs text-muted-foreground">
-                            {s.user_agent ?? `${d.label} device`}
+                            {s.user_agent ?? __('sessions.device_suffix', { label: d.label })}
                           </div>
-                          <div className="mt-1 text-xs text-muted-foreground">Last active: {formatDateTime(s.last_activity)}</div>
+                          <div className="mt-1 text-xs text-muted-foreground">{__('sessions.last_active', { time: formatDateTime(s.last_activity) })}</div>
                         </div>
                       </div>
                       <div className="shrink-0">
                         <Form method="delete" action={route('settings.sessions.destroy', s.id)}>
                           {({ processing }) => (
-                            <Button type="submit" variant="secondary" disabled={processing || s.is_current} isLoading={processing}>Log out</Button>
+                            <Button type="submit" variant="secondary" disabled={processing || s.is_current} isLoading={processing}>{__('common.log_out')}</Button>
                           )}
                         </Form>
                       </div>
@@ -91,12 +93,12 @@ export default function Sessions({ sessions }) {
           <div className="flex flex-wrap items-center gap-3">
             <Form method="post" action={route('settings.sessions.others')}>
               {({ processing }) => (
-                <Button type="submit" variant="secondary" disabled={processing} isLoading={processing}>Log out other sessions</Button>
+                <Button type="submit" variant="secondary" disabled={processing} isLoading={processing}>{__('common.log_out_other_sessions')}</Button>
               )}
             </Form>
             <Form method="post" action={route('settings.sessions.all')}>
               {({ processing }) => (
-                <Button type="submit" variant="destructive" disabled={processing} isLoading={processing}>Log out all sessions</Button>
+                <Button type="submit" variant="destructive" disabled={processing} isLoading={processing}>{__('common.log_out_all_sessions')}</Button>
               )}
             </Form>
           </div>

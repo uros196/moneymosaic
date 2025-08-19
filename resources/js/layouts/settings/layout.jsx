@@ -3,26 +3,28 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-
-const sidebarNavItems = [
-    {
-        title: 'Profile',
-        href: '/settings/profile',
-        icon: null,
-    },
-    {
-        title: 'Password',
-        href: '/settings/password',
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: '/settings/appearance',
-        icon: null,
-    },
-];
+import { useI18n } from '@/i18n';
 
 export default function SettingsLayout({ children }) {
+    const { __ } = useI18n();
+
+    const sidebarNavItems = [
+        {
+            title: __('profile.title'),
+            href: route('profile.edit'),
+            icon: null,
+        },
+        {
+            title: __('password.title'),
+            href: route('password.edit'),
+            icon: null,
+        },
+        {
+            title: __('appearance.title'),
+            href: route('appearance'),
+            icon: null,
+        },
+    ];
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
         return null;
@@ -32,7 +34,7 @@ export default function SettingsLayout({ children }) {
 
     return (
         <div className="px-4 py-6">
-            <Heading title="Settings" description="Manage your profile and account settings" />
+            <Heading title={__('settings.title')} description={__('settings.description')} />
 
             <div className="flex flex-col lg:flex-row lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">

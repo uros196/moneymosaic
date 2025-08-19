@@ -22,7 +22,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        $inProgress = $user !== null && $user2fa->isSetupInProgress($user, $request->session());
+        $inProgress = $user2fa->isSetupInProgress($user, $request->session());
 
         return Inertia::render('settings/profile', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
@@ -44,7 +44,11 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit')->with('success', 'Profile information updated.');
+        // instant update app locale
+        app()->setLocale($request->validated('locale'));
+
+        return to_route('profile.edit')
+            ->with('success', __('Profile information updated.'));
     }
 
     /**

@@ -121,6 +121,6 @@ class TwoFactorController extends Controller
         // Ensure any in-progress TOTP setup is fully canceled
         $tfSession->clearTotpSetup($request->session());
 
-        return back();
+        return back()->with('success', __('Two-factor authentication disabled.'));
     }
 }

@@ -70,6 +70,20 @@ class HandleInertiaRequests extends Middleware
                     'key' => $hasFlash ? (string) microtime(true) : null,
                 ];
             },
+            'locale' => app()->getLocale(),
+            'translations' => function () {
+                return [
+                    'common' => trans('common'),
+                    'security' => trans('security'),
+                    'sessions' => trans('sessions'),
+                    'appearance' => trans('appearance'),
+                    'password' => trans('password'),
+                    'profile' => trans('profile'),
+                    'auth' => trans('auth'),
+                    'settings' => trans('settings'),
+                    'nav' => trans('nav'),
+                ];
+            },
         ];
     }
 }

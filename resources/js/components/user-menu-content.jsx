@@ -3,9 +3,11 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 export function UserMenuContent({ user }) {
     const cleanup = useMobileNavigation();
+    const { __ } = useI18n();
 
     const handleLogout = () => {
         cleanup();
@@ -24,7 +26,7 @@ export function UserMenuContent({ user }) {
                 <DropdownMenuItem asChild>
                     <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2" />
-                        Settings
+                        {__('settings.title')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -32,7 +34,7 @@ export function UserMenuContent({ user }) {
             <DropdownMenuItem asChild>
                 <Link className="block w-full" method="post" href={route('logout')} as="button" onClick={handleLogout}>
                     <LogOut className="mr-2" />
-                    Log out
+                    {__('common.log_out')}
                 </Link>
             </DropdownMenuItem>
         </>

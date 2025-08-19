@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import AuthLayout from '@/layouts/auth-layout'
+import { useI18n } from '@/i18n'
 
 export default function TwoFactorChallenge({ method, status }) {
   const [values, setValues] = useState(Array(6).fill(''))
+  const { __ } = useI18n()
   const [showRecovery, setShowRecovery] = useState(false)
   const [recovery, setRecovery] = useState('')
   const inputsRef = useRef([])
@@ -97,8 +99,8 @@ export default function TwoFactorChallenge({ method, status }) {
   }
 
   return (
-    <AuthLayout title="Two-factor authentication" description={method === 'email' ? 'Enter the 6-digit code sent to your email.' : 'Enter the 6-digit code from your authenticator app.'}>
-      <Head title="Two-factor challenge" />
+    <AuthLayout title={__('auth.twofactor_title')} description={method === 'email' ? __('auth.twofactor_desc_email') : __('auth.twofactor_desc_totp')}>
+      <Head title={__('auth.twofactor_head')} />
 
       {status && (
         <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>
@@ -110,18 +112,18 @@ export default function TwoFactorChallenge({ method, status }) {
             {showRecovery ? (
               <>
                 <div className="grid gap-2">
-                  <Label htmlFor="recovery_code">Recovery code</Label>
+                  <Label htmlFor="recovery_code">{__('auth.recovery_code')}</Label>
                   <Input
                     id="recovery_code"
                     name="recovery_code"
                     value={recovery}
                     onChange={(e) => setRecovery(e.target.value)}
-                    placeholder="XXXX-XXXX or paste your recovery code"
+                    placeholder={__('auth.recovery_placeholder')}
                     aria-invalid={!!errors.recovery_code}
                   />
                   <InputError message={errors.recovery_code} />
                   <button type="button" className="text-sm underline" onClick={() => setShowRecovery(false)}>
-                    Use authenticator code instead
+                    {__('auth.use_authenticator_instead')}
                   </button>
                 </div>
               </>
@@ -129,7 +131,7 @@ export default function TwoFactorChallenge({ method, status }) {
               <>
                 <input type="hidden" name="code" value={code} />
                 <div className="grid gap-2">
-                  <Label>Authentication code</Label>
+                  <Label>{__('auth.authentication_code')}</Label>
                   <div className="flex justify-between gap-2">
                     {values.map((v, idx) => (
                       <Input
@@ -151,7 +153,7 @@ export default function TwoFactorChallenge({ method, status }) {
                   <InputError message={errors.code} />
                   {method === 'totp' && (
                     <button type="button" className="text-sm underline" onClick={() => setShowRecovery(true)}>
-                      Use recovery code
+                      {__('auth.use_recovery_code')}
                     </button>
                   )}
                 </div>
@@ -160,15 +162,15 @@ export default function TwoFactorChallenge({ method, status }) {
 
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={processing} className="min-w-28" isLoading={processing}>
-                Verify
+                {__('auth.verify')}
               </Button>
               {method === 'email' && (
                 <Link as="button" href={route('twofactor.resend')} method="post" className="text-sm text-foreground underline">
-                  Resend code
+                  {__('common.resend_code')}
                 </Link>
               )}
               <TextLink href={route('logout')} method="post" className="ml-auto text-sm">
-                Log out
+                {__('common.log_out')}
               </TextLink>
             </div>
           </>

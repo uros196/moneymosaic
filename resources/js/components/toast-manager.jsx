@@ -30,10 +30,10 @@ export default function ToastManager() {
                     toast.error(String(m.text));
                     break;
                 case 'success':
-                    toast.success(String(m.text));
+                    toast.success(String(m.text), {duration: 4000});
                     break;
                 default:
-                    toast(String(m.text));
+                    toast(String(m.text), {duration: 4000});
                     break;
             }
         });
