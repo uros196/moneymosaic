@@ -2,6 +2,7 @@
 
 namespace App\Services\TwoFactor\Strategies;
 
+use App\Enums\TwoFactorType;
 use App\Models\User;
 use App\Services\TwoFactor\Contracts\TwoFactorStrategy;
 use App\Services\TwoFactor\EmailCodeService;
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\Hash;
 class EmailTwoFactorStrategy implements TwoFactorStrategy
 {
     /**
+     * Create a new EmailTwoFactorStrategy instance.
+     *
      * @param  EmailCodeService  $emailService  Service for generating and sending email verification codes
+     * @param  TwoFactorSessionService  $sessionService  Centralized session state manager for 2FA
      */
     public function __construct(
         protected EmailCodeService $emailService,
@@ -58,7 +62,7 @@ class EmailTwoFactorStrategy implements TwoFactorStrategy
      */
     public function isSetupInProgress(User $user, SessionContract $session): bool
     {
-        if ($user->two_factor_type !== 'email' || $user->two_factor_enabled) {
+        if (! $user->isTwoFactorTypeOf(TwoFactorType::Email) || $user->two_factor_enabled) {
             return false;
         }
 

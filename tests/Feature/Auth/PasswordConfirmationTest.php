@@ -52,4 +52,74 @@ class PasswordConfirmationTest extends TestCase
 
         $response->assertSessionHasErrors();
     }
+
+    public function test_needs_confirmation_guest_is_redirected_to_login(): void
+    {
+        $this->get('/password/needs-confirmation')
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_needs_confirmation_redirects_to_confirm_page_when_required(): void
+    {
+        $user = User::factory()->create([
+            'password_confirm_minutes' => 5,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession([
+                'auth.password_confirmed_at' => time() - (10 * 60),
+            ])
+            ->get('/password/needs-confirmation')
+            ->assertRedirect(route('password.confirm'));
+    }
+
+    public function test_needs_confirmation_returns_no_content_when_within_window(): void
+    {
+        $user = User::factory()->create([
+            'password_confirm_minutes' => 5,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession([
+                'auth.password_confirmed_at' => time() - 60,
+            ])
+            ->get('/password/needs-confirmation')
+            ->assertNoContent();
+    }
+
+    public function test_needs_confirmation_returns_no_content_when_feature_disabled(): void
+    {
+        $user = User::factory()->create([
+            'password_confirm_minutes' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/password/needs-confirmation')
+            ->assertNoContent();
+    }
+
+    public function test_confirm_password_screen_redirects_when_feature_disabled(): void
+    {
+        $user = User::factory()->create([
+            'password_confirm_minutes' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->get('/confirm-password')
+            ->assertRedirect(route('dashboard', absolute: false));
+    }
+
+    public function test_confirm_password_screen_redirects_when_within_window(): void
+    {
+        $user = User::factory()->create([
+            'password_confirm_minutes' => 5,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession([
+                'auth.password_confirmed_at' => time(),
+            ])
+            ->get('/confirm-password')
+            ->assertRedirect(route('dashboard', absolute: false));
+    }
 }

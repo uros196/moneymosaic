@@ -1,6 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react'
 import { Dialog, Transition } from '@headlessui/react'
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 
 import HeadingSmall from '@/components/heading-small'
 import InputError from '@/components/input-error'
@@ -27,6 +27,9 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
 
   const [open, setOpen] = useState(Boolean(setupJustBegan || qrUrl))
   const [emailOpen, setEmailOpen] = useState(Boolean(emailPending))
+
+  const emailInputRef = useRef(null)
+  const totpInputRef = useRef(null)
 
   useEffect(() => {
     setEmailOpen(Boolean(emailPending))
@@ -147,7 +150,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
       </SettingsLayout>
 
       <Transition appear show={emailOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={setEmailOpen}>
+        <Dialog as="div" className="relative z-50" onClose={setEmailOpen} initialFocus={emailInputRef}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-200"
@@ -180,7 +183,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                         <>
                           <div className="grid gap-2">
                             <Label htmlFor="email_code">{__('security.authentication_code')}</Label>
-                            <Input id="email_code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} />
+                            <Input id="email_code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} ref={emailInputRef} autoFocus />
                             <InputError message={errors.code} />
                           </div>
                           <div className="flex items-center gap-3">
@@ -208,7 +211,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
       </Transition>
 
       <Transition appear show={open && Boolean(qrUrl)} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={setOpen}>
+        <Dialog as="div" className="relative z-50" onClose={setOpen} initialFocus={totpInputRef}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-200"
@@ -244,7 +247,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                             <>
                               <div className="grid gap-2">
                                 <Label htmlFor="code">{__('security.enter_code_to_confirm')}</Label>
-                                <Input id="code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} />
+                                <Input id="code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} ref={totpInputRef} autoFocus />
                                 <InputError message={errors.code} />
                               </div>
                               <div className="flex items-center gap-3">

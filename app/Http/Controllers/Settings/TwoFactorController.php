@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\TwoFactorType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ConfirmEmailTwoFactorRequest;
 use App\Http\Requests\Settings\ConfirmTotpRequest;
@@ -90,7 +91,7 @@ class TwoFactorController extends Controller
     public function confirmEmail(ConfirmEmailTwoFactorRequest $request, UserTwoFactorService $user2fa): RedirectResponse
     {
         $user = $request->user();
-        if ($user->two_factor_type !== 'email' || $user->two_factor_enabled) {
+        if (! $user->isTwoFactorTypeOf(TwoFactorType::Email) || $user->two_factor_enabled) {
             return back();
         }
 

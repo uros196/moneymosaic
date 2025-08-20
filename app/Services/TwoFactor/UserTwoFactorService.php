@@ -2,8 +2,8 @@
 
 namespace App\Services\TwoFactor;
 
+use App\Enums\TwoFactorType;
 use App\Models\User;
-use App\Services\TwoFactor\Contracts\TwoFactorStrategy;
 use Illuminate\Contracts\Session\Session as SessionContract;
 
 /**
@@ -13,7 +13,6 @@ use Illuminate\Contracts\Session\Session as SessionContract;
 class UserTwoFactorService
 {
     public function __construct(
-        public TwoFactorStrategyFactory $factory,
         public TotpService $totp,
         public RecoveryCodeService $recovery,
         public TwoFactorSessionService $tfSession,
@@ -24,7 +23,7 @@ class UserTwoFactorService
      */
     public function isSetupInProgress(User $user, SessionContract $session): bool
     {
-        return $this->factory->forUser($user)->isSetupInProgress($user, $session);
+        return $user->two_factor_auth?->isSetupInProgress($user, $session) ?? false;
     }
 
     /**
@@ -41,15 +40,15 @@ class UserTwoFactorService
     public function getSecurityProps(User $user, SessionContract $session): array
     {
         $otpAuthUrl = null;
-        if ($user->two_factor_type === 'totp' && ! $user->two_factor_enabled && $user->two_factor_secret) {
-            $label = config('app.name') . ':' . $user->email;
+        if ($this->isTwoFactorTypeOf($user, TwoFactorType::Totp) && ! $user->two_factor_enabled && $user->two_factor_secret) {
+            $label = config('app.name').':'.$user->email;
             $otpAuthUrl = $this->totp->getOtpAuthUri($label, $user->two_factor_secret, config('app.name'));
         }
 
-        $qrUrl = $otpAuthUrl ? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($otpAuthUrl) : null;
+        $qrUrl = $otpAuthUrl ? 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='.urlencode($otpAuthUrl) : null;
 
-        $emailStrategy = $this->factory->forType('email');
-        $totpStrategy = $this->factory->forType('totp');
+        $emailStrategy = TwoFactorType::Email->strategy();
+        $totpStrategy = TwoFactorType::Totp->strategy();
 
         return [
             'otpAuthUrl' => $otpAuthUrl,
@@ -67,7 +66,7 @@ class UserTwoFactorService
         $secret = $this->totp->generateSecret();
 
         $user->forceFill([
-            'two_factor_type' => 'totp',
+            'two_factor_type' => TwoFactorType::Totp->value,
             'two_factor_enabled' => false,
             'two_factor_secret' => $secret,
         ])->save();
@@ -85,7 +84,7 @@ class UserTwoFactorService
             return null;
         }
 
-        if (! $this->factory->forType('totp')->verify($user, $code, $session)) {
+        if (! TwoFactorType::Totp->strategy()->verify($user, $code, $session)) {
             return null;
         }
 
@@ -105,12 +104,12 @@ class UserTwoFactorService
     public function startEmailTwoFactorSetup(User $user, SessionContract $session): void
     {
         $user->forceFill([
-            'two_factor_type' => 'email',
+            'two_factor_type' => TwoFactorType::Email->value,
             'two_factor_enabled' => false,
             'two_factor_secret' => null,
         ])->save();
 
-        $this->factory->forType('email')->beginChallenge($user, $session);
+        $user->two_factor_auth->beginChallenge($user, $session);
         $this->tfSession->beginChallenge($session);
     }
 
@@ -120,11 +119,11 @@ class UserTwoFactorService
      */
     public function confirmEmail(User $user, string $code, SessionContract $session): bool
     {
-        if ($user->two_factor_type !== 'email' || $user->two_factor_enabled) {
+        if (! $this->isTwoFactorTypeOf($user, TwoFactorType::Email) || $user->two_factor_enabled) {
             return false;
         }
 
-        $ok = $this->factory->forType('email')->verify($user, $code, $session);
+        $ok = $user->two_factor_auth->verify($user, $code, $session);
         if (! $ok) {
             return false;
         }
@@ -139,12 +138,12 @@ class UserTwoFactorService
     }
 
     /**
-     * Resend the email code during the enable flow.
+     * Resend the email code during the 'enable' flow.
      */
     public function resendEmail(User $user, SessionContract $session): void
     {
-        if ($user->two_factor_type === 'email' && ! $user->two_factor_enabled) {
-            $this->factory->forType('email')->beginChallenge($user, $session);
+        if ($this->isTwoFactorTypeOf($user, TwoFactorType::Email) && ! $user->two_factor_enabled) {
+            $user->two_factor_auth->beginChallenge($user, $session);
             $this->tfSession->beginChallenge($session);
         }
     }
@@ -161,5 +160,13 @@ class UserTwoFactorService
         ])->save();
 
         $this->tfSession->clearAll($session);
+    }
+
+    /**
+     * Check if user's configured two-factor type matches the given type.
+     */
+    public function isTwoFactorTypeOf(User $user, TwoFactorType $type): bool
+    {
+        return TwoFactorType::tryFrom($user->two_factor_type) === $type;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\TwoFactor\Strategies;
 
+use App\Enums\TwoFactorType;
 use App\Models\User;
 use App\Services\TwoFactor\Contracts\TwoFactorStrategy;
 use App\Services\TwoFactor\TotpService;
@@ -16,6 +17,12 @@ use Illuminate\Contracts\Session\Session as SessionContract;
  */
 class TotpTwoFactorStrategy implements TwoFactorStrategy
 {
+    /**
+     * Create a new TotpTwoFactorStrategy instance.
+     *
+     * @param  TotpService  $totp  TOTP generator/verifier
+     * @param  TwoFactorSessionService  $sessionService  Central 2FA session helper
+     */
     public function __construct(protected TotpService $totp, protected TwoFactorSessionService $sessionService) {}
 
     /**
@@ -47,7 +54,7 @@ class TotpTwoFactorStrategy implements TwoFactorStrategy
      */
     public function isSetupInProgress(User $user, SessionContract $session): bool
     {
-        if ($user->two_factor_type !== 'totp' || $user->two_factor_enabled) {
+        if (! $user->isTwoFactorTypeOf(TwoFactorType::Totp) || $user->two_factor_enabled) {
             return false;
         }
 
@@ -65,7 +72,7 @@ class TotpTwoFactorStrategy implements TwoFactorStrategy
     public function isModalPending(User $user, SessionContract $session): bool
     {
         // For TOTP, modal shows automatically when setup has just begun in this session
-        return $user->two_factor_type === 'totp'
+        return $user->isTwoFactorTypeOf(TwoFactorType::Totp)
             && ! $user->two_factor_enabled
             && $this->sessionService->isTotpSetupBegan($session);
     }

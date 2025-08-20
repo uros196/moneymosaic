@@ -21,11 +21,10 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }) {
         const check = () => {
             if (ticking.current) return;
             ticking.current = true;
-            fetch(route('password.needs-confirmation'), { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
-                .then((r) => r.json())
-                .then((data) => {
-                    if (data?.required && data?.redirect) {
-                        router.visit(data.redirect, { preserveState: true });
+            fetch(route('password.needs-confirmation'), { credentials: 'same-origin' })
+                .then((r) => {
+                    if (r.redirected && r.url) {
+                        router.visit(r.url, { preserveState: true });
                     }
                 })
                 .finally(() => {

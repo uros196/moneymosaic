@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
+use App\Services\Auth\PasswordConfirmationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,29 +22,23 @@ use Inertia\Response;
 class ConfirmablePasswordController extends Controller
 {
     /**
-     * Show the confirm password page.
-     *
-     * @return Response Inertia response rendering the confirm password page.
+     * Show the confirmation password page.
      */
-    public function show(Request $request): Response|RedirectResponse
+    public function show(Request $request, PasswordConfirmationService $passwords): Response|RedirectResponse
     {
         $user = $request->user();
-        $minutes = (int) ($user?->password_confirm_minutes ?? 0);
+        $minutes = $user ? $passwords->getWindowMinutesForUser($user) : 0;
 
         // If feature disabled or still within confirmation window, redirect away
         if ($minutes === 0) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        $last = (int) $request->session()->get('auth.password_confirmed_at', 0);
-        $now = time();
-        if ($last > 0 && ($now - $last) < ($minutes * 60)) {
+        if (! $passwords->needsConfirmation($request)) {
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
-        return Inertia::render('auth/confirm-password', [
-            'logout' => route('logout', absolute: false),
-        ]);
+        return Inertia::render('auth/confirm-password');
     }
 
     /**
@@ -56,18 +49,17 @@ class ConfirmablePasswordController extends Controller
      *
      * @throws ValidationException If the provided password is invalid.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, PasswordConfirmationService $passwords): RedirectResponse
     {
-        if (! Auth::guard('web')->validate([
-            'email' => $request->user()->email,
-            'password' => $request->password,
-        ])) {
+        $user = $request->user();
+
+        if (! $user || ! $passwords->validateForUser($user, (string) $request->password)) {
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),
             ]);
         }
 
-        $request->session()->put('auth.password_confirmed_at', time());
+        $passwords->confirmNow();
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
@@ -75,23 +67,27 @@ class ConfirmablePasswordController extends Controller
     /**
      * Check whether password confirmation is required due to inactivity.
      *
-     * @param  Request  $request  The current request containing user session data.
-     * @return JsonResponse JSON payload with required (bool) and redirect (string) URL.
+     * Behaviors:
+     * - Guest: redirect to the login page.
+     * - Authenticated and needs confirmation: redirect to the confirmation password page.
+     * - Authenticated and within the confirmation window: 204 No Content.
      */
-    public function needsConfirmation(Request $request): JsonResponse
+    public function needsConfirmation(Request $request, PasswordConfirmationService $passwords): RedirectResponse|\Illuminate\Http\Response
     {
         $user = $request->user();
-        $minutes = (int) ($user?->password_confirm_minutes ?? 0);
-
-        $required = false;
-        if ($user && $minutes > 0) {
-            $last = (int) $request->session()->get('auth.password_confirmed_at', 0);
-            $required = $last === 0 || (time() - $last) >= ($minutes * 60);
+        if (! $user) {
+            return redirect()->to(route('login', absolute: false));
         }
 
-        return response()->json([
-            'required' => $required,
-            'redirect' => route('password.confirm', absolute: false),
-        ]);
+        $minutes = $passwords->getWindowMinutesForUser($user);
+        if ($minutes <= 0) {
+            return response()->noContent();
+        }
+
+        if ($passwords->needsConfirmation($request)) {
+            return redirect()->to(route('password.confirm', absolute: false));
+        }
+
+        return response()->noContent();
     }
 }

@@ -7,6 +7,19 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
 use RuntimeException;
 
+/**
+ * CurrencyConversionService
+ *
+ * Responsibilities:
+ * - Convert integer monetary amounts (minor units) between currencies using daily exchange rates.
+ * - Resolve rates by transaction date with rollback to the most recent available date (bounded by lookback).
+ * - Cache rate lookups to minimize database load.
+ *
+ * Conventions:
+ * - Amounts are integers in minor units (e.g., cents) – never floats for storage/transport.
+ * - Conversion is performed via the configured base currency when necessary (two-leg conversion: from -> base -> to).
+ * - Rounding is banker's simple rounding using PHP round() to the nearest minor unit.
+ */
 class CurrencyConversionService
 {
     public function __construct(public ?ExchangeRateRepositoryContract $repository = null)

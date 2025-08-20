@@ -6,13 +6,20 @@ use App\Models\User;
 use App\Services\TwoFactor\Contracts\TwoFactorStrategy;
 use Illuminate\Contracts\Session\Session as SessionContract;
 
+/**
+ * Coordinates verifying 2FA codes using the user's configured strategy with a recovery-code fallback.
+ *
+ * Responsibilities:
+ * - Try primary strategy first (email/totp).
+ * - If primary fails, attempt recovery code verification and consume it.
+ * - On success, mark the session as passed and clear temporary state via TwoFactorSessionService.
+ */
 class TwoFactorChallengeService
 {
     /**
-     * TwoFactorChallengeService constructor.
+     * Create a new TwoFactorChallengeService instance.
      */
     public function __construct(
-        public TwoFactorStrategyFactory $factory,
         public RecoveryCodeService $recoveryCodes,
         public TwoFactorSessionService $sessionService,
     ) {}
@@ -24,8 +31,7 @@ class TwoFactorChallengeService
      */
     public function attempt(User $user, string $code, SessionContract $session): bool
     {
-        $strategy = $this->factory->forUser($user);
-        if ($this->verifyWithStrategy($strategy, $user, $code, $session)) {
+        if ($this->verifyWithStrategy($user->two_factor_auth, $user, $code, $session)) {
             $this->sessionService->finalizeSuccess($session);
 
             return true;
@@ -43,16 +49,9 @@ class TwoFactorChallengeService
 
     /**
      * Verify the provided code using the given two-factor authentication strategy.
-     *
-     * @param  TwoFactorStrategy  $strategy  The strategy to use for verification
-     * @param  User  $user  The user attempting verification
-     * @param  string  $code  The verification code to validate
-     * @param  SessionContract  $session  The current session
-     * @return bool True if verification succeeds, false otherwise
      */
     protected function verifyWithStrategy(TwoFactorStrategy $strategy, User $user, string $code, SessionContract $session): bool
     {
         return $strategy->verify($user, $code, $session);
     }
-
 }

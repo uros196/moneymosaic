@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Auth\PasswordConfirmationService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnsureRecentPasswordMiddleware
 {
+    public function __construct(public PasswordConfirmationService $passwords) {}
+
     /**
      * Require recent password confirmation based on user's per-session inactivity setting.
      *
@@ -25,32 +28,19 @@ class EnsureRecentPasswordMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $session = $request->session();
 
         // If no user or user disabled the feature, allow
-        $minutes = (int) ($user?->password_confirm_minutes ?? 0);
+        $minutes = $user ? $this->passwords->getWindowMinutesForUser($user) : 0;
         if (! $user || $minutes === 0) {
             return $next($request);
         }
 
-        $now = time();
-        $lastInteraction = (int) $session->get('auth.password_confirmed_at', 0);
-
-        // If never confirmed in this session, require confirmation
-        if ($lastInteraction === 0) {
-            return redirect()->guest(route('password.confirm'));
-        }
-
-        $inactiveSeconds = $now - $lastInteraction;
-        $threshold = $minutes * 60;
-
-        // If over threshold, redirect to password confirm unless we're already on confirm routes
-        if ($inactiveSeconds >= $threshold) {
-            return redirect()->guest(route('password.confirm'));
+        if ($this->passwords->needsConfirmation($request)) {
+            return redirect()->to(route('password.confirm', absolute: false));
         }
 
         // Still within window: refresh last interaction
-        $session->put('auth.password_confirmed_at', $now);
+        $this->passwords->confirmNow();
 
         return $next($request);
     }

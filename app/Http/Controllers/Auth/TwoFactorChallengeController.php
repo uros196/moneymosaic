@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\TwoFactorChallengeRequest;
 use App\Services\TwoFactor\TwoFactorChallengeService;
-use App\Services\TwoFactor\TwoFactorStrategyFactory;
 use App\Services\TwoFactor\TwoFactorSessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,7 +38,7 @@ class TwoFactorChallengeController extends Controller
         }
 
         return Inertia::render('auth/two-factor-challenge', [
-            'method' => $user?->two_factor_type,
+            'method' => $user->two_factor_type,
             'status' => session('status'),
         ]);
     }
@@ -47,16 +46,10 @@ class TwoFactorChallengeController extends Controller
     /**
      * Verify the submitted 2FA code or recovery code.
      *
-     * @param  Request  $request  Current request with 'code' or 'recovery_code'.
-     * @param  TwoFactorChallengeService  $service  Service to validate the provided code.
-     * @return RedirectResponse Redirects to intended dashboard on success.
-     *
      * @throws ValidationException When the provided authentication code is invalid.
      */
     public function store(TwoFactorChallengeRequest $request, TwoFactorChallengeService $service): RedirectResponse
     {
-        $validated = $request->validated();
-
         $user = $request->user();
         if (! $user || ! $user->two_factor_enabled) {
             return redirect()->intended(route('dashboard', absolute: false));
@@ -79,16 +72,12 @@ class TwoFactorChallengeController extends Controller
 
     /**
      * Resend a new 2FA code using the current two-factor strategy.
-     *
-     * @param  Request  $request  Current request instance.
-     * @param  TwoFactorStrategyFactory  $factory  Factory to resolve the strategy used to send codes.
-     * @return RedirectResponse Redirects back with a status message.
      */
-    public function resend(Request $request, TwoFactorStrategyFactory $factory): RedirectResponse
+    public function resend(Request $request): RedirectResponse
     {
         $user = $request->user();
         if ($user && $user->two_factor_enabled) {
-            $factory->forUser($user)->beginChallenge($user, $request->session());
+            $user->two_factor_auth->beginChallenge($user, $request->session());
         }
 
         return back()->with('status', __('A new authentication code has been sent to your email address.'));

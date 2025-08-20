@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import AuthLayout from '@/layouts/auth-layout'
 import { useI18n } from '@/i18n'
 
-export default function ConfirmPassword({ logout }) {
+export default function ConfirmPassword() {
   const { __ } = useI18n()
   return (
     <AuthLayout
@@ -37,7 +37,7 @@ export default function ConfirmPassword({ logout }) {
             </div>
 
             <div className="text-center text-sm">
-              <TextLink href={logout} method="post">{__('common.log_out')}</TextLink>
+              <TextLink href={route('logout')} method="post">{__('common.log_out')}</TextLink>
             </div>
           </>
         )}

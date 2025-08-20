@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Services\TwoFactor\TwoFactorStrategyFactory;
+use App\Services\Auth\PasswordConfirmationService;
 use App\Services\TwoFactor\TwoFactorSessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,14 +46,14 @@ class AuthenticatedSessionController extends Controller
      * @param  LoginRequest  $request  Validated login request.
      * @return RedirectResponse Redirects to either the 2FA challenge or intended dashboard.
      */
-    public function store(LoginRequest $request, TwoFactorSessionService $tfSession): RedirectResponse
+    public function store(LoginRequest $request, TwoFactorSessionService $tfSession, PasswordConfirmationService $passwords): RedirectResponse
     {
         $request->authenticate();
 
         $request->session()->regenerate();
 
         // Still within window: refresh last interaction
-        $request->session()->put('auth.password_confirmed_at', time());
+        $passwords->confirmNow();
 
         // If the user has 2FA enabled, redirect to the 2FA challenge
         $user = $request->user();
@@ -62,9 +62,7 @@ class AuthenticatedSessionController extends Controller
             $tfSession->beginChallenge($request->session());
 
             // Initialize the challenge via the appropriate strategy
-            app(TwoFactorStrategyFactory::class)
-                ->forUser($user)
-                ->beginChallenge($user, $request->session());
+            $user->two_factor_auth->beginChallenge($user, $request->session());
 
             return redirect()->route('twofactor.challenge');
         }
