@@ -26,7 +26,6 @@ class PasswordConfirmationTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
             ->component('auth/confirm-password')
-            ->has('logout')
         );
     }
 
@@ -70,10 +69,7 @@ class PasswordConfirmationTest extends TestCase
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
             ->get('/password/needs-confirmation')
-            ->assertOk()
-            ->assertJson([
-                'required' => true,
-            ]);
+            ->assertRedirect(route('password.confirm', absolute: false));
     }
 
     public function test_needs_confirmation_returns_no_content_when_within_window(): void
@@ -87,10 +83,7 @@ class PasswordConfirmationTest extends TestCase
                 'auth.password_confirmed_at' => time() - 60,
             ])
             ->get('/password/needs-confirmation')
-            ->assertOk()
-            ->assertJson([
-                'required' => false,
-            ]);
+            ->assertNoContent();
     }
 
     public function test_needs_confirmation_returns_no_content_when_feature_disabled(): void
@@ -101,10 +94,7 @@ class PasswordConfirmationTest extends TestCase
 
         $this->actingAs($user)
             ->get('/password/needs-confirmation')
-            ->assertOk()
-            ->assertJson([
-                'required' => false,
-            ]);
+            ->assertNoContent();
     }
 
     public function test_confirm_password_screen_redirects_when_feature_disabled(): void

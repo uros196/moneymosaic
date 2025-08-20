@@ -63,22 +63,16 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
-            ->get(route('password.needs-confirmation'))
-            ->assertOk()
-            ->assertJson([
-                'required' => true,
-            ]);
+            ->get('/password/needs-confirmation')
+            ->assertRedirect(route('password.confirm', absolute: false));
 
         // Within window
         $this->actingAs($user)
             ->withSession([
                 'auth.password_confirmed_at' => time() - 60,
             ])
-            ->get(route('password.needs-confirmation'))
-            ->assertOk()
-            ->assertJson([
-                'required' => false,
-            ]);
+            ->get('/password/needs-confirmation')
+            ->assertNoContent();
 
         // Disabled setting
         $user->update(['password_confirm_minutes' => null]);
@@ -86,10 +80,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
-            ->get(route('password.needs-confirmation'))
-            ->assertOk()
-            ->assertJson([
-                'required' => false,
-            ]);
+            ->get('/password/needs-confirmation')
+            ->assertNoContent();
     }
 }

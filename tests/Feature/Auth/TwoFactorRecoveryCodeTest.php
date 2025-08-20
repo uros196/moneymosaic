@@ -27,7 +27,7 @@ class TwoFactorRecoveryCodeTest extends TestCase
         $this->actingAs($user);
 
         $response = $this->post(route('twofactor.store'), [
-            'code' => $codes[0],
+            'recovery_code' => $codes[0],
         ]);
 
         $response->assertRedirect(route('dashboard', absolute: false));
