@@ -21,4 +21,14 @@ class DashboardTest extends TestCase
 
         $this->get('/dashboard')->assertOk();
     }
+
+    public function test_authenticated_users_can_visit_the_dashboard_after_skipping_reminder_for_session()
+    {
+        $this->actingAs($user = User::factory()->create());
+
+        // Even if we call skip, dashboard should be accessible as reminder shows only post-login
+        $this->post(route('twofactor.reminder.skip'));
+
+        $this->get('/dashboard')->assertOk();
+    }
 }

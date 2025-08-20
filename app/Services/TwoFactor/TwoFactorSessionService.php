@@ -67,6 +67,22 @@ class TwoFactorSessionService
     }
 
     /**
+     * Mark the 2FA reminder as skipped for the current session only.
+     */
+    public function markReminderSkipped(SessionContract $session): void
+    {
+        $session->put('twofactor.reminder_skipped', true);
+    }
+
+    /**
+     * Clear the session flag that marks the 2FA reminder as skipped.
+     */
+    public function clearReminderSkipped(SessionContract $session): void
+    {
+        $session->forget('twofactor.reminder_skipped');
+    }
+
+    /**
      * Mark that TOTP setup has begun so the UI can auto-open the setup modal.
      */
     public function markTotpSetupBegan(SessionContract $session): void

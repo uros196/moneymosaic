@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
+use App\Http\Controllers\Auth\TwoFactorReminderController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,11 @@ Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
     ->name('password.email');
 
 Route::middleware('auth')->group(function () {
+    // 2FA reminder page and actions
+    Route::get('twofactor/reminder', [TwoFactorReminderController::class, 'show'])->name('twofactor.reminder');
+    Route::post('twofactor/reminder/skip', [TwoFactorReminderController::class, 'skip'])->name('twofactor.reminder.skip');
+    Route::post('twofactor/reminder/snooze', [TwoFactorReminderController::class, 'snooze'])->name('twofactor.reminder.snooze');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

@@ -54,4 +54,7 @@ return [
     'recovery_placeholder' => 'XXXX-XXXX or paste your recovery code',
     'use_authenticator_instead' => 'Use authenticator code instead',
     'use_recovery_code' => 'Use recovery code',
+    'skip_for_now' => 'Skip for now',
+    'remind_me_later' => 'Remind me later',
+    'remind_again_in_days' => 'Remind me again in :days days.',
 ];

@@ -26,8 +26,8 @@ class TwoFactorChallengeRequest extends FormRequest
      * Either a one-time code (email or TOTP) or a recovery code must be provided.
      *
      * @return array<string, ValidationRule|array<mixed>|string> Fields:
-     *                       - code: required when recovery_code is absent; string with 6 chars.
-     *                       - recovery_code: required when code is absent; string.
+     *                                                           - code: required when recovery_code is absent; string with 6 chars.
+     *                                                           - recovery_code: required when code is absent; string.
      */
     public function rules(): array
     {

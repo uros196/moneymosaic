@@ -19,6 +19,46 @@ class UserTwoFactorService
     ) {}
 
     /**
+     * Determine if we should show a post-login 2FA reminder for the user.
+     */
+    public function shouldShowReminder(User $user, \Illuminate\Contracts\Session\Session $session): bool
+    {
+        if ($user->two_factor_enabled) {
+            return false;
+        }
+
+        if ((bool) $session->get('twofactor.reminder_skipped', false) === true) {
+            return false;
+        }
+
+        $snoozedAt = $user->two_factor_reminder_snoozed_at;
+        $days = $this->getReminderSnoozeDays();
+        if ($snoozedAt && now()->diffInDays($snoozedAt) < max($days, 0)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get number of days to snooze the post-login reminder.
+     */
+    public function getReminderSnoozeDays(): int
+    {
+        return (int) (config('twofactor.reminder_snooze_days') ?? 30);
+    }
+
+    /**
+     * Snooze the reminder for the given user by setting timestamp.
+     */
+    public function snoozeReminder(User $user): void
+    {
+        $user->forceFill([
+            'two_factor_reminder_snoozed_at' => now(),
+        ])->save();
+    }
+
+    /**
      * Determine if the current user is in a setup/in-progress state for their selected 2FA type.
      */
     public function isSetupInProgress(User $user, SessionContract $session): bool

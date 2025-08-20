@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Services\Auth\PasswordConfirmationService;
 use App\Services\TwoFactor\TwoFactorSessionService;
+use App\Services\TwoFactor\UserTwoFactorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +47,7 @@ class AuthenticatedSessionController extends Controller
      * @param  LoginRequest  $request  Validated login request.
      * @return RedirectResponse Redirects to either the 2FA challenge or intended dashboard.
      */
-    public function store(LoginRequest $request, TwoFactorSessionService $tfSession, PasswordConfirmationService $passwords): RedirectResponse
+    public function store(LoginRequest $request, TwoFactorSessionService $tfSession, PasswordConfirmationService $passwords, UserTwoFactorService $user2fa): RedirectResponse
     {
         $request->authenticate();
 
@@ -65,6 +66,11 @@ class AuthenticatedSessionController extends Controller
             $user->two_factor_auth->beginChallenge($user, $request->session());
 
             return redirect()->route('twofactor.challenge');
+        }
+
+        // If 2FA is not enabled, consider showing a one-time reminder page exclusively post-login
+        if ($user && $user2fa->shouldShowReminder($user, $request->session())) {
+            return redirect()->route('twofactor.reminder');
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

@@ -54,4 +54,7 @@ return [
     'recovery_placeholder' => 'XXXX-XXXX ili nalepite kod za oporavak',
     'use_authenticator_instead' => 'Koristite kod iz aplikacije umesto toga',
     'use_recovery_code' => 'Koristi kod za oporavak',
+    'skip_for_now' => 'Preskoči za sada',
+    'remind_me_later' => 'Podseti me kasnije',
+    'remind_again_in_days' => 'Podseti me ponovo za :days dana.',
 ];
