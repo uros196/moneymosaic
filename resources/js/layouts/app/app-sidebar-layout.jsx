@@ -57,7 +57,9 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }) {
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 <ToastManager />
-                {children}
+                <div className="px-4 py-6">
+                    {children}
+                </div>
             </AppContent>
         </AppShell>
     );

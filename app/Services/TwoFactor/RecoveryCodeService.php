@@ -16,15 +16,12 @@ class RecoveryCodeService
     /**
      * Create a new recovery code service instance.
      *
-     * @param int $defaultCount Default number of recovery codes to generate for users
+     * @param  int  $defaultCount  Default number of recovery codes to generate for users
      */
     public function __construct(public int $defaultCount = 10) {}
 
     /**
      * Generate recovery codes, store hashed on the user, and return plaintext codes for display once.
-     *
-     * @param  int  $count  Number of codes to generate
-     * @return list<string>
      */
     public function generateAndStore(User $user, ?int $count = null): array
     {
@@ -74,11 +71,7 @@ class RecoveryCodeService
     }
 
     /**
-     * Generate a single recovery code with configurable format.
-     *
-     * @param int $segments Number of segments in the code
-     * @param int $segmentLength Length of each segment
-     * @return string  Generated code in format like "XXXX-XXXX"
+     * Generate a single recovery code with a configurable format.
      */
     protected function generateCode(int $segments = 2, int $segmentLength = 4): string
     {
@@ -93,9 +86,6 @@ class RecoveryCodeService
     /**
      * Normalize a recovery code by removing special characters and converting to uppercase.
      * This allows flexible input formats (with or without dashes) to be accepted.
-     *
-     * @param string $code Raw recovery code input
-     * @return string  Normalized code containing only uppercase alphanumeric characters
      */
     protected function normalize(string $code): string
     {
