@@ -13,8 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed sample exchange rates for development/testing
+        // Seed system income types and sample exchange rates for development/testing
         $this->call([
+            IncomeTypeSeeder::class,
             ExchangeRatesSeeder::class,
         ]);
 

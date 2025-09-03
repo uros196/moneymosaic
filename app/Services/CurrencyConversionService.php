@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\Contracts\ExchangeRateRepository as ExchangeRateRepositoryContract;
+use App\Repositories\Contracts\ExchangeRateRepository;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
 use RuntimeException;
@@ -22,9 +22,9 @@ use RuntimeException;
  */
 class CurrencyConversionService
 {
-    public function __construct(public ?ExchangeRateRepositoryContract $repository = null)
+    public function __construct(public ?ExchangeRateRepository $repository = null)
     {
-        $this->repository ??= app(ExchangeRateRepositoryContract::class);
+        $this->repository ??= app(ExchangeRateRepository::class);
     }
 
     /**

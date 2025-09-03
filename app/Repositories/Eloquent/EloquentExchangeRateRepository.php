@@ -1,13 +1,18 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Eloquent;
 
 use App\Models\ExchangeRate;
-use App\Repositories\Contracts\ExchangeRateRepository as ExchangeRateRepositoryContract;
+use App\Repositories\Contracts\ExchangeRateRepository;
 use Carbon\CarbonInterface;
 
-class ExchangeRateRepository implements ExchangeRateRepositoryContract
+class EloquentExchangeRateRepository implements ExchangeRateRepository
 {
+    /**
+     * Create a new repository instance.
+     */
+    public function __construct(protected ExchangeRate $model) {}
+
     /**
      * Find the latest exchange rate record for a base->quote pair on or before the given date.
      *
@@ -18,7 +23,7 @@ class ExchangeRateRepository implements ExchangeRateRepositoryContract
      */
     public function findLatestOnOrBefore(string $baseCurrency, string $quoteCurrency, CarbonInterface $date): ?ExchangeRate
     {
-        return ExchangeRate::query()
+        return $this->model->query()
             ->where('base_currency_code', strtoupper($baseCurrency))
             ->where('quote_currency_code', strtoupper($quoteCurrency))
             ->whereDate('date', '<=', $date->toDateString())

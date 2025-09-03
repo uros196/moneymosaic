@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Eloquent;
 
 use App\Models\User;
-use App\Repositories\Contracts\SessionRepository as SessionRepositoryContract;
+use App\Repositories\Contracts\SessionRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
  * Repository for interacting with session records using the configured model.
  */
-class SessionRepository implements SessionRepositoryContract
+class EloquentSessionRepository implements SessionRepository
 {
     /**
-     * @param  string  $modelClass  FQN of the session model; defaults to config('session.model').
+     * @param  string  $model  FQN of the session model; defaults to config('session.model').
      */
-    public function __construct(
-        protected string $modelClass = ''
-    ) {
-        $this->modelClass = $modelClass ?: (string) config('session.model', \App\Models\Session::class);
+    public function __construct(protected string $model = '')
+    {
+        $this->model = $model ?: (string) config('session.model');
     }
 
     /**
@@ -29,12 +28,9 @@ class SessionRepository implements SessionRepositoryContract
     protected function query(): Builder
     {
         /** @var class-string<\Illuminate\Database\Eloquent\Model> $cls */
-        $cls = $this->modelClass;
+        $cls = $this->model;
 
-        /** @var Builder $q */
-        $q = $cls::query();
-
-        return $q;
+        return $cls::query();
     }
 
     /**

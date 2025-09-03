@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Contracts\SessionRepository as SessionRepositoryContract;
+use App\Repositories\Contracts\SessionRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,9 +21,9 @@ use Inertia\Response;
 class SessionsController extends Controller
 {
     /**
-     * @param  SessionRepositoryContract  $sessions  Repository for session management.
+     * @param  SessionRepository  $sessions  Repository for session management.
      */
-    public function __construct(public SessionRepositoryContract $sessions)
+    public function __construct(public SessionRepository $sessions)
     {
         //
     }
