@@ -82,6 +82,7 @@ class HandleInertiaRequests extends Middleware
                     'auth' => trans('auth'),
                     'settings' => trans('settings'),
                     'nav' => trans('nav'),
+                    'incomes' => trans('incomes'),
                 ];
             },
         ];

@@ -1,9 +1,9 @@
 {
-  "Profile information updated.": "Profile information updated.",
-  "No TOTP secret to confirm. Please start setup again.": "No TOTP secret to confirm. Please start setup again.",
-  "Invalid code. Try again.": "Invalid code. Try again.",
-  "Two-factor authentication enabled.": "Two-factor authentication enabled.",
-  "Two-factor authentication disabled.": "Two-factor authentication disabled.",
-  "A new authentication code has been sent to your email address.": "A new authentication code has been sent to your email address.",
-  "A reset link will be sent if the account exists.": "A reset link will be sent if the account exists."
+    "Profile information updated.": "Profile information updated.",
+    "No TOTP secret to confirm. Please start setup again.": "No TOTP secret to confirm. Please start setup again.",
+    "Invalid code. Try again.": "Invalid code. Try again.",
+    "Two-factor authentication enabled.": "Two-factor authentication enabled.",
+    "Two-factor authentication disabled.": "Two-factor authentication disabled.",
+    "A new authentication code has been sent to your email address.": "A new authentication code has been sent to your email address.",
+    "A reset link will be sent if the account exists.": "A reset link will be sent if the account exists."
 }

@@ -5,6 +5,7 @@ return [
     'confirm_and_enable' => 'Potvrdi i omogući',
     'begin_setup' => 'Započni podešavanje',
     'open_setup' => 'Otvori podešavanje',
+    'open_calendar' => 'Otvori kalendar',
     'cancel' => 'Otkaži',
     'resend_code' => 'Ponovo pošalji kod',
     'disable_2fa' => 'Onemogući 2FA',
@@ -18,4 +19,5 @@ return [
     'save' => 'Sačuvaj',
     'saved' => 'Sačuvano',
     'manage' => 'Upravljaj',
+    'back' => 'Nazad',
 ];

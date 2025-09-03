@@ -5,6 +5,7 @@ return [
     'confirm_and_enable' => 'Confirm and enable',
     'begin_setup' => 'Begin setup',
     'open_setup' => 'Open setup',
+    'open_calendar' => 'Open calendar',
     'cancel' => 'Cancel',
     'resend_code' => 'Resend code',
     'disable_2fa' => 'Disable 2FA',
@@ -18,4 +19,5 @@ return [
     'save' => 'Save',
     'saved' => 'Saved',
     'manage' => 'Manage',
+    'back' => 'Back',
 ];
