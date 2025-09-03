@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Enums\TwoFactorType;
 use App\Models\User;
 use App\Notifications\TwoFactorCodeNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,7 +20,7 @@ class TwoFactorTest extends TestCase
 
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => 'email',
+            'two_factor_type' => TwoFactorType::Email->value,
         ]);
 
         $response = $this->post('/login', [
@@ -35,7 +36,7 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => 'email',
+            'two_factor_type' => TwoFactorType::Email->value,
         ]);
 
         // Prepare session with a known code
@@ -56,7 +57,7 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => 'email',
+            'two_factor_type' => TwoFactorType::Email->value,
         ]);
 
         $this->actingAs($user);
@@ -68,7 +69,7 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => 'email',
+            'two_factor_type' => TwoFactorType::Email->value,
         ]);
 
         $this->actingAs($user);

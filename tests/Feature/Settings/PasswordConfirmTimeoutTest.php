@@ -20,7 +20,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (6 * 60),
             ])
-            ->get('/settings/profile')
+            ->get(route('profile.edit'))
             ->assertRedirect(route('password.confirm', absolute: false));
     }
 
@@ -34,7 +34,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - 60,
             ])
-            ->get('/settings/profile')
+            ->get(route('profile.edit'))
             ->assertOk();
     }
 
@@ -48,7 +48,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (24 * 60 * 60),
             ])
-            ->get('/settings/profile')
+            ->get(route('profile.edit'))
             ->assertOk();
     }
 
@@ -63,7 +63,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
-            ->get('/password/needs-confirmation')
+            ->get(route('password.needs-confirmation'))
             ->assertRedirect(route('password.confirm', absolute: false));
 
         // Within window
@@ -71,7 +71,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - 60,
             ])
-            ->get('/password/needs-confirmation')
+            ->get(route('password.needs-confirmation'))
             ->assertNoContent();
 
         // Disabled setting
@@ -80,7 +80,7 @@ class PasswordConfirmTimeoutTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
-            ->get('/password/needs-confirmation')
+            ->get(route('password.needs-confirmation'))
             ->assertNoContent();
     }
 }

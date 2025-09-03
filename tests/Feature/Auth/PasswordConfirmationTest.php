@@ -21,7 +21,7 @@ class PasswordConfirmationTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
-            ->get('/confirm-password');
+            ->get(route('password.confirm'));
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
@@ -33,9 +33,10 @@ class PasswordConfirmationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post('/confirm-password', [
-            'password' => 'password',
-        ]);
+        $response = $this->actingAs($user)
+            ->post(route('password.confirm'), [
+                'password' => 'password',
+            ]);
 
         $response->assertRedirect();
         $response->assertSessionHasNoErrors();
@@ -45,16 +46,17 @@ class PasswordConfirmationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post('/confirm-password', [
-            'password' => 'wrong-password',
-        ]);
+        $response = $this->actingAs($user)
+            ->post(route('password.confirm'), [
+                'password' => 'wrong-password',
+            ]);
 
         $response->assertSessionHasErrors();
     }
 
     public function test_needs_confirmation_guest_is_redirected_to_login(): void
     {
-        $this->get('/password/needs-confirmation')
+        $this->get(route('password.needs-confirmation'))
             ->assertRedirect(route('login'));
     }
 
@@ -68,7 +70,7 @@ class PasswordConfirmationTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - (10 * 60),
             ])
-            ->get('/password/needs-confirmation')
+            ->get(route('password.needs-confirmation'))
             ->assertRedirect(route('password.confirm', absolute: false));
     }
 
@@ -82,7 +84,7 @@ class PasswordConfirmationTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time() - 60,
             ])
-            ->get('/password/needs-confirmation')
+            ->get(route('password.needs-confirmation'))
             ->assertNoContent();
     }
 
@@ -93,7 +95,7 @@ class PasswordConfirmationTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/password/needs-confirmation')
+            ->get(route('password.needs-confirmation'))
             ->assertNoContent();
     }
 
@@ -104,7 +106,7 @@ class PasswordConfirmationTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get('/confirm-password')
+            ->get(route('password.confirm'))
             ->assertRedirect(route('dashboard', absolute: false));
     }
 
@@ -118,7 +120,7 @@ class PasswordConfirmationTest extends TestCase
             ->withSession([
                 'auth.password_confirmed_at' => time(),
             ])
-            ->get('/confirm-password')
+            ->get(route('password.confirm'))
             ->assertRedirect(route('dashboard', absolute: false));
     }
 }

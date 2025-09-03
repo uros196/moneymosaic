@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Currency;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
@@ -30,21 +31,21 @@ class ExchangeRatesSyncCommandTest extends TestCase
         // Assert database has the expected rows
         $this->assertDatabaseHas('exchange_rates', [
             'date' => '2025-08-10 00:00:00',
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'USD',
+            'base_currency_code' => Currency::EUR->value,
+            'quote_currency_code' => Currency::USD->value,
         ]);
 
         $this->assertDatabaseHas('exchange_rates', [
             'date' => '2025-08-10 00:00:00',
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'RSD',
+            'base_currency_code' => Currency::EUR->value,
+            'quote_currency_code' => Currency::RSD->value,
         ]);
 
         // base->base enforced
         $this->assertDatabaseHas('exchange_rates', [
             'date' => '2025-08-10 00:00:00',
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'EUR',
+            'base_currency_code' => Currency::EUR->value,
+            'quote_currency_code' => Currency::EUR->value,
         ]);
     }
 }

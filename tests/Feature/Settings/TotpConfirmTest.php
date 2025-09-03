@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Enums\TwoFactorType;
 use App\Models\User;
 use App\Services\TwoFactor\TotpService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,7 +23,7 @@ class TotpConfirmTest extends TestCase
         $code = $totp->currentCode($secret);
 
         $user->forceFill([
-            'two_factor_type' => 'totp',
+            'two_factor_type' => TwofactorType::Totp->value,
             'two_factor_secret' => $secret,
         ])->save();
 
