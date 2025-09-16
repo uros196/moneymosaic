@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Repositories\Contracts\ExchangeRateRepository;
+use App\Repositories\Contracts\IncomeRepository;
 use App\Repositories\Contracts\IncomeTypeRepository;
 use App\Repositories\Contracts\SessionRepository;
 use App\Repositories\Contracts\TagRepository;
 use App\Repositories\Eloquent\EloquentExchangeRateRepository;
+use App\Repositories\Eloquent\EloquentIncomeRepository;
 use App\Repositories\Eloquent\EloquentIncomeTypeRepository;
 use App\Repositories\Eloquent\EloquentSessionRepository;
 use App\Repositories\Eloquent\EloquentTagRepository;
@@ -25,5 +27,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ExchangeRateRepository::class, EloquentExchangeRateRepository::class);
         $this->app->bind(TagRepository::class, EloquentTagRepository::class);
         $this->app->bind(IncomeTypeRepository::class, EloquentIncomeTypeRepository::class);
+        $this->app->bind(IncomeRepository::class, EloquentIncomeRepository::class);
     }
 }

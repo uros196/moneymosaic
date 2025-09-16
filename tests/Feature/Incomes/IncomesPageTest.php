@@ -6,20 +6,20 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class IncomeShowPageTest extends TestCase
+class IncomesPageTest extends TestCase
 {
     use RefreshDatabase;
 
     public function test_guests_are_redirected_to_login(): void
     {
-        $this->get('/incomes/1')->assertRedirect('/login');
+        $this->get(route('incomes.index'))->assertRedirect('/login');
     }
 
-    public function test_authenticated_users_can_visit_income_details_page(): void
+    public function test_authenticated_users_can_visit_incomes_page(): void
     {
         $this->actingAs(User::factory()->create());
 
-        $this->get(route('incomes.show', 1))
+        $this->get(route('incomes.index'))
             ->assertOk();
     }
 }

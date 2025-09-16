@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react'
+import { Deferred, Head, Link, router, usePage, useRemember } from '@inertiajs/react';
 import IncomeDrawer from './income-drawer'
 import AppLayout from '@/layouts/app-layout'
 import HeadingSmall from '@/components/heading-small'
@@ -10,8 +10,8 @@ import ConfirmDialog from '@/components/ui/confirm-dialog'
 import { Eye, Pencil, PlusIcon, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
-
-const TYPES = ['salary', 'bonus', 'other']
+import DataTable from '@/components/ui/data-table'
+import TableSkeleton from '@/components/skeletons/table-skeleton.jsx';
 
 function formatAmount(minor, currency) {
   try {
@@ -80,33 +80,79 @@ export default function IncomesIndex() {
 
   const [filtersOpen, setFiltersOpen] = useState(false)
   const years = useMemo(() => {
-    const ys = new Set(items.map((i) => i.occurred_on.slice(0, 4)))
+    const rowsLocal = (pageProps.incomes?.data ?? [])
+    const ys = new Set(rowsLocal.map((i) => String(i.occurred_on).slice(0, 4)))
     ys.add(`${now.getFullYear()}`)
     return Array.from(ys).sort((a, b) => Number(b) - Number(a))
-  }, [items])
+  }, [pageProps.incomes])
 
-  const filtered = useMemo(() => {
-    return items.filter((i) => {
-      const [y, m] = i.occurred_on.split('-')
-      if (filters.month !== 'all' && m !== filters.month) return false
-      if (filters.year !== 'all' && y !== filters.year) return false
-      if (filters.type !== 'all' && i.income_type_key !== filters.type) return false
-      if (filters.currency !== 'all' && i.currency_code !== filters.currency) return false
-      return true
-    })
-  }, [items, filters])
 
-  // Income types: start with built-ins, allow adding custom ones dynamically (front-only)
-  const BUILTIN_TYPES = TYPES
-  const [types, setTypes] = useState([...TYPES])
-  const [typeLabels, setTypeLabels] = useState({}) // map custom key -> label
-  function isBuiltinType(key) {
-    return BUILTIN_TYPES.includes(String(key))
-  }
-  function getTypeLabel(key) {
-    return isBuiltinType(key) ? __(`incomes.types.${key}`) : (typeLabels[key] || String(key))
-  }
+    // const { rows } = useDeferredProps();
+  const columns = useMemo(() => [
+    { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on },
+    { id: 'description', header: __('incomes.table.description'), accessor: (r) => r.name || r.description },
+    { id: 'income_type', header: __('incomes.table.type'), accessor: (r) => r.income_type.name },
+    { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount },
+    { id: 'currency_code', header: __('incomes.table.currency'), accessor: (r) => r.currency_code },
+    {
+      id: 'actions',
+      header: __('incomes.table.actions'),
+      cell: (income) => (
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href={route('incomes.show', income.id)}
+                prefetch
+                className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
+              >
+                <Eye className="size-4" />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>{__('incomes.actions.view')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
+                onClick={() => openEdit(income)}
+              >
+                <Pencil className="size-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{__('incomes.actions.edit')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
+                onClick={() => askDelete(income.id)}
+              >
+                <Trash2 className="size-4 text-destructive" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{__('incomes.actions.delete')}</TooltipContent>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ], [__])
 
+
+    /**
+     * Parses the query parameters from the current window's URL and returns them as an object.
+     *
+     * @return {Object} An object where each key-value pair corresponds to a query parameter and its value.
+     */
+    function getQuery() {
+        return Object.fromEntries(new URL(window.location.href).searchParams.entries())
+    }
+
+    // Updates the indexQuery state when the URL changes.
+    // This effect ensures the stored query parameters stay in sync with the URL.
+    // It runs whenever the page URL changes, updating the remembered query state.
+    const [indexQuery, setIndexQuery] = useRemember(getQuery(), 'incomes.indexQuery');
+    useEffect(() => { setIndexQuery(getQuery()) }, [usePage().url])
 
   // Modal state
   const [open, setOpen] = useState(false)
@@ -117,11 +163,19 @@ export default function IncomesIndex() {
   }, [pageProps.modal])
 
   function openCreate() {
-    router.visit(route('incomes.create'), { preserveScroll: true })
+    router.visit(route('incomes.create'), {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['modal', 'paging', 'tagSuggestions'],
+    })
   }
 
   function openEdit(item) {
-    router.visit(route('incomes.edit', item.id), { preserveScroll: true })
+    router.visit(route('incomes.edit', item.id), {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['modal', 'income', 'paging', 'tagSuggestions'],
+    })
   }
 
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -180,7 +234,7 @@ export default function IncomesIndex() {
                               </div>
                           )}
                       </div>
-                      <div className="flex justify-end">
+                      <div className="flex items-center gap-3">
                           <Button type="button" title={__('incomes.actions.add')} onClick={openCreate}>
                               <PlusIcon className="size-4" /> {__('incomes.actions.add')}
                           </Button>
@@ -267,107 +321,19 @@ export default function IncomesIndex() {
                   )}
               </div>
 
-              {/* Table */}
-              <div className="overflow-x-auto rounded-lg border">
-                  <table className="w-full text-sm">
-                      <thead className="bg-muted">
-                          <tr className="text-left">
-                              <th className="px-3 py-2">{__('incomes.table.date')}</th>
-                              <th className="px-3 py-2">{__('incomes.table.description')}</th>
-                              <th className="px-3 py-2">{__('incomes.table.type')}</th>
-                              <th className="px-3 py-2 text-right">{__('incomes.table.amount')}</th>
-                              <th className="px-3 py-2">{__('incomes.table.currency')}</th>
-                              <th className="px-3 py-2">{__('incomes.table.actions')}</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          {filtered.length === 0 && (
-                              <tr>
-                                  <td className="px-3 py-8 text-center text-muted-foreground" colSpan={6}>
-                                      {__('incomes.table.empty')}
-                                  </td>
-                              </tr>
-                          )}
-                          {filtered.map((i) => (
-                              <tr key={i.id} className="border-t">
-                                  <td className="px-3 py-2 whitespace-nowrap">{i.occurred_on}</td>
-                                  <td className="px-3 py-2">{i.description}</td>
-                                  <td className="px-3 py-2">{getTypeLabel(i.income_type_key)}</td>
-                                  <td className="px-3 py-2 text-right font-medium">
-                                      {convertEnabled && i.currency_code !== convertCurrency ? (
-                                          <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                  <span className="cursor-help underline decoration-dotted">
-                                                      {formatAmount(convertMinor(i.amount_minor, i.currency_code, convertCurrency), convertCurrency)}
-                                                  </span>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                  {__('incomes.original_value', {
-                                                      value: `${formatAmount(i.amount_minor, i.currency_code)} ${i.currency_code}`,
-                                                  })}
-                                              </TooltipContent>
-                                          </Tooltip>
-                                      ) : (
-                                          formatAmount(i.amount_minor, i.currency_code)
-                                      )}
-                                  </td>
-                                  <td className="px-3 py-2">
-                                      {convertEnabled && i.currency_code !== convertCurrency ? (
-                                          <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                  <span className="cursor-help underline decoration-dotted">{convertCurrency}</span>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                  {__('incomes.original_value', { value: formatAmount(i.amount_minor, i.currency_code) })}
-                                              </TooltipContent>
-                                          </Tooltip>
-                                      ) : (
-                                          i.currency_code
-                                      )}
-                                  </td>
-                                  <td className="px-3 py-2">
-                                      <div className="flex items-center gap-2">
-                                          <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                  <Link
-                                                      href={route('incomes.show', i.id)}
-                                                      prefetch
-                                                      className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
-                                                  >
-                                                      <Eye className="size-4" />
-                                                  </Link>
-                                              </TooltipTrigger>
-                                              <TooltipContent>{__('incomes.actions.view')}</TooltipContent>
-                                          </Tooltip>
-                                          <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                  <button
-                                                      className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
-                                                      onClick={() => openEdit(i)}
-                                                  >
-                                                      <Pencil className="size-4" />
-                                                  </button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>{__('incomes.actions.edit')}</TooltipContent>
-                                          </Tooltip>
-                                          <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                  <button
-                                                      className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
-                                                      onClick={() => askDelete(i.id)}
-                                                  >
-                                                      <Trash2 className="size-4 text-destructive" />
-                                                  </button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>{__('incomes.actions.delete')}</TooltipContent>
-                                          </Tooltip>
-                                      </div>
-                                  </td>
-                              </tr>
-                          ))}
-                      </tbody>
-                  </table>
-              </div>
+              <Deferred fallback={<TableSkeleton columns={columns}/>} data='incomes'>
+                  <DataTable
+                      columns={columns}
+                      data={pageProps.incomes}
+                      emptyText={__('incomes.table.empty')}
+                      // perPageLabel={__('incomes.table.per_page')}
+                      perPage={{
+                          value: pageProps.paging.perPage,
+                          options: pageProps.paging.options,
+                          onChange: (v) => router.visit(route('incomes.index', { perPage: v, page: 1 }), { preserveScroll: true, replace: true }),
+                      }}
+                  />
+              </Deferred>
           </div>
 
           {/* Drawer: render only when modal needs to be opened */}

@@ -12,13 +12,16 @@ use App\Http\Resources\TagListResource;
 use App\Http\Resources\UserResource;
 use App\Models\Income;
 use App\Models\IncomeType;
+use App\Repositories\Contracts\IncomeRepository;
 use App\Repositories\Contracts\IncomeTypeRepository;
 use App\Repositories\Contracts\TagRepository;
 use App\Services\IncomeService;
 use App\Services\TagService;
+use App\Support\TableConfig;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class IncomeController extends BaseController
 {
@@ -30,38 +33,33 @@ class IncomeController extends BaseController
         protected IncomeService $incomeService,
         protected TagRepository $tagRepository,
         protected IncomeTypeRepository $incomeTypes,
+        protected IncomeRepository $incomes,
     ) {}
 
     /**
      * Display the income index page.
      */
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        $user = $request->user();
-
-        return Inertia::render('incomes/index', [
-            // Optional props that the frontend may use in the future
-            'currencies' => CurrencyResource::collection(Currency::cases()),
-            'user' => UserResource::make($user),
-            'incomeTypes' => IncomeTypeResource::collection($this->incomeTypes->visibleForUser($user)),
+        return $this->render($request, [
+            // Additional props used by the UI
+            'user' => UserResource::make($request->user()),
         ]);
     }
 
     /**
      * Open the drawer in creation mode via URL.
      */
-    public function create(Request $request)
+    public function create(Request $request): Response
     {
         $user = $request->user();
 
-        return Inertia::render('incomes/index', [
+        return $this->render($request, [
             'modal' => [
                 'type' => 'create',
                 'action' => route('incomes.store'),
                 'method' => 'post',
             ],
-            'currencies' => CurrencyResource::collection(Currency::cases()),
-            'incomeTypes' => IncomeTypeResource::collection($this->incomeTypes->visibleForUser($user)),
             'tagSuggestions' => TagListResource::collection($this->tagService->getSuggestions($user)),
         ]);
     }
@@ -99,20 +97,18 @@ class IncomeController extends BaseController
     /**
      * Open the drawer in edit mode via URL with the given ID.
      */
-    public function edit(Request $request, Income $income)
+    public function edit(Request $request, Income $income): Response
     {
         $user = $request->user();
         $income->load('tags');
 
-        return Inertia::render('incomes/index', [
+        return $this->render($request, [
             'modal' => [
                 'type' => 'edit',
                 'action' => route('incomes.update', $income),
                 'method' => 'put',
             ],
             'income' => IncomeResource::make($income),
-            'currencies' => CurrencyResource::collection(Currency::cases()),
-            'incomeTypes' => IncomeTypeResource::collection($this->incomeTypes->visibleForUser($user)),
             'tagSuggestions' => TagListResource::collection($this->tagService->getSuggestions($user)),
         ]);
     }
@@ -125,5 +121,31 @@ class IncomeController extends BaseController
         $this->incomeService->save($request, $income);
 
         return redirect()->route('incomes.index');
+    }
+
+    /**
+     * Render the income index page with the given data.
+     *
+     * Merges the provided data with default props including:
+     * - Pagination configuration
+     * - Income list (lazy loaded)
+     * - Available currencies
+     * - Income types visible to the user
+     */
+    protected function render(Request $request, array $data = []): Response
+    {
+        $user = $request->user();
+
+        return Inertia::render('incomes/index', array_merge([
+
+            // Provide a paging props
+            'paging' => TableConfig::pagingData($request, 'incomes'),
+
+            // Load the table lazily on modal route to keep drawer snappy, but still show the table when landing directly
+            'incomes' => Inertia::defer(fn () => IncomeResource::collection($this->incomeService->paginate($user))),
+            'currencies' => fn () => CurrencyResource::collection(Currency::cases()),
+            'incomeTypes' => fn () => IncomeTypeResource::collection($this->incomeTypes->visibleForUser($user)),
+
+        ], $data));
     }
 }

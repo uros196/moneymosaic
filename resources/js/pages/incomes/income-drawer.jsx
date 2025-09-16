@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, router, usePage } from '@inertiajs/react';
+import { Form, router, usePage, useRemember } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useI18n } from '@/i18n/index.js';
 import { useEffect, useRef, useState } from 'react';
@@ -21,6 +21,7 @@ export default function IncomeDrawer({ open, setOpen }) {
     // define props and adjust them for later use
     const incomeData = props.income?.data ?? {};
     const tagSuggestions = props.tagSuggestions.data.map((t) => t.name);
+    const defaultCurrency = props.currencies.data[0];
 
     // define states for the drawer
     const [discardOpen, setDiscardOpen] = useState(false);
@@ -29,9 +30,9 @@ export default function IncomeDrawer({ open, setOpen }) {
 
     // define states for the custom form fields
     const [incomeTypeId, setIncomeTypeId] = useState(incomeData.income_type_id ?? '');
-    const [currencyCode, setCurrencyCode] = useState(incomeData.currency_code ?? '');
+    const [currencyCode, setCurrencyCode] = useState(incomeData.currency_code ?? defaultCurrency.value);
     const [tags, setTags] = useState(incomeData.tags?.map((t) => t.name) ?? []);
-    const [amountStep, setAmountStep] = useState('0.01');
+    const [amountStep, setAmountStep] = useState();
 
     // track changes of currency code and dynamically gets the step
     useEffect(() => {
@@ -41,6 +42,9 @@ export default function IncomeDrawer({ open, setOpen }) {
 
     // define form field references
     const newIncomeType = useRef(null);
+
+    // read the query params remembered by the useRemember hook on the income index page
+    const [indexQuery] = useRemember({}, 'incomes.indexQuery');
 
     /**
      * Synchronizes the drawer's dirty state with the form's dirty state
@@ -57,7 +61,12 @@ export default function IncomeDrawer({ open, setOpen }) {
      * Uses 'router.visit' with specific options to ensure smooth navigation.
      */
     function incomeIndexRedirect() {
-        router.visit(route('incomes.index'), { preserveScroll: true, preserveState: true, replace: true });
+        router.visit(route('incomes.index', {...indexQuery}), {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+            only: ['modal', 'income', 'paging', 'incomeTypes'],
+        });
     }
 
     return (
@@ -84,9 +93,15 @@ export default function IncomeDrawer({ open, setOpen }) {
                     <Form
                         method={props.modal.method}
                         action={props.modal.action}
-                        options={{ preserveScroll: true }}
+                        options={{
+                            preserveScroll: true,
+                            // in case of errors, preserve the state of the form fields and do not render the whole page
+                            preserveState: (page) => Boolean(page?.props?.errors),
+                            only: ['modal'],
+                        }}
                         onSuccess={() => {
-                            incomeIndexRedirect();
+                            // if the form was successful, redirect to the income index page (require full page render)
+                            router.visit(route('incomes.index'), { preserveScroll: true })
                         }}
                     >
                         {({ processing, errors, isDirty }) => (
