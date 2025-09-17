@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Incomes;
 
 use App\Enums\Currency;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Incomes\StoreIncomeRequest;
 use App\Http\Requests\Incomes\StoreIncomeTypeRequest;
 use App\Http\Resources\CurrencyResource;
@@ -17,13 +18,11 @@ use App\Repositories\Contracts\IncomeTypeRepository;
 use App\Repositories\Contracts\TagRepository;
 use App\Services\IncomeService;
 use App\Services\TagService;
-use App\Support\TableConfig;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller as BaseController;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class IncomeController extends BaseController
+class IncomeController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -34,7 +33,9 @@ class IncomeController extends BaseController
         protected TagRepository $tagRepository,
         protected IncomeTypeRepository $incomeTypes,
         protected IncomeRepository $incomes,
-    ) {}
+    ) {
+        $this->authorizeResource(Income::class, 'income');
+    }
 
     /**
      * Display the income index page.
@@ -71,7 +72,8 @@ class IncomeController extends BaseController
     {
         $this->incomeService->save($request, Income::make());
 
-        return redirect()->route('incomes.index');
+        return redirect()->route('incomes.index')
+            ->with('success', __('incomes.toasts.created'));
     }
 
     /**
@@ -79,6 +81,8 @@ class IncomeController extends BaseController
      */
     public function storeType(StoreIncomeTypeRequest $request)
     {
+        $this->authorize('create', IncomeType::class);
+
         $user = $request->user();
         $data = $request->validated();
 
@@ -120,7 +124,18 @@ class IncomeController extends BaseController
     {
         $this->incomeService->save($request, $income);
 
-        return redirect()->route('incomes.index');
+        return redirect()->route('incomes.index')
+            ->with('success', __('incomes.toasts.updated'));
+    }
+
+    /**
+     * Delete an income that belongs to the current user.
+     */
+    public function destroy(Income $income)
+    {
+        $income->delete();
+
+        return back(303)->with('success', __('incomes.toasts.deleted', ['name' => $income->name]));
     }
 
     /**
@@ -137,9 +152,6 @@ class IncomeController extends BaseController
         $user = $request->user();
 
         return Inertia::render('incomes/index', array_merge([
-
-            // Provide a paging props
-            'paging' => TableConfig::pagingData($request, 'incomes'),
 
             // Load the table lazily on modal route to keep drawer snappy, but still show the table when landing directly
             'incomes' => Inertia::defer(fn () => IncomeResource::collection($this->incomeService->paginate($user))),

@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Enums\Currency;
+use App\Policies\IncomePolicy;
 use App\Support\Money;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Tags\HasTags;
 
+#[UsePolicy(IncomePolicy::class)]
 class Income extends Model
 {
     use HasFactory, HasTags;

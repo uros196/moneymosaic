@@ -78,7 +78,7 @@ function Button({
           <Loader className="size-4 text-current" />
         </span>
       )}
-      <span className={isLoading ? "opacity-0" : ""}>{children}</span>
+      <span className={cn(isLoading ? "opacity-0" : "", "inline-flex items-center gap-2")}>{children}</span>
     </Comp>
   )
 }

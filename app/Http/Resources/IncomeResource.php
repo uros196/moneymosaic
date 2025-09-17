@@ -26,7 +26,8 @@ class IncomeResource extends JsonResource
             'income_type_id' => $this->income_type_id,
             'income_type' => IncomeTypeResource::make($this->whenLoaded('incomeType')),
             'description' => $this->description,
-            'occurred_on' => $this->occurred_on->translatedFormat('d F Y'),
+            'occurred_on' => $this->occurred_on->format('Y-m-d'),
+            'occurred_on_display' => $this->occurred_on->translatedFormat('d F Y'),
             'tags' => TagListResource::collection($this->whenLoaded('tags')),
         ];
     }

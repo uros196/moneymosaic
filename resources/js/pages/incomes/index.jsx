@@ -1,17 +1,17 @@
-import { Deferred, Head, Link, router, usePage, useRemember } from '@inertiajs/react';
+import { Deferred, Head, router, usePage, useRemember } from '@inertiajs/react';
+import { toast } from 'react-hot-toast';
 import IncomeDrawer from './income-drawer'
 import AppLayout from '@/layouts/app-layout'
 import HeadingSmall from '@/components/heading-small'
 import { useI18n } from '@/i18n'
 import { useEffect, useMemo, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import ConfirmDialog from '@/components/ui/confirm-dialog'
-import { Eye, Pencil, PlusIcon, Trash2 } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import DataTable from '@/components/ui/data-table'
 import TableSkeleton from '@/components/skeletons/table-skeleton.jsx';
+import { ViewAction, EditAction, DeleteAction } from '@/components/ui/table-actions'
 
 function formatAmount(minor, currency) {
   try {
@@ -87,9 +87,8 @@ export default function IncomesIndex() {
   }, [pageProps.incomes])
 
 
-    // const { rows } = useDeferredProps();
   const columns = useMemo(() => [
-    { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on },
+    { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on_display },
     { id: 'description', header: __('incomes.table.description'), accessor: (r) => r.name || r.description },
     { id: 'income_type', header: __('incomes.table.type'), accessor: (r) => r.income_type.name },
     { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount },
@@ -99,40 +98,15 @@ export default function IncomesIndex() {
       header: __('incomes.table.actions'),
       cell: (income) => (
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href={route('incomes.show', income.id)}
-                prefetch
-                className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
-              >
-                <Eye className="size-4" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>{__('incomes.actions.view')}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
-                onClick={() => openEdit(income)}
-              >
-                <Pencil className="size-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>{__('incomes.actions.edit')}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="inline-flex items-center rounded-md border px-2 py-1 hover:bg-accent"
-                onClick={() => askDelete(income.id)}
-              >
-                <Trash2 className="size-4 text-destructive" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>{__('incomes.actions.delete')}</TooltipContent>
-          </Tooltip>
+          <ViewAction href={route('incomes.show', income.id)} label={__('incomes.actions.view')} />
+          <EditAction onClick={() => openEdit(income)} label={__('incomes.actions.edit')} />
+          <DeleteAction
+            onConfirm={() => performDelete(income.id)}
+            // requirePassword={true}
+            label={__('incomes.actions.delete')}
+            confirmTitle={__('incomes.confirm.delete_title')}
+            confirmDescription={__('incomes.confirm.delete_description')}
+          />
         </div>
       ),
     },
@@ -158,9 +132,7 @@ export default function IncomesIndex() {
   const [open, setOpen] = useState(false)
 
   // Open the drawer based on modal props (URL-driven)
-  useEffect(() => {
-      hasModal ? setOpen(true) : setOpen(false)
-  }, [pageProps.modal])
+  useEffect(() => { setOpen(hasModal) }, [pageProps.modal])
 
   function openCreate() {
     router.visit(route('incomes.create'), {
@@ -178,17 +150,18 @@ export default function IncomesIndex() {
     })
   }
 
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [toDeleteId, setToDeleteId] = useState(null)
-
-  function askDelete(id) {
-    setToDeleteId(id)
-    setConfirmOpen(true)
-  }
-  function confirmDelete() {
-    if (toDeleteId != null) {
-      // TODO: call the server for this
-    }
+  function performDelete(id) {
+    if (id == null) return
+    router.delete(route('incomes.destroy', id), {
+      preserveScroll: true,
+      replace: true,
+      onSuccess: () => {
+        router.reload({ preserveScroll: true, only: ['incomes', 'flash'] })
+      },
+      onError: () => {
+        toast.error(__('incomes.toasts.delete_failed'))
+      }
+    })
   }
 
   const breadcrumbs = [
@@ -235,7 +208,7 @@ export default function IncomesIndex() {
                           )}
                       </div>
                       <div className="flex items-center gap-3">
-                          <Button type="button" title={__('incomes.actions.add')} onClick={openCreate}>
+                          <Button type="button" title={__('incomes.actions.add')} onClick={openCreate} className="whitespace-nowrap">
                               <PlusIcon className="size-4" /> {__('incomes.actions.add')}
                           </Button>
                       </div>
@@ -337,18 +310,8 @@ export default function IncomesIndex() {
           </div>
 
           {/* Drawer: render only when modal needs to be opened */}
-          {hasModal && <IncomeDrawer open={open} setOpen={setOpen} />}
+          {hasModal && <IncomeDrawer open={open} />}
 
-          {/* Confirm delete */}
-          <ConfirmDialog
-              open={confirmOpen}
-              onOpenChange={setConfirmOpen}
-              title={__('incomes.confirm.delete_title')}
-              description={__('incomes.confirm.delete_description')}
-              confirmText={__('incomes.actions.delete')}
-              cancelText={__('incomes.actions.cancel')}
-              onConfirm={confirmDelete}
-          />
       </AppLayout>
   );
 }

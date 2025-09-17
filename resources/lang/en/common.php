@@ -20,4 +20,18 @@ return [
     'saved' => 'Saved',
     'manage' => 'Manage',
     'back' => 'Back',
+    'view' => 'View',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'confirm' => 'Confirm',
+    'confirm_delete' => 'Delete item',
+    'verify_password_prompt' => 'For security, please confirm your password to continue.',
+
+    'table' => [
+        'empty' => 'No data available',
+    ],
+    'pagination' => [
+        'per_page' => 'Per page',
+        'showing' => 'Showing :from–:to of :total',
+    ],
 ];

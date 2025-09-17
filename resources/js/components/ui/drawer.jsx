@@ -33,7 +33,7 @@ function DrawerOverlay({ className, ...props }) {
   )
 }
 
-function DrawerContent({ className, children, showClose = true, preventClose = false, ...props }) {
+function DrawerContent({ className, children, preventClose = false, ...props }) {
   return (
     <DrawerPortal>
       <DrawerOverlay />
@@ -41,7 +41,7 @@ function DrawerContent({ className, children, showClose = true, preventClose = f
         data-slot="drawer-content"
         // Right side slide-over panel
         className={cn(
-          "fixed inset-y-0 right-0 z-50 grid h-full w-full overflow-y-auto bg-background shadow-xl outline-none",
+          "fixed inset-y-0 right-0 z-50 flex h-full w-full flex-col overflow-hidden bg-background shadow-xl outline-none",
           // Responsive width: full on mobile, a bit wider on desktop
           "sm:w-full md:w-3/5 lg:w-2/5 xl:w-2/5",
           // Slide in/out animations using translate-x
@@ -57,12 +57,10 @@ function DrawerContent({ className, children, showClose = true, preventClose = f
         {...props}
       >
         {children}
-        {showClose ? (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+          <DrawerClose className="absolute right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 ring-offset-background [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
             <XIcon />
             <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
-        ) : null}
+          </DrawerClose>
       </DialogPrimitive.Content>
     </DrawerPortal>
   )

@@ -20,4 +20,18 @@ return [
     'saved' => 'Sačuvano',
     'manage' => 'Upravljaj',
     'back' => 'Nazad',
+    'view' => 'Pregled',
+    'edit' => 'Izmeni',
+    'delete' => 'Obriši',
+    'confirm' => 'Potvrdi',
+    'confirm_delete' => 'Brisanje stavke',
+    'verify_password_prompt' => 'Iz bezbednosnih razloga potvrdite lozinku da nastavite.',
+
+    'table' => [
+        'empty' => 'Zapisi nisu dostupni',
+    ],
+    'pagination' => [
+        'per_page' => 'Po strani',
+        'showing' => 'Prikazano :from–:to od ukupno :total',
+    ],
 ];

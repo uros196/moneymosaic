@@ -70,4 +70,13 @@ return [
         'delete_type_description' => 'Are you sure you want to delete this custom type? Affected entries will switch to Salary.',
     ],
     'original_value' => 'Original: :value',
+
+    // Toast messages
+    'toasts' => [
+        'created' => 'New income created.',
+        'updated' => 'Income updated.',
+        'deleted' => 'Income ":name" is deleted.',
+        'delete_failed' => 'Failed to delete income.',
+        'delete_forbidden' => 'You are not allowed to delete this income.',
+    ],
 ];

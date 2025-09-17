@@ -71,8 +71,8 @@ class HandleInertiaRequests extends Middleware
                 ];
             },
             'locale' => app()->getLocale(),
-            'translations' => function () {
-                return [
+            'translations' => function () use ($request) {
+                $base = [
                     'common' => trans('common'),
                     'security' => trans('security'),
                     'sessions' => trans('sessions'),
@@ -84,6 +84,10 @@ class HandleInertiaRequests extends Middleware
                     'nav' => trans('nav'),
                     'incomes' => trans('incomes'),
                 ];
+
+                $extra = (array) $request->attributes->get('translations.extra', []);
+
+                return array_merge($base, $extra);
             },
         ];
     }

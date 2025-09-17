@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             '2fa' => EnsureTwoFactorVerified::class,
             'password.recent' => EnsureRecentPasswordMiddleware::class,
+            'paging' => \App\Http\Middleware\PreparePagingPropMiddleware::class,
+            'translations' => \App\Http\Middleware\LoadTranslationsMiddleware::class,
         ]);
 
         $middleware->web(append: [

@@ -1,6 +1,6 @@
 import InputError from '@/components/input-error';
 import { DateInput } from '@/components/ui/date-input';
-import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,7 +14,7 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-export default function IncomeDrawer({ open, setOpen }) {
+export default function IncomeDrawer({ open }) {
     const { __ } = useI18n();
     const props = usePage().props;
 
@@ -27,6 +27,7 @@ export default function IncomeDrawer({ open, setOpen }) {
     const [discardOpen, setDiscardOpen] = useState(false);
     const [addTypeOpen, setAddTypeOpen] = useState(false);
     const [isDirtyDrawer, setDirtyDrawer] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     // define states for the custom form fields
     const [incomeTypeId, setIncomeTypeId] = useState(incomeData.income_type_id ?? '');
@@ -39,6 +40,9 @@ export default function IncomeDrawer({ open, setOpen }) {
         const currency = props.currencies.data.filter((c) => c.value === currencyCode)[0];
         setAmountStep(currency.step);
     }, [currencyCode]);
+
+    // Updates the isCreating state based on the modal type, setting it to true when the type is 'create'
+    useEffect(() => { setIsCreating(props.modal.type === 'create') }, [props.modal.type]);
 
     // define form field references
     const newIncomeType = useRef(null);
@@ -61,11 +65,11 @@ export default function IncomeDrawer({ open, setOpen }) {
      * Uses 'router.visit' with specific options to ensure smooth navigation.
      */
     function incomeIndexRedirect() {
-        router.visit(route('incomes.index', {...indexQuery}), {
+        router.visit(route('incomes.index', { ...indexQuery }), {
             preserveScroll: true,
             preserveState: true,
             replace: true,
-            only: ['modal', 'income', 'paging', 'incomeTypes'],
+            only: ['modal', 'income', 'paging', 'incomeTypes', 'flash'],
         });
     }
 
@@ -73,35 +77,28 @@ export default function IncomeDrawer({ open, setOpen }) {
         <>
             <Drawer
                 open={open}
-                onOpenChange={(v) => {
-                    if (!v && isDirtyDrawer) {
-                        setOpen(true);
-                        return;
-                    }
-                    setOpen(v);
-                    if (!v) {
-                        incomeIndexRedirect();
-                    }
-                }}
+                onOpenChange={() => { isDirtyDrawer ? setDiscardOpen(true) : incomeIndexRedirect() }}
             >
-                <DrawerContent preventClose={isDirtyDrawer} showClose={!isDirtyDrawer}>
+                <DrawerContent>
                     <DrawerHeader>
-                        <DrawerTitle>{props.modal.type === 'create' ? __('incomes.actions.add') : __('incomes.actions.edit')}</DrawerTitle>
+                        <DrawerTitle>{isCreating ? __('incomes.actions.add') : __('incomes.actions.edit')}</DrawerTitle>
                         <DrawerDescription>{__('incomes.description')}</DrawerDescription>
                     </DrawerHeader>
 
                     <Form
+                        className="flex min-h-0 flex-1 flex-col"
                         method={props.modal.method}
                         action={props.modal.action}
                         options={{
                             preserveScroll: true,
                             // in case of errors, preserve the state of the form fields and do not render the whole page
                             preserveState: (page) => Boolean(page?.props?.errors),
-                            only: ['modal'],
+                            only: ['modal', 'flash'],
                         }}
                         onSuccess={() => {
                             // if the form was successful, redirect to the income index page (require full page render)
-                            router.visit(route('incomes.index'), { preserveScroll: true })
+                            // if the edit mode is on, return it to the exact previous page
+                            router.visit(route('incomes.index', isCreating ? {} : {...indexQuery}), { preserveScroll: true });
                         }}
                     >
                         {({ processing, errors, isDirty }) => (
@@ -110,7 +107,7 @@ export default function IncomeDrawer({ open, setOpen }) {
                                     return dirtySync(isDirty);
                                 })()}
 
-                                <div className="grid gap-3 px-6 py-4">
+                                <div className="grid content-start gap-3 px-6 py-4 flex-1 overflow-y-auto min-h-0">
                                     <div className="grid gap-2">
                                         <Label htmlFor="name">{__('incomes.form.name')}</Label>
                                         <Input
@@ -237,15 +234,11 @@ export default function IncomeDrawer({ open, setOpen }) {
 
                                 <DrawerFooter>
                                     <div className="flex items-center justify-end gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="secondary"
-                                            onClick={() => {
-                                                isDirty ? setDiscardOpen(true) : incomeIndexRedirect();
-                                            }}
-                                        >
-                                            {__('incomes.actions.cancel')}
-                                        </Button>
+                                        <DrawerClose>
+                                            <Button type="button" variant="secondary">
+                                                {__('incomes.actions.cancel')}
+                                            </Button>
+                                        </DrawerClose>
                                         <Button disabled={processing} isLoading={processing}>
                                             {__('incomes.actions.save')}
                                         </Button>

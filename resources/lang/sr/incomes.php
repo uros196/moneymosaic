@@ -70,4 +70,13 @@ return [
         'delete_type_description' => 'Da li ste sigurni da želite da obrišete ovaj prilagođeni tip? Pogođene stavke će biti prebačene na Platu.',
     ],
     'original_value' => 'Originalni iznos: :value',
+
+    // Poruke (toast)
+    'toasts' => [
+        'created' => 'Novi prihod je dodat.',
+        'updated' => 'Prihod je ažuriran.',
+        'deleted' => 'Prihod ":name" je obrisan.',
+        'delete_failed' => 'Brisanje prihoda nije uspelo.',
+        'delete_forbidden' => 'Nemate dozvolu da obrišete ovaj prihod.',
+    ],
 ];
