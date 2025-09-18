@@ -44,9 +44,6 @@ class ConfirmablePasswordController extends Controller
     /**
      * Confirm the user's password.
      *
-     * @param  Request  $request  The current request containing the password to validate.
-     * @return RedirectResponse Redirect to the intended page after confirmation.
-     *
      * @throws ValidationException If the provided password is invalid.
      */
     public function store(Request $request, PasswordConfirmationService $passwords): RedirectResponse

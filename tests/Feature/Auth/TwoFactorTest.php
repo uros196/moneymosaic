@@ -20,7 +20,7 @@ class TwoFactorTest extends TestCase
 
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         $response = $this->post('/login', [
@@ -36,7 +36,7 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         // Prepare session with a known code
@@ -57,7 +57,7 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         $this->actingAs($user);
@@ -69,7 +69,7 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         $this->actingAs($user);

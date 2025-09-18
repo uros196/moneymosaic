@@ -21,7 +21,7 @@ export default function IncomeDrawer({ open }) {
     // define props and adjust them for later use
     const incomeData = props.income?.data ?? {};
     const tagSuggestions = props.tagSuggestions.data.map((t) => t.name);
-    const defaultCurrency = props.currencies.data[0];
+    const defaultCurrency = props.user.data.default_currency_code;
 
     // define states for the drawer
     const [discardOpen, setDiscardOpen] = useState(false);
@@ -30,8 +30,8 @@ export default function IncomeDrawer({ open }) {
     const [isCreating, setIsCreating] = useState(false);
 
     // define states for the custom form fields
-    const [incomeTypeId, setIncomeTypeId] = useState(incomeData.income_type_id ?? '');
-    const [currencyCode, setCurrencyCode] = useState(incomeData.currency_code ?? defaultCurrency.value);
+    const [incomeTypeId, setIncomeTypeId] = useState(String(incomeData.income_type_id ?? ''));
+    const [currencyCode, setCurrencyCode] = useState(incomeData.currency_code ?? defaultCurrency);
     const [tags, setTags] = useState(incomeData.tags?.map((t) => t.name) ?? []);
     const [amountStep, setAmountStep] = useState();
 
@@ -150,7 +150,7 @@ export default function IncomeDrawer({ open }) {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {props.incomeTypes.data.map((type) => (
-                                                    <SelectItem value={type.id} key={type.id}>
+                                                    <SelectItem value={String(type.id)} key={"income-type-" + type.id}>
                                                         {type.name}
                                                     </SelectItem>
                                                 ))}
@@ -265,6 +265,7 @@ export default function IncomeDrawer({ open }) {
                             form.reset();
                             setAddTypeOpen(false);
                         }}
+                        className="space-y-6"
                     >
                         {({ resetAndClearErrors, processing, errors }) => (
                             <>

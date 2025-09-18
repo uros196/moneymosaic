@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Incomes;
 
 use App\Enums\Currency;
+use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Incomes\StoreIncomeRequest;
 use App\Http\Requests\Incomes\StoreIncomeTypeRequest;
@@ -17,6 +18,7 @@ use App\Repositories\Contracts\IncomeRepository;
 use App\Repositories\Contracts\IncomeTypeRepository;
 use App\Repositories\Contracts\TagRepository;
 use App\Services\IncomeService;
+use App\Services\IncomeTypeService;
 use App\Services\TagService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,7 +34,7 @@ class IncomeController extends Controller
         protected IncomeService $incomeService,
         protected TagRepository $tagRepository,
         protected IncomeTypeRepository $incomeTypes,
-        protected IncomeRepository $incomes,
+        protected IncomeRepository $incomes
     ) {
         $this->authorizeResource(Income::class, 'income');
     }
@@ -42,10 +44,7 @@ class IncomeController extends Controller
      */
     public function index(Request $request): Response
     {
-        return $this->render($request, [
-            // Additional props used by the UI
-            'user' => UserResource::make($request->user()),
-        ]);
+        return $this->render($request);
     }
 
     /**
@@ -73,23 +72,20 @@ class IncomeController extends Controller
         $this->incomeService->save($request, Income::make());
 
         return redirect()->route('incomes.index')
-            ->with('success', __('incomes.toasts.created'));
+            ->with(ToastType::Success->message(__('incomes.toasts.created')));
     }
 
     /**
      * Create a new income type for the current user.
      */
-    public function storeType(StoreIncomeTypeRequest $request)
+    public function storeType(StoreIncomeTypeRequest $request, IncomeTypeService $incomeTypeService)
     {
         $this->authorize('create', IncomeType::class);
 
         $user = $request->user();
-        $data = $request->validated();
+        $name = $request->validated('name');
 
-        $type = IncomeType::create([
-            'user_id' => $user->id,
-            'name' => $data['name'],
-        ]);
+        $type = $incomeTypeService->create($user, $name);
 
         // return IncomeTypeResource::make($type)
         //     ->response()
@@ -125,7 +121,7 @@ class IncomeController extends Controller
         $this->incomeService->save($request, $income);
 
         return redirect()->route('incomes.index')
-            ->with('success', __('incomes.toasts.updated'));
+            ->with(ToastType::Success->message(__('incomes.toasts.updated')));
     }
 
     /**
@@ -135,7 +131,8 @@ class IncomeController extends Controller
     {
         $income->delete();
 
-        return back(303)->with('success', __('incomes.toasts.deleted', ['name' => $income->name]));
+        return back(303)
+            ->with(ToastType::Success->message(__('incomes.toasts.deleted', ['name' => $income->name])));
     }
 
     /**
@@ -153,9 +150,12 @@ class IncomeController extends Controller
 
         return Inertia::render('incomes/index', array_merge([
 
+            // Additional props used by the UI
+            'user' => UserResource::make($request->user()),
+
             // Load the table lazily on modal route to keep drawer snappy, but still show the table when landing directly
             'incomes' => Inertia::defer(fn () => IncomeResource::collection($this->incomeService->paginate($user))),
-            'currencies' => fn () => CurrencyResource::collection(Currency::cases()),
+            'currencies' => CurrencyResource::collection(Currency::cases()),
             'incomeTypes' => fn () => IncomeTypeResource::collection($this->incomeTypes->visibleForUser($user)),
 
         ], $data));

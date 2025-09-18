@@ -35,6 +35,7 @@ return [
 
     'table' => [
         'date' => 'Date',
+        'name' => 'Name',
         'description' => 'Description',
         'type' => 'Type',
         'amount' => 'Amount',

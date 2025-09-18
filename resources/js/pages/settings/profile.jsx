@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx';
 import { useI18n } from '@/i18n';
 
-export default function Profile({ mustVerifyEmail, status, twoFactorSetupInProgress }) {
+export default function Profile({ user, mustVerifyEmail, status, twoFactorSetupInProgress }) {
     const { __ } = useI18n();
     const breadcrumbs = [
         {
@@ -20,11 +20,11 @@ export default function Profile({ mustVerifyEmail, status, twoFactorSetupInProgr
             href: route('profile.edit'),
         },
     ];
-    const { auth } = usePage().props;
-    const enabled = Boolean(auth.user.two_factor_enabled);
-    const tfType = auth.user.two_factor_type;
-    const [locale, setLocale] = useState(auth.user.locale ?? 'en');
-    const [passwordConfirmMinutes, setPasswordConfirmMinutes] = useState(String(auth.user.password_confirm_minutes ?? '0'));
+
+    const enabled = Boolean(user.data.two_factor_enabled);
+    const tfType = user.data.two_factor_type;
+    const [locale, setLocale] = useState(user.data.locale);
+    const [passwordConfirmMinutes, setPasswordConfirmMinutes] = useState(String(user.data.password_confirm_minutes ?? '0'));
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -49,7 +49,7 @@ export default function Profile({ mustVerifyEmail, status, twoFactorSetupInProgr
 
                                     <Input
                                         id="name"
-                                        defaultValue={auth.user.name}
+                                        defaultValue={user.data.name}
                                         name="name"
                                         required
                                         autoComplete="name"
@@ -66,7 +66,7 @@ export default function Profile({ mustVerifyEmail, status, twoFactorSetupInProgr
                                     <Input
                                         id="email"
                                         type="email"
-                                        defaultValue={auth.user.email}
+                                        defaultValue={user.data.email}
                                         name="email"
                                         required
                                         autoComplete="username"
@@ -113,7 +113,7 @@ export default function Profile({ mustVerifyEmail, status, twoFactorSetupInProgr
                                     <InputError className="mt-2" message={errors.password_confirm_minutes} />
                                 </div>
 
-                                {mustVerifyEmail && auth.user.email_verified_at === null && (
+                                {mustVerifyEmail && user.data.email_verified_at === null && (
                                     <div>
                                         <p className="-mt-4 text-sm text-muted-foreground">
                                             {__('profile.email_unverified')}{' '}

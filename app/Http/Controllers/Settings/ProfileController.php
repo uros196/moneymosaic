@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\DeleteAccountRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Http\Resources\UserResource;
 use App\Services\TwoFactor\UserTwoFactorService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -21,13 +23,13 @@ class ProfileController extends Controller
     public function edit(Request $request, UserTwoFactorService $user2fa): Response
     {
         $user = $request->user();
-
-        $inProgress = $user2fa->isSetupInProgress($user, $request->session());
+        $this->authorize('view', $user);
 
         return Inertia::render('settings/profile', [
+            'user' => UserResource::make($user),
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
-            'twoFactorSetupInProgress' => $inProgress,
+            'twoFactorSetupInProgress' => $user2fa->isSetupInProgress($user, $request->session()),
         ]);
     }
 
@@ -36,6 +38,8 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        $this->authorize('update', $request->user());
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -48,7 +52,7 @@ class ProfileController extends Controller
         app()->setLocale($request->validated('locale'));
 
         return to_route('profile.edit')
-            ->with('success', __('Profile information updated.'));
+            ->with(ToastType::Success->message(__('Profile information updated.')));
     }
 
     /**
@@ -57,6 +61,8 @@ class ProfileController extends Controller
     public function destroy(DeleteAccountRequest $request): RedirectResponse
     {
         $user = $request->user();
+
+        $this->authorize('delete', $user);
 
         Auth::logout();
 

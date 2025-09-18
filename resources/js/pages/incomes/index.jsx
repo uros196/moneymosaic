@@ -73,9 +73,8 @@ export default function IncomesIndex() {
 
   // Conversion UI state (display-only)
   const pageProps = usePage().props || {}
-  const userDefault = pageProps?.auth?.user?.default_currency_code || 'EUR'
   const [convertEnabled, setConvertEnabled] = useState(false)
-  const [convertCurrency, setConvertCurrency] = useState(userDefault)
+  const [convertCurrency, setConvertCurrency] = useState(pageProps.user.default_currency_code)
     const hasModal = Boolean(pageProps.modal)
 
   const [filtersOpen, setFiltersOpen] = useState(false)
@@ -85,32 +84,6 @@ export default function IncomesIndex() {
     ys.add(`${now.getFullYear()}`)
     return Array.from(ys).sort((a, b) => Number(b) - Number(a))
   }, [pageProps.incomes])
-
-
-  const columns = useMemo(() => [
-    { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on_display },
-    { id: 'description', header: __('incomes.table.description'), accessor: (r) => r.name || r.description },
-    { id: 'income_type', header: __('incomes.table.type'), accessor: (r) => r.income_type.name },
-    { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount },
-    { id: 'currency_code', header: __('incomes.table.currency'), accessor: (r) => r.currency_code },
-    {
-      id: 'actions',
-      header: __('incomes.table.actions'),
-      cell: (income) => (
-        <div className="flex items-center gap-2">
-          <ViewAction href={route('incomes.show', income.id)} label={__('incomes.actions.view')} />
-          <EditAction onClick={() => openEdit(income)} label={__('incomes.actions.edit')} />
-          <DeleteAction
-            onConfirm={() => performDelete(income.id)}
-            // requirePassword={true}
-            label={__('incomes.actions.delete')}
-            confirmTitle={__('incomes.confirm.delete_title')}
-            confirmDescription={__('incomes.confirm.delete_description')}
-          />
-        </div>
-      ),
-    },
-  ], [__])
 
 
     /**
@@ -167,6 +140,31 @@ export default function IncomesIndex() {
   const breadcrumbs = [
     { title: __('incomes.title'), href: route('incomes.index') },
   ]
+
+    // define incomes table columns
+    const columns = useMemo(() => [
+        { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on_display },
+        { id: 'description', header: __('incomes.table.name'), accessor: (r) => r.name || r.description },
+        { id: 'income_type', header: __('incomes.table.type'), accessor: (r) => r.income_type.name },
+        { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount },
+        { id: 'currency_code', header: __('incomes.table.currency'), accessor: (r) => r.currency_code },
+        {
+            id: 'actions',
+            header: __('incomes.table.actions'),
+            cell: (income) => (
+                <div className="flex items-center gap-2">
+                    <ViewAction href={route('incomes.show', income.id)} label={__('incomes.actions.view')} />
+                    <EditAction onClick={() => openEdit(income)} label={__('incomes.actions.edit')} />
+                    <DeleteAction
+                        onConfirm={() => performDelete(income.id)}
+                        label={__('incomes.actions.delete')}
+                        confirmTitle={__('incomes.confirm.delete_title')}
+                        confirmDescription={__('incomes.confirm.delete_description')}
+                    />
+                </div>
+            ),
+        },
+    ], [__])
 
   return (
       <AppLayout breadcrumbs={breadcrumbs}>

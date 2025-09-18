@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\Income;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
 /**
  * @mixin Income
@@ -26,6 +27,7 @@ class IncomeResource extends JsonResource
             'income_type_id' => $this->income_type_id,
             'income_type' => IncomeTypeResource::make($this->whenLoaded('incomeType')),
             'description' => $this->description,
+            'description_short' => Str::limit($this->description),
             'occurred_on' => $this->occurred_on->format('Y-m-d'),
             'occurred_on_display' => $this->occurred_on->translatedFormat('d F Y'),
             'tags' => TagListResource::collection($this->whenLoaded('tags')),

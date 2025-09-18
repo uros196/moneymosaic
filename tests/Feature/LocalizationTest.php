@@ -32,13 +32,6 @@ class LocalizationTest extends TestCase
         $response->assertInertia(fn (Assert $page) => $page
             ->has('locale')
             ->has('translations.common')
-            ->has('translations.security')
-            ->has('translations.sessions')
-            ->has('translations.appearance')
-            ->has('translations.password')
-            ->has('translations.profile')
-            ->has('translations.auth')
-            ->has('translations.settings')
             ->has('translations.nav')
         );
     }

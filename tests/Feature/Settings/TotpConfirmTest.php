@@ -23,7 +23,7 @@ class TotpConfirmTest extends TestCase
         $code = $totp->currentCode($secret);
 
         $user->forceFill([
-            'two_factor_type' => TwofactorType::Totp->value,
+            'two_factor_type' => TwofactorType::Totp,
             'two_factor_secret' => $secret,
         ])->save();
 

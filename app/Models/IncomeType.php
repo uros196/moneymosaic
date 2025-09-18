@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Translatable\HasTranslations;
 
 #[UsePolicy(IncomeTypePolicy::class)]
 class IncomeType extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +22,11 @@ class IncomeType extends Model
         'user_id',
         'name',
     ];
+
+    /**
+     * The attributes that are translatable.
+     */
+    public array $translatable = ['name'];
 
     /**
      * Owner user (null means a system type).

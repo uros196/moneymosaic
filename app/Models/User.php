@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use App\Models\Concerns\HasTwoFactor;
+use App\Policies\UserPolicy;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,6 +18,7 @@ use Illuminate\Notifications\Notifiable;
  * Two-Factor Authentication (2FA) attributes with appropriate casting and
  * encryption for sensitive fields.
  */
+#[UsePolicy(UserPolicy::class)]
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasTwoFactor, Notifiable;
@@ -30,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'locale',
         'password_confirm_minutes',
         'password',
+        'default_currency_code',
     ];
 
     /**
@@ -53,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'password_confirm_minutes' => 'integer',
+            'default_currency_code' => Currency::class,
         ], $this->twoFactorCasts());
     }
 }

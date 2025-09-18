@@ -19,13 +19,13 @@ class TwoFactorResendThrottleTest extends TestCase
 
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
-        // Postavljamo referer kako bi back()->with() znao gde da se vrati
+        // Set the referer so that back()->with() knows where to redirect back to
         $referer = route('twofactor.challenge', absolute: false);
 
-        // Prva tri zahteva treba da prođu (302 redirect nazad)
+        // The first three requests should succeed (302 redirect back)
         $this->actingAs($user)
             ->from($referer)
             ->post(route('twofactor.resend'))
@@ -39,12 +39,12 @@ class TwoFactorResendThrottleTest extends TestCase
             ->post(route('twofactor.resend'))
             ->assertRedirect($referer);
 
-        // Četvrti zahtev u istom prozoru treba da bude odbijen sa 429
+        // The fourth request within the same one-minute window should be rejected with 429
         $this->from($referer)
             ->post(route('twofactor.resend'))
             ->assertStatus(429);
 
-        // Notifikacija treba da je poslata tačno 3 puta tokom prva tri zahteva
+        // The notification should have been sent exactly 3 times during the first three requests
         Notification::assertSentToTimes($user, TwoFactorCodeNotification::class, 3);
     }
 }

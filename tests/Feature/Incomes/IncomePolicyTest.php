@@ -82,10 +82,15 @@ class IncomePolicyTest extends TestCase
             ->put(route('incomes.update', $income), $payload)
             ->assertRedirect(route('incomes.index'));
 
+        // Encrypted columns cannot be asserted directly in the database
         $this->assertDatabaseHas('incomes', [
             'id' => $income->id,
             'user_id' => $user->id,
-            'name' => 'Updated Name',
         ]);
+
+        // Verify via Eloquent
+        $income->refresh();
+        $this->assertSame('Updated Name', $income->name);
+        $this->assertSame('Updated description', $income->description);
     }
 }

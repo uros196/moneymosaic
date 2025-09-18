@@ -203,10 +203,10 @@ class UserTwoFactorService
     }
 
     /**
-     * Check if user's configured two-factor type matches the given type.
+     * Check if the user's configured two-factor type matches the given type.
      */
     public function isTwoFactorTypeOf(User $user, TwoFactorType $type): bool
     {
-        return TwoFactorType::tryFrom($user->two_factor_type) === $type;
+        return $user->two_factor_type === $type;
     }
 }

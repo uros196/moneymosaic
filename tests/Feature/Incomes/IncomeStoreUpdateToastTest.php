@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Currency;
+use App\Enums\ToastType;
 use App\Models\Income;
 use App\Models\IncomeType;
 use App\Models\User;
@@ -32,7 +33,7 @@ class IncomeStoreUpdateToastTest extends TestCase
             ->post(route('incomes.store'), $payload);
 
         $response->assertRedirect(route('incomes.index'));
-        $response->assertSessionHas('success', trans('incomes.toasts.created'));
+        $response->assertSessionHas(ToastType::Success->value, trans('incomes.toasts.created'));
     }
 
     public function test_success_flash_is_set_after_update(): void
@@ -58,6 +59,6 @@ class IncomeStoreUpdateToastTest extends TestCase
             ->put(route('incomes.update', $income), $payload);
 
         $response->assertRedirect(route('incomes.index'));
-        $response->assertSessionHas('success', trans('incomes.toasts.updated'));
+        $response->assertSessionHas(ToastType::Success->value, trans('incomes.toasts.updated'));
     }
 }

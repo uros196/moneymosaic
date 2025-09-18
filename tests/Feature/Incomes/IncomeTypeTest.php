@@ -22,7 +22,8 @@ class IncomeTypeTest extends TestCase
 
         $this->assertDatabaseHas('income_types', [
             'user_id' => $user->id,
-            'name' => 'Custom Type',
+            'name->en' => 'Custom Type',
+            'name->sr' => 'Custom Type',
         ]);
     }
 

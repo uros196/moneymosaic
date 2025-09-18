@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedInteger;
 use App\Enums\Currency;
 use App\Policies\IncomePolicy;
 use App\Support\Money;
@@ -38,7 +39,12 @@ class Income extends Model
     protected function casts(): array
     {
         return [
-            'amount_minor' => 'integer',
+            // Encrypted attributes
+            'name' => 'encrypted',
+            'description' => 'encrypted',
+            'amount_minor' => EncryptedInteger::class,
+
+            // Other casts
             'occurred_on' => 'date',
             'currency_code' => Currency::class,
         ];

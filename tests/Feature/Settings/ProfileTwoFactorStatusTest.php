@@ -15,7 +15,7 @@ class ProfileTwoFactorStatusTest extends TestCase
     public function test_shows_in_progress_when_email_pending(): void
     {
         $user = User::factory()->create([
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
             'two_factor_enabled' => false,
         ]);
 
@@ -32,7 +32,7 @@ class ProfileTwoFactorStatusTest extends TestCase
     public function test_shows_in_progress_when_totp_setup_begun(): void
     {
         $user = User::factory()->create([
-            'two_factor_type' => TwoFactorType::Totp->value,
+            'two_factor_type' => TwoFactorType::Totp,
             'two_factor_enabled' => false,
         ]);
 

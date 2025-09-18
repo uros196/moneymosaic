@@ -86,6 +86,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | The list of locales supported by the application for translations and UI.
+    | These locales may be used when creating translatable records or rendering
+    | language switches in the interface.
+    |
+    */
+
+    'available_locales' => ['en', 'sr'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('income_types', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->string('name');
+            $table->json('name');
             $table->timestamps();
 
             $table->index('user_id');

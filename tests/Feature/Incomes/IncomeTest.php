@@ -51,13 +51,16 @@ class IncomeTest extends TestCase
         $this->assertInstanceOf(Currency::class, $income->currency_code);
         $this->assertSame('EUR', $income->currency_code->value);
 
+        // Encrypted columns (name, description, amount_minor) cannot be asserted directly in the database
         $this->assertDatabaseHas('incomes', [
             'id' => $income->id,
             'user_id' => $user->id,
-            'amount_minor' => 123_456,
             'currency_code' => Currency::EUR->value,
             'income_type_id' => $salaryType->id,
         ]);
+
+        // Verify decrypted value via Eloquent
+        $this->assertSame(123_456, $income->amount_minor);
 
         $this->assertSame('Monthly salary', $income->description);
         $this->assertEquals('2025-08-01', $income->occurred_on->format('Y-m-d'));

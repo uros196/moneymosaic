@@ -12,7 +12,11 @@ class IncomeTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $types = ['Salary', 'Bonus', 'Other'];
+        $types = [
+            ['en' => 'Salary', 'sr' => 'Plata'],
+            ['en' => 'Bonus', 'sr' => 'Bonus'],
+            ['en' => 'Other', 'sr' => 'Ostalo'],
+        ];
 
         foreach ($types as $name) {
             IncomeType::query()->firstOrCreate([

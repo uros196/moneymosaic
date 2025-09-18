@@ -46,6 +46,7 @@ trait HasTwoFactor
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_reminder_snoozed_at' => 'datetime',
+            'two_factor_type' => TwoFactorType::class,
         ];
     }
 

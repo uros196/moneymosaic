@@ -29,7 +29,8 @@ class EmailTwoFactorEnableTest extends TestCase
         $response->assertRedirect();
 
         $user->refresh();
-        $this->assertSame('email', $user->two_factor_type);
+        $this->assertInstanceOf(TwoFactorType::class, $user->two_factor_type);
+        $this->assertSame(TwoFactorType::Email, $user->two_factor_type);
         $this->assertFalse($user->two_factor_enabled);
 
         Notification::assertSentTo($user, TwoFactorCodeNotification::class);
@@ -39,7 +40,7 @@ class EmailTwoFactorEnableTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => false,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         $this->actingAs($user);
@@ -63,7 +64,7 @@ class EmailTwoFactorEnableTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => false,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         $this->actingAs($user);
@@ -86,7 +87,7 @@ class EmailTwoFactorEnableTest extends TestCase
 
         $user = User::factory()->create([
             'two_factor_enabled' => false,
-            'two_factor_type' => TwoFactorType::Email->value,
+            'two_factor_type' => TwoFactorType::Email,
         ]);
 
         $response = $this->actingAs($user)

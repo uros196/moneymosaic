@@ -35,6 +35,7 @@ return [
 
     'table' => [
         'date' => 'Datum',
+        'name' => 'Naziv',
         'description' => 'Opis',
         'type' => 'Tip',
         'amount' => 'Iznos',

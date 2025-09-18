@@ -10,17 +10,17 @@ export default function SettingsLayout({ children }) {
 
     const sidebarNavItems = [
         {
-            title: __('profile.title'),
+            title: __('settings.nav.profile'),
             href: route('profile.edit'),
             icon: null,
         },
         {
-            title: __('password.title'),
+            title: __('settings.nav.password'),
             href: route('password.edit'),
             icon: null,
         },
         {
-            title: __('appearance.title'),
+            title: __('settings.nav.appearance'),
             href: route('appearance'),
             icon: null,
         },

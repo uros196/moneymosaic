@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'two_factor_enabled' => $this->two_factor_enabled,
             'two_factor_type' => $this->two_factor_type,
             'locale' => $this->locale,
+            'default_currency_code' => $this->default_currency_code,
             'password_confirm_minutes' => $this->password_confirm_minutes,
         ];
     }
