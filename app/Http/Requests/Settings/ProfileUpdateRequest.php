@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Enums\Currency;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -48,7 +49,7 @@ class ProfileUpdateRequest extends FormRequest
             ],
 
             'locale' => ['required', 'string', 'in:en,sr'],
-
+            'default_currency_code' => ['required', Rule::enum(Currency::class)],
             'password_confirm_minutes' => ['nullable', Rule::in([30, 60, 240, 600])],
         ];
     }

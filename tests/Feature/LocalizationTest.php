@@ -22,7 +22,7 @@ class LocalizationTest extends TestCase
     {
         app()->setLocale('sr');
 
-        $this->assertSame('Aktivne sesije', trans('sessions.title'));
+        $this->assertSame('Aktivne sesije', trans('settings.sessions.title'));
     }
 
     public function test_inertia_middleware_shares_locale_and_translations(): void

@@ -3,6 +3,8 @@
 return [
     // Generic
     'email' => 'Email address',
+    'name' => 'Name',
+    'full_name' => 'Full name',
     'password' => 'Password',
     'confirm_password' => 'Confirm password',
     'new_password' => 'New password',
@@ -46,6 +48,7 @@ return [
     // Two-factor challenge
     'twofactor_title' => 'Two-factor authentication',
     'twofactor_head' => 'Two-factor challenge',
+    'twofactor_desc' => 'Add an extra layer of security to your account.',
     'twofactor_desc_email' => 'Enter the 6-digit code sent to your email.',
     'twofactor_desc_totp' => 'Enter the 6-digit code from your authenticator app.',
     'authentication_code' => 'Authentication code',

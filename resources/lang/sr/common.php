@@ -34,4 +34,12 @@ return [
         'per_page' => 'Po strani',
         'showing' => 'Prikazano :from–:to od ukupno :total',
     ],
+
+    // Opšti prevodi za izgled
+    'appearance' => [
+        'light' => 'Svetla',
+        'dark' => 'Tamna',
+        'system' => 'Sistemska',
+        'toggle_theme' => 'Promeni temu',
+    ],
 ];

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\Currency;
 use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\DeleteAccountRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Http\Resources\CurrencyResource;
 use App\Http\Resources\UserResource;
+use App\Services\ProfileService;
 use App\Services\TwoFactor\UserTwoFactorService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +32,7 @@ class ProfileController extends Controller
             'user' => UserResource::make($user),
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'currencies' => CurrencyResource::collection(Currency::cases()),
             'twoFactorSetupInProgress' => $user2fa->isSetupInProgress($user, $request->session()),
         ]);
     }
@@ -36,20 +40,11 @@ class ProfileController extends Controller
     /**
      * Update the user's profile settings.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, ProfileService $profiles): RedirectResponse
     {
         $this->authorize('update', $request->user());
 
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        // instant update app locale
-        app()->setLocale($request->validated('locale'));
+        $profiles->updateProfile($request->user(), $request->validated());
 
         return to_route('profile.edit')
             ->with(ToastType::Success->message(__('Profile information updated.')));

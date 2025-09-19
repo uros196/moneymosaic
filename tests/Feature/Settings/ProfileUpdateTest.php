@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Enums\Currency;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -31,6 +32,7 @@ class ProfileUpdateTest extends TestCase
                 'name' => 'Test User',
                 'email' => 'test@example.com',
                 'locale' => 'en',
+                'default_currency_code' => Currency::EUR->value,
             ]);
 
         $response
@@ -54,6 +56,7 @@ class ProfileUpdateTest extends TestCase
                 'name' => 'Test User',
                 'email' => $user->email,
                 'locale' => 'en',
+                'default_currency_code' => Currency::EUR->value,
             ]);
 
         $response

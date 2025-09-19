@@ -13,11 +13,13 @@ export function AppSidebar() {
         {
             title: __('nav.dashboard'),
             href: route('dashboard'),
+            match: 'dashboard',
             icon: LayoutGrid,
         },
         {
             title: __('nav.incomes'),
             href: route('incomes.index'),
+            match: 'incomes.*',
             icon: CircleDollarSign,
         },
     ];

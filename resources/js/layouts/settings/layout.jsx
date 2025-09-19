@@ -12,16 +12,19 @@ export default function SettingsLayout({ children }) {
         {
             title: __('settings.nav.profile'),
             href: route('profile.edit'),
+            match: ['profile.*', 'settings.security', 'settings.sessions', 'settings.sessions.*'],
             icon: null,
         },
         {
             title: __('settings.nav.password'),
             href: route('password.edit'),
+            match: 'password.*',
             icon: null,
         },
         {
             title: __('settings.nav.appearance'),
             href: route('appearance'),
+            match: 'appearance',
             icon: null,
         },
     ];
@@ -30,7 +33,21 @@ export default function SettingsLayout({ children }) {
         return null;
     }
 
-    const currentPath = window.location.pathname;
+    const isItemActive = (item) => {
+        try {
+            if (item.match) {
+                // Support both a single pattern string and an array of patterns
+                if (Array.isArray(item.match)) {
+                    return item.match.some((pattern) => route().current(pattern));
+                }
+                return route().current(item.match);
+            }
+        } catch (e) {
+            // Ignore if Ziggy route() is not available for some reason
+        }
+        const currentPath = window.location.pathname;
+        return (item.matchPrefixes || [item.href]).some((prefix) => currentPath.startsWith(prefix));
+    };
 
     return (
         <div className="px-4 py-6">
@@ -39,21 +56,23 @@ export default function SettingsLayout({ children }) {
             <div className="flex flex-col lg:flex-row lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">
                     <nav className="flex flex-col space-y-1 space-x-0">
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${item.href}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': currentPath === item.href,
-                                })}
-                            >
-                                <Link href={item.href} prefetch>
-                                    {item.title}
-                                </Link>
-                            </Button>
-                        ))}
+                        {sidebarNavItems.map((item, index) => {
+                            return (
+                                <Button
+                                    key={`${item.href}-${index}`}
+                                    size="sm"
+                                    variant="ghost"
+                                    asChild
+                                    className={cn('w-full justify-start', {
+                                        'bg-muted': isItemActive(item),
+                                    })}
+                                >
+                                    <Link href={item.href} prefetch>
+                                        {item.title}
+                                    </Link>
+                                </Button>
+                            );
+                        })}
                     </nav>
                 </aside>
 

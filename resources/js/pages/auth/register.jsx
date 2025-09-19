@@ -28,7 +28,7 @@ export default function Register() {
                     <>
                         <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">{__('profile.name')}</Label>
+                                <Label htmlFor="name">{__('auth.name')}</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -37,7 +37,7 @@ export default function Register() {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder={__('profile.full_name')}
+                                    placeholder={__('auth.full_name')}
                                     aria-invalid={!!errors.name}
                                 />
                                 <InputError message={errors.name} className="mt-2" />

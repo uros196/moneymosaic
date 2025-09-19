@@ -9,14 +9,14 @@ export default function TwoFactorReminder({ snoozeDays }) {
   return (
     <AuthLayout
       title={__('auth.twofactor_title')}
-      description={__('security.two_factor_desc')}
+      description={__('auth.twofactor_desc')}
     >
       <Head title={__('auth.twofactor_head')} />
 
       <div className="flex flex-col gap-6">
         <div className="rounded-lg border p-4">
           <p className="text-sm text-muted-foreground">
-            {__('profile.two_factor')}: {__('security.two_factor_desc')}
+            {__('auth.twofactor_title')}: {__('auth.twofactor_desc')}
           </p>
         </div>
 

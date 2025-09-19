@@ -28,7 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             HandleAppearance::class,
-            \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\SetLocaleMiddleware::class,
             HandleInertiaRequests::class,
             \App\Http\Middleware\UpdateSessionMetadata::class,
             AddLinkHeadersForPreloadedAssets::class,

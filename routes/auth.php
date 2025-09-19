@@ -12,7 +12,7 @@ use App\Http\Controllers\Auth\TwoFactorReminderController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'translations:auth'])->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -31,13 +31,13 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+    ->middleware('translations:auth')
     ->name('password.request');
 
 Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
     ->name('password.email');
 
-Route::middleware('auth')
-    ->middleware('translations:auth,security,profile')
+Route::middleware(['auth', 'translations:auth,security,profile'])
     ->group(function () {
         // 2FA reminder page and actions
         Route::get('twofactor/reminder', [TwoFactorReminderController::class, 'show'])->name('twofactor.reminder');

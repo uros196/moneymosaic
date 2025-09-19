@@ -34,4 +34,12 @@ return [
         'per_page' => 'Per page',
         'showing' => 'Showing :from–:to of :total',
     ],
+
+    // Appearance common labels
+    'appearance' => [
+        'light' => 'Light',
+        'dark' => 'Dark',
+        'system' => 'System',
+        'toggle_theme' => 'Toggle theme',
+    ],
 ];

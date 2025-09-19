@@ -27,6 +27,7 @@ class ProfileControllerPolicyTest extends TestCase
             'name' => 'New Name',
             'email' => $user->email, // unchanged, unique rule ignores current user
             'locale' => 'sr',
+            'default_currency_code' => 'USD',
             'password_confirm_minutes' => 60,
         ];
 
@@ -38,6 +39,7 @@ class ProfileControllerPolicyTest extends TestCase
             'id' => $user->id,
             'name' => 'New Name',
             'locale' => 'sr',
+            'default_currency_code' => 'USD',
         ]);
     }
 
@@ -50,5 +52,22 @@ class ProfileControllerPolicyTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    }
+
+    public function test_default_currency_code_must_be_valid(): void
+    {
+        $user = User::factory()->create();
+
+        $payload = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'locale' => $user->locale,
+            'default_currency_code' => 'XYZ',
+            'password_confirm_minutes' => 60,
+        ];
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), $payload)
+            ->assertSessionHasErrors(['default_currency_code']);
     }
 }

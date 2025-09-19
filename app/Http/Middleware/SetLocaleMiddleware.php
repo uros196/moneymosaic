@@ -9,10 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Middleware that sets the application locale for the current request.
  *
- * Prefers the authenticated user's preferred locale, falling back to
- * the configured app locale and finally to 'en' as a safe default.
+ * Prefers the authenticated user's preferred locale, then a session-stored
+ * locale for guests, falling back to the configured app locale and finally
+ * to 'en' as a safe default.
  */
-class SetLocale
+class SetLocaleMiddleware
 {
     /**
      * Set the application locale for the current request.
@@ -23,7 +24,10 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->user()?->locale ?? config('app.locale');
+        $locale = $request->user()?->locale
+            ?? $request->session()->get('locale')
+            ?? config('app.locale');
+
         app()->setLocale($locale ?: 'en');
 
         return $next($request);

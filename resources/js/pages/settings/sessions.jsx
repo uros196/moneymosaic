@@ -13,18 +13,18 @@ function getDeviceInfo(uaRaw, __) {
   const isPhone = /iphone|ipod/.test(ua) || (isAndroid && /mobile/.test(ua))
 
   if (isPhone) {
-    return { Icon: Smartphone, label: __('sessions.phone') }
+    return { Icon: Smartphone, label: __('settings.sessions.phone') }
   }
   if (isTablet) {
-    return { Icon: Tablet, label: __('sessions.tablet') }
+    return { Icon: Tablet, label: __('settings.sessions.tablet') }
   }
-  return { Icon: Laptop, label: __('sessions.computer') }
+  return { Icon: Laptop, label: __('settings.sessions.computer') }
 }
 
 export default function Sessions({ sessions }) {
   const { __ } = useI18n()
   const breadcrumbs = [
-    { title: __('sessions.title'), href: route('settings.sessions') },
+    { title: __('settings.sessions.title'), href: route('settings.sessions') },
   ]
 
   const formatDateTime = (epochSeconds) => {
@@ -38,19 +38,19 @@ export default function Sessions({ sessions }) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={__('sessions.title')} />
+      <Head title={__('settings.sessions.title')} />
 
       <SettingsLayout>
         <div className="space-y-6">
           <div className="flex items-start justify-between gap-4">
-            <HeadingSmall title={__('sessions.title')} description={__('sessions.description')} />
+            <HeadingSmall title={__('settings.sessions.title')} description={__('settings.sessions.description')} />
             <Link href={route('profile.edit')} className="mt-1 text-sm underline">{__('common.back_to_profile')}</Link>
           </div>
 
           <div className="rounded-lg border">
             <div className="divide-y">
               {(!sessions || sessions.length === 0) ? (
-                <div className="p-4 text-sm text-muted-foreground">{__('sessions.no_active')}</div>
+                <div className="p-4 text-sm text-muted-foreground">{__('settings.sessions.no_active')}</div>
               ) : (
                 sessions.map((s) => {
                   const d = getDeviceInfo(s.user_agent, __)
@@ -65,15 +65,15 @@ export default function Sessions({ sessions }) {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{s.ip_address ?? __('sessions.unknown_ip')}</span>
+                            <span className="font-medium">{s.ip_address ?? __('settings.sessions.unknown_ip')}</span>
                             {s.is_current && (
-                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{__('sessions.current')}</span>
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{__('settings.sessions.current')}</span>
                             )}
                           </div>
                           <div className="mt-1 truncate text-xs text-muted-foreground">
-                            {s.user_agent ?? __('sessions.device_suffix', { label: d.label })}
+                            {s.user_agent ?? __('settings.sessions.device_suffix', { label: d.label })}
                           </div>
-                          <div className="mt-1 text-xs text-muted-foreground">{__('sessions.last_active', { time: formatDateTime(s.last_activity) })}</div>
+                          <div className="mt-1 text-xs text-muted-foreground">{__('settings.sessions.last_active', { time: formatDateTime(s.last_activity) })}</div>
                         </div>
                       </div>
                       <div className="shrink-0">
