@@ -7,8 +7,7 @@ use App\Http\Controllers\Settings\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::middleware(['auth', 'verified', '2fa', 'password.recent', 'translations:settings'])
-    ->prefix('settings')
+Route::middleware('translations:settings')
     ->group(function () {
         Route::redirect('', '/settings/profile');
 

@@ -2,6 +2,17 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Input — styled input component used across the app.
+ *
+ * - Forwards the ref to the underlying <input /> element.
+ * - Accepts all native input props via ...props.
+ * - Applies consistent focus, invalid, and disabled styles.
+ *
+ * Props:
+ * - className?: string — extra classes merged with defaults.
+ * - type?: string — input type (defaults to browser default if omitted).
+ */
 const Input = React.forwardRef(function Input(
   { className, type, ...props },
   ref

@@ -54,4 +54,18 @@ class IncomeTypeTest extends TestCase
             'name' => 'Side',
         ])->assertStatus(422);
     }
+
+    public function test_json_response_returns_created_type(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->postJson(route('incomes.types.store'), [
+            'name' => 'Freelance',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure(['data' => ['id', 'name', 'is_system']])
+            ->assertJsonPath('data.name', 'Freelance');
+    }
 }

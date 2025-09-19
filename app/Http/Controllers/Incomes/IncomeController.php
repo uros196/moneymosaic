@@ -87,9 +87,11 @@ class IncomeController extends Controller
 
         $type = $incomeTypeService->create($user, $name);
 
-        // return IncomeTypeResource::make($type)
-        //     ->response()
-        //     ->setStatusCode(201);
+        if ($request->expectsJson()) {
+            return IncomeTypeResource::make($type)
+                ->response()
+                ->setStatusCode(201);
+        }
 
         return back(303);
     }

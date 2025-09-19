@@ -8,6 +8,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
 
 /**
+ * IncomeResource transforms an Income model into a JSON-friendly array for the frontend.
+ *
+ * Notes:
+ * - Dates: "occurred_on" => Y-m-d, and "occurred_on_display" => localized 'd F Y'.
+ * - Currency: "currency_code" is emitted as the enum string value.
+ * - Tags: exposes both a collection of tag resources ("tags") and a simple list of names ("tags_list").
+ *
  * @mixin Income
  */
 class IncomeResource extends JsonResource
@@ -31,6 +38,7 @@ class IncomeResource extends JsonResource
             'occurred_on' => $this->occurred_on->format('Y-m-d'),
             'occurred_on_display' => $this->occurred_on->translatedFormat('d F Y'),
             'tags' => TagListResource::collection($this->whenLoaded('tags')),
+            'tags_list' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
         ];
     }
 }

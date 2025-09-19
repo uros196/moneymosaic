@@ -1,63 +1,83 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useEffect, useRef, useState } from 'react';
+import { Input } from '@headlessui/react';
 
 /**
- * TagInput component
+ * TagInput — simple tag input with suggestions.
  *
- * Props:
- * - value: string[]
- * - onChange: (tags: string[]) => void
- * - suggestions?: string[] (existing tags to suggest)
- * - placeholder?: string
- * - allowNew?: boolean (default: true)
- * - className?: string
+ * Props (short):
+ * - name: string — hidden input name (required, submitted as `${name}[]`).
+ * - defaultValue?: string[] — initial tags.
+ * - onChange?: (tags: string[]) => void — callback when tags change.
+ * - suggestions?: string[] — list of existing tags to suggest.
+ * - placeholder?: string — input placeholder text.
+ * - allowNew?: boolean — allow creating a new tag (default: true).
+ * - className?: string — additional CSS classes for the wrapper.
  */
-export function TagInput({ value = [], onChange, suggestions = [], placeholder = "", allowNew = true, className }) {
-  const [input, setInput] = React.useState("")
-  const [open, setOpen] = React.useState(false)
-  const [highlight, setHighlight] = React.useState(0)
-  const containerRef = React.useRef(null)
-  const inputRef = React.useRef(null)
+export function TagInput({ name, defaultValue = [], onChange, suggestions = [], placeholder = "", allowNew = true, className }) {
+  // Internal state
+  const [input, setInput] = useState("")
+  const [open, setOpen] = useState(false)
+  const [highlight, setHighlight] = useState(0)
+  const [tags, setTags] = useState(Array.isArray(defaultValue) ? defaultValue : [])
+  const containerRef = useRef(null)
+  const inputRef = useRef(null)
 
-  const selected = Array.isArray(value) ? value : []
+  // Sync tags only when the contents of defaultValue actually change
+  const defaultValueKey = React.useMemo(() => JSON.stringify(Array.isArray(defaultValue) ? defaultValue : []), [defaultValue])
+  useEffect(() => {
+    setTags(Array.isArray(defaultValue) ? defaultValue : [])
+  }, [defaultValueKey])
 
+  // Filtered suggestions (exclude selected, limit to 12 items)
   const filtered = React.useMemo(() => {
     const q = (input || "").trim().toLowerCase()
     const pool = Array.isArray(suggestions) ? suggestions : []
-    const seen = new Set(selected.map((t) => String(t).toLowerCase()))
+    const seen = new Set(tags.map((t) => String(t).toLowerCase()))
     const list = pool
       .filter((s) => !seen.has(String(s).toLowerCase()))
       .filter((s) => (q ? String(s).toLowerCase().includes(q) : true))
     return list.slice(0, 12)
-  }, [input, suggestions, selected])
+  }, [input, suggestions, tags])
 
+  // Open the suggestions list + reset the highlighted row
   React.useEffect(() => {
     setOpen(Boolean(input) && filtered.length > 0)
     setHighlight(0)
   }, [input, filtered.length])
 
+  // Helper: set tags and call onChange
+  function commit(next) {
+    setTags(next)
+    onChange?.(next)
+  }
+
+  // Add a new/selected tag
   function addTag(tag) {
     const t = String(tag || "").trim()
     if (!t) return
-    const exists = selected.some((x) => String(x).toLowerCase() === t.toLowerCase())
+    const exists = tags.some((x) => String(x).toLowerCase() === t.toLowerCase())
     if (exists) {
       setInput("")
       return
     }
-    onChange?.([...selected, t])
+    commit([...tags, t])
     setInput("")
   }
 
+  // Remove a tag
   function removeTag(tag) {
-    onChange?.(selected.filter((t) => t !== tag))
+    commit(tags.filter((t) => t !== tag))
   }
 
+  // Keyboard: backspace removes last, arrows navigate, enter/space confirm
   function handleKeyDown(e) {
     if (e.key === "Backspace" && !input) {
-      // Remove last tag when input empty
-      if (selected.length > 0) {
+      // Delete the last tag when the input is empty
+      if (tags.length > 0) {
         e.preventDefault()
-        onChange?.(selected.slice(0, -1))
+        commit(tags.slice(0, -1))
       }
       return
     }
@@ -82,7 +102,7 @@ export function TagInput({ value = [], onChange, suggestions = [], placeholder =
     }
 
     if (e.key === "Enter" || e.key === " ") {
-      // Space or Enter creates/chooses tag
+      // Space or Enter: confirm selection or create a new tag
       e.preventDefault()
       if (open && filtered.length > 0) {
         const chosen = filtered[highlight] ?? filtered[0]
@@ -97,13 +117,18 @@ export function TagInput({ value = [], onChange, suggestions = [], placeholder =
     }
   }
 
+  // Short delay so a click on a suggestion is captured
   function handleBlur(e) {
-    // Delay closing suggestions to allow click
     setTimeout(() => setOpen(false), 100)
   }
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
+      {/* Hidden inputs for submitting to the server */}
+      {Array.isArray(tags) && name ? tags.map((t, idx) => (
+        <Input type="hidden" name={`${name}[]`} value={t} key={`hidden-${t}-${idx}`} />
+      )) : null}
+
       <div
         className={cn(
           "flex flex-wrap items-center gap-2 border rounded-md px-2 py-2 bg-background",
@@ -111,8 +136,9 @@ export function TagInput({ value = [], onChange, suggestions = [], placeholder =
         )}
         onClick={() => inputRef.current?.focus()}
       >
-        {selected.length > 0 ? (
-          selected.map((tag) => (
+        {/* Selected tags list */}
+        {tags.length > 0 ? (
+          tags.map((tag) => (
             <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs">
               {tag}
               <button
@@ -128,6 +154,8 @@ export function TagInput({ value = [], onChange, suggestions = [], placeholder =
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}
+
+        {/* Text input */}
         <input
           ref={inputRef}
           value={input}
@@ -139,6 +167,7 @@ export function TagInput({ value = [], onChange, suggestions = [], placeholder =
         />
       </div>
 
+      {/* Dropdown with suggestions */}
       {open && filtered.length > 0 ? (
         <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md border bg-popover p-1 text-sm shadow-md">
           {filtered.map((s, idx) => (

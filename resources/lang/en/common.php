@@ -27,6 +27,13 @@ return [
     'confirm_delete' => 'Delete item',
     'verify_password_prompt' => 'For security, please confirm your password to continue.',
 
+    // Generic component labels
+    'add_new' => 'Add new',
+    'add_new_item_title' => 'Add new item',
+    'add_new_item_desc' => 'Create and select a new item.',
+    'name' => 'Name',
+    'name_placeholder' => 'Enter name',
+
     'table' => [
         'empty' => 'No data available',
     ],

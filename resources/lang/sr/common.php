@@ -27,6 +27,13 @@ return [
     'confirm_delete' => 'Brisanje stavke',
     'verify_password_prompt' => 'Iz bezbednosnih razloga potvrdite lozinku da nastavite.',
 
+    // Opšti prevodi za generičke komponente
+    'add_new' => 'Dodaj novo',
+    'add_new_item_title' => 'Dodaj novu stavku',
+    'add_new_item_desc' => 'Kreiraj i izaberi novu stavku.',
+    'name' => 'Naziv',
+    'name_placeholder' => 'Unesite naziv',
+
     'table' => [
         'empty' => 'Zapisi nisu dostupni',
     ],

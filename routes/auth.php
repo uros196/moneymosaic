@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\PasswordVerifyController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\Auth\TwoFactorReminderController;
@@ -80,3 +81,8 @@ Route::middleware(['auth', 'translations:auth,security,profile'])
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
             ->name('logout');
     });
+
+// Password verify API (no password.recent, but requires auth + 2FA/verified)
+Route::middleware(['auth', 'verified', '2fa', 'throttle:6,1'])->group(function () {
+    Route::post('auth/password/verify', [PasswordVerifyController::class, 'store'])->name('auth.password.verify');
+});

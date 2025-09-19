@@ -3,16 +3,15 @@ import { DateInput } from '@/components/ui/date-input';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, router, usePage, useRemember } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
 import { useI18n } from '@/i18n/index.js';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import SelectWithCreate from '@/components/ui/select-with-create.jsx';
 
 export default function IncomeDrawer({ open }) {
     const { __ } = useI18n();
@@ -25,14 +24,11 @@ export default function IncomeDrawer({ open }) {
 
     // define states for the drawer
     const [discardOpen, setDiscardOpen] = useState(false);
-    const [addTypeOpen, setAddTypeOpen] = useState(false);
     const [isDirtyDrawer, setDirtyDrawer] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
 
     // define states for the custom form fields
-    const [incomeTypeId, setIncomeTypeId] = useState(String(incomeData.income_type_id ?? ''));
     const [currencyCode, setCurrencyCode] = useState(incomeData.currency_code ?? defaultCurrency);
-    const [tags, setTags] = useState(incomeData.tags?.map((t) => t.name) ?? []);
     const [amountStep, setAmountStep] = useState();
 
     // track changes of currency code and dynamically gets the step
@@ -44,8 +40,6 @@ export default function IncomeDrawer({ open }) {
     // Updates the isCreating state based on the modal type, setting it to true when the type is 'create'
     useEffect(() => { setIsCreating(props.modal.type === 'create') }, [props.modal.type]);
 
-    // define form field references
-    const newIncomeType = useRef(null);
 
     // read the query params remembered by the useRemember hook on the income index page
     const [indexQuery] = useRemember({}, 'incomes.indexQuery');
@@ -134,34 +128,22 @@ export default function IncomeDrawer({ open }) {
 
                                     <div className="grid gap-2">
                                         <Label htmlFor="income_type_id">{__('incomes.form.income_type_key')}</Label>
-                                        <input type="hidden" name="income_type_id" value={incomeTypeId} />
-                                        <Select
-                                            value={incomeTypeId}
-                                            onValueChange={(v) => {
-                                                if (v === '__add_type__') {
-                                                    setAddTypeOpen(true);
-                                                    return;
-                                                }
-                                                setIncomeTypeId(v);
+                                        <SelectWithCreate
+                                            name="income_type_id"
+                                            items={props.incomeTypes.data}
+                                            defaultValue={incomeData.income_type_id}
+                                            createAction={route('incomes.types.store')}
+                                            labels={{
+                                                addOption: __('incomes.form.add_type'),
+                                                modalTitle: __('incomes.form.add_type_title'),
+                                                modalDescription: __('incomes.form.add_type_desc'),
+                                                inputLabel: __('incomes.form.new_type_label'),
+                                                inputPlaceholder: __('incomes.form.new_type_placeholder'),
+                                                cancel: __('incomes.actions.cancel'),
+                                                save: __('incomes.actions.save'),
                                             }}
-                                        >
-                                            <SelectTrigger id="income_type_id" aria-invalid={!!errors.income_type_id}>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {props.incomeTypes.data.map((type) => (
-                                                    <SelectItem value={String(type.id)} key={"income-type-" + type.id}>
-                                                        {type.name}
-                                                    </SelectItem>
-                                                ))}
-                                                <SelectSeparator />
-                                                <SelectItem value="__add_type__">
-                                                    <span className="inline-flex items-center gap-2">
-                                                        <Plus className="size-4" /> {__('incomes.form.add_type')}
-                                                    </span>
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                            selectProps={{ id: 'income_type_id', 'aria-invalid': !!errors.income_type_id }}
+                                        />
                                         <InputError message={errors.income_type_id} />
                                     </div>
 
@@ -202,20 +184,14 @@ export default function IncomeDrawer({ open }) {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        {tags.map((t, idx) => (
-                                            <input type="hidden" name="tags[]" value={t} key={`tag-${t}-${idx}`} />
-                                        ))}
-
                                         <Label htmlFor="tags_input">{__('incomes.form.tags')}</Label>
                                         <TagInput
-                                            value={tags}
-                                            onChange={setTags}
+                                            name="tags"
+                                            defaultValue={incomeData.tags_list ?? []}
                                             suggestions={tagSuggestions}
                                             placeholder={__('incomes.form.tags_placeholder')}
                                         />
-                                        {Object.entries(errors)
-                                            .filter(([field]) => field.startsWith('tags.'))
-                                            .map(([field, msg], idx) => idx === 0 && <InputError message={msg} />)}
+                                        <InputError errors={errors} prefix="tags." />
                                     </div>
 
                                     <div className="grid gap-2">
@@ -250,45 +226,6 @@ export default function IncomeDrawer({ open }) {
                 </DrawerContent>
             </Drawer>
 
-            {/* Add Type Dialog */}
-            <Dialog open={addTypeOpen} onOpenChange={setAddTypeOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{__('incomes.form.add_type_title')}</DialogTitle>
-                        <DialogDescription>{__('incomes.form.add_type_desc')}</DialogDescription>
-                    </DialogHeader>
-                    <Form
-                        method="post"
-                        action={route('incomes.types.store')}
-                        onError={() => newIncomeType.current?.focus()}
-                        onSubmitComplete={(form) => {
-                            form.reset();
-                            setAddTypeOpen(false);
-                        }}
-                        className="space-y-6"
-                    >
-                        {({ resetAndClearErrors, processing, errors }) => (
-                            <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="new_type_name">{__('incomes.form.new_type_label')}</Label>
-                                    <Input name="name" ref={newIncomeType} placeholder={__('incomes.form.new_type_placeholder')} />
-                                    <InputError message={errors.name} />
-                                </div>
-                                <DialogFooter className="gap-2">
-                                    <DialogClose asChild>
-                                        <Button variant="secondary" onClick={() => resetAndClearErrors()}>
-                                            {__('incomes.actions.cancel')}
-                                        </Button>
-                                    </DialogClose>
-                                    <Button isLoading={processing} disabled={processing}>
-                                        {__('incomes.actions.save')}
-                                    </Button>
-                                </DialogFooter>
-                            </>
-                        )}
-                    </Form>
-                </DialogContent>
-            </Dialog>
 
             {/* Confirm discard changes */}
             <ConfirmDialog
