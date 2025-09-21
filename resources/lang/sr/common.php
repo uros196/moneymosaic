@@ -2,6 +2,7 @@
 
 return [
     'back_to_profile' => 'Nazad na profil',
+    'back_to_lists' => 'Nazad na liste',
     'confirm_and_enable' => 'Potvrdi i omogući',
     'begin_setup' => 'Započni podešavanje',
     'open_setup' => 'Otvori podešavanje',
@@ -33,6 +34,8 @@ return [
     'add_new_item_desc' => 'Kreiraj i izaberi novu stavku.',
     'name' => 'Naziv',
     'name_placeholder' => 'Unesite naziv',
+    'nothing_here_yet' => 'Još uvek nema stavki',
+    'system' => 'Sistemski',
 
     'table' => [
         'empty' => 'Zapisi nisu dostupni',

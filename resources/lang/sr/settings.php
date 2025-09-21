@@ -8,6 +8,7 @@ return [
         'profile' => 'Profil',
         'password' => 'Lozinka',
         'appearance' => 'Podešavanja izgleda',
+        'lists' => 'Liste',
     ],
 
     'profile' => [
@@ -76,6 +77,21 @@ return [
         'save_password' => 'Sačuvaj lozinku',
     ],
 
+    'lists' => [
+        'title' => 'Upravljanje listama',
+        'description' => 'Kreirajte, preimenujte i brišite stavke koje se koriste kroz aplikaciju.',
+
+        'income_types_title' => 'Tipovi prihoda',
+        'income_types_desc' => 'Dodajte prilagođene tipove za vaše prihode. Možete ih kasnije preimenovati.',
+        'name_placeholder' => 'Unesite naziv tipa',
+        'used_by_incomes' => '{1} Koristi se u :count prihodu|[2,4] Koristi se u :count prihoda|[5,*] Koristi se u :count prihoda',
+        'delete_disabled_hint' => 'Brisanje je onemogućeno jer se tip koristi.',
+        'cannot_delete_reason' => 'Ovaj tip se koristi u jednom ili više prihoda.',
+        'view_incomes_with_type' => 'Prikaži prihode sa ovim tipom',
+        'delete_type_title' => 'Brisanje tipa prihoda',
+        'delete_type_description' => 'Da li ste sigurni da želite da obrišete ovaj prilagođeni tip',
+    ],
+
     'sessions' => [
         'title' => 'Aktivne sesije',
         'description' => 'Pregledajte uređaje koji su trenutno prijavljeni na vaš nalog.',
@@ -95,6 +111,7 @@ return [
         'two_factor_desc' => 'Dodajte dodatni sloj bezbednosti vašem nalogu.',
 
         'enabled_using' => '2FA je omogućena putem :type.',
+        'enabled_using_prefix' => '2FA je omogućena putem',
 
         'email_code_title' => 'Email kod',
         'email_code_desc' => 'Prilikom prijave primićete šestocifreni kod na svoju email adresu.',

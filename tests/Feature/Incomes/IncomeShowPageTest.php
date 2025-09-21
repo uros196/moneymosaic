@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Income;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,10 +18,11 @@ class IncomeShowPageTest extends TestCase
 
     public function test_authenticated_users_can_visit_income_details_page(): void
     {
+        $user = User::factory()->create();
+        $income = Income::factory()->for($user)->create();
 
-        $this->actingAs(User::factory()->create());
-
-        $this->get(route('incomes.show', 1))
+        $this->actingAs($user);
+        $this->get(route('incomes.show', $income->id))
             ->assertOk();
     }
 }

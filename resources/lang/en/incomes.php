@@ -31,6 +31,13 @@ return [
         'salary' => 'Salary',
         'bonus' => 'Bonus',
         'other' => 'Other',
+
+        // Income type CRUD messages
+        'created' => 'Income type created.',
+        'updated' => 'Income type updated.',
+        'deleted' => 'Income type deleted.',
+        'cannot_delete_linked' => 'This income type cannot be deleted because it is used by existing incomes.',
+        'cannot_delete_system' => 'System income types cannot be deleted.',
     ],
 
     'table' => [
@@ -61,14 +68,14 @@ return [
         'add_type_desc' => 'Create a custom income type to reuse later.',
         'new_type_label' => 'Type name',
         'new_type_placeholder' => 'e.g. Royalty, Freelance, Gift',
+        'manage_types_hint' => 'Tip: For better control over your types, use the page linked below.',
+        'manage_types_link' => 'Manage income types',
     ],
     'confirm' => [
         'delete_title' => 'Delete income',
         'delete_description' => 'Are you sure you want to delete this income? This action cannot be undone.',
         'discard_title' => 'Discard changes?',
         'discard_description' => 'You have unsaved changes. Do you want to discard them?',
-        'delete_type_title' => 'Delete income type',
-        'delete_type_description' => 'Are you sure you want to delete this custom type? Affected entries will switch to Salary.',
     ],
     'original_value' => 'Original: :value',
 

@@ -31,6 +31,13 @@ return [
         'salary' => 'Plata',
         'bonus' => 'Bonus',
         'other' => 'Ostalo',
+
+        // Poruke za CRUD nad tipovima prihoda
+        'created' => 'Tip prihoda je kreiran.',
+        'updated' => 'Tip prihoda je ažuriran.',
+        'deleted' => 'Tip prihoda je obrisan.',
+        'cannot_delete_linked' => 'Ovaj tip prihoda nije moguće obrisati jer se koristi na postojećim prihodima.',
+        'cannot_delete_system' => 'Sistemske tipove prihoda nije moguće obrisati.',
     ],
 
     'table' => [
@@ -61,14 +68,14 @@ return [
         'add_type_desc' => 'Kreirajte prilagođeni tip prihoda za kasniju upotrebu.',
         'new_type_label' => 'Naziv tipa',
         'new_type_placeholder' => 'npr. Honorari, Freelance, Poklon',
+        'manage_types_hint' => 'Savet: Za detaljnije upravljanje tipovima, koristite stranicu ispod.',
+        'manage_types_link' => 'Upravljaj tipovima prihoda',
     ],
     'confirm' => [
         'delete_title' => 'Brisanje prihoda',
         'delete_description' => 'Da li ste sigurni da želite da obrišete ovaj prihod? Ova radnja je nepovratna.',
         'discard_title' => 'Odbaciti izmene?',
         'discard_description' => 'Imate nesačuvane izmene. Da li želite da ih odbacite?',
-        'delete_type_title' => 'Brisanje tipa prihoda',
-        'delete_type_description' => 'Da li ste sigurni da želite da obrišete ovaj prilagođeni tip? Pogođene stavke će biti prebačene na Platu.',
     ],
     'original_value' => 'Originalni iznos: :value',
 

@@ -8,6 +8,7 @@ return [
         'profile' => 'Profile settings',
         'password' => 'Password settings',
         'appearance' => 'Appearance settings',
+        'lists' => 'Manage lists',
     ],
 
     'profile' => [
@@ -74,6 +75,21 @@ return [
         'placeholder_confirm' => 'Confirm password',
 
         'save_password' => 'Save password',
+    ],
+
+    'lists' => [
+        'title' => 'Manage lists',
+        'description' => 'Create, rename, and delete items used across the app.',
+
+        'income_types_title' => 'Income types',
+        'income_types_desc' => 'Add custom types for your incomes. You can rename them anytime.',
+        'name_placeholder' => 'Enter type name',
+        'used_by_incomes' => '{1} Used by :count income|[2,*] Used by :count incomes',
+        'delete_disabled_hint' => 'Delete is disabled because this type is used.',
+        'cannot_delete_reason' => 'This type is used by one or more incomes.',
+        'view_incomes_with_type' => 'View incomes with this type',
+        'delete_type_title' => 'Delete income type',
+        'delete_type_description' => 'Are you sure you want to delete this custom type?',
     ],
 
     'sessions' => [

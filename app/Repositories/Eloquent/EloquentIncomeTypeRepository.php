@@ -5,7 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\IncomeType;
 use App\Models\User;
 use App\Repositories\Contracts\IncomeTypeRepository;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class EloquentIncomeTypeRepository implements IncomeTypeRepository
 {
@@ -26,6 +26,19 @@ class EloquentIncomeTypeRepository implements IncomeTypeRepository
                 $q->whereNull('user_id')->orWhere('user_id', $user->id);
             })
             ->orderBy('user_id')
+            ->get();
+    }
+
+    /**
+     * Get income types created by the given user.
+     *
+     * @return Collection<int, IncomeType>
+     */
+    public function createdByUser(User $user): Collection
+    {
+        return $this->model->query()
+            ->where('user_id', $user->id)
+            ->orderBy('name')
             ->get();
     }
 }

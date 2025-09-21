@@ -6,12 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, router, usePage, useRemember } from '@inertiajs/react';
+import { Form, router, usePage, useRemember, Link } from '@inertiajs/react';
 import { useI18n } from '@/i18n/index.js';
 import { useEffect, useState } from 'react';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import SelectWithCreate from '@/components/ui/select-with-create.jsx';
+import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
+import { Info } from 'lucide-react';
 
 export default function IncomeDrawer({ open }) {
     const { __ } = useI18n();
@@ -26,6 +28,7 @@ export default function IncomeDrawer({ open }) {
     const [discardOpen, setDiscardOpen] = useState(false);
     const [isDirtyDrawer, setDirtyDrawer] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [pendingNav, setPendingNav] = useState(null);
 
     // define states for the custom form fields
     const [currencyCode, setCurrencyCode] = useState(incomeData.currency_code ?? defaultCurrency);
@@ -67,11 +70,36 @@ export default function IncomeDrawer({ open }) {
         });
     }
 
+    /**
+     * Leave the page by either visiting a URL or running a provided callback.
+     * If the form has unsaved changes, open a confirmation dialog first.
+     * @param {string | Function} target - URL to visit or a callback to execute
+     */
+    function leavePage(target) {
+        if (isDirtyDrawer) {
+            // If the target is a function, wrap it to store as a state value, otherwise store the URL string
+            setPendingNav((typeof target === 'function'
+                ? () => target
+                : target
+            ));
+            setDiscardOpen(true);
+        } else {
+            if (typeof target === 'function') {
+                target();
+            } else if (target) {
+                router.visit(target, { preserveScroll: true });
+            }
+        }
+    }
+
     return (
         <>
             <Drawer
                 open={open}
-                onOpenChange={() => { isDirtyDrawer ? setDiscardOpen(true) : incomeIndexRedirect() }}
+                onOpenChange={() => {
+                    // Use the unified leavePage helper so closing respects dirty state and confirmation
+                    leavePage(() => incomeIndexRedirect());
+                }}
             >
                 <DrawerContent>
                     <DrawerHeader>
@@ -101,7 +129,7 @@ export default function IncomeDrawer({ open }) {
                                     return dirtySync(isDirty);
                                 })()}
 
-                                <div className="grid content-start gap-3 px-6 py-4 flex-1 overflow-y-auto min-h-0">
+                                <div className="grid content-start gap-4 px-6 py-4 flex-1 overflow-y-auto min-h-0">
                                     <div className="grid gap-2">
                                         <Label htmlFor="name">{__('incomes.form.name')}</Label>
                                         <Input
@@ -127,17 +155,39 @@ export default function IncomeDrawer({ open }) {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="income_type_id">{__('incomes.form.income_type_key')}</Label>
+                                        <div className="flex items-center gap-1">
+                                            <Label htmlFor="income_type_id">{__('incomes.form.income_type_key')}</Label>
+                                            <HoverCard>
+                                                <HoverCardTrigger asChild>
+                                                    <button type="button" className="text-muted-foreground hover:text-foreground" aria-label={__('incomes.form.manage_types_hint')}>
+                                                        <Info className="size-4" />
+                                                    </button>
+                                                </HoverCardTrigger>
+                                                <HoverCardContent>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        <p>{__('incomes.form.manage_types_hint')}</p>
+                                                        <p className="mt-1">
+                                                            <Link
+                                                                href={route('settings.lists.income-types')}
+                                                                onClick={(e) => { e.preventDefault(); leavePage(route('settings.lists.income-types')); }}
+                                                                className="underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                                            >
+                                                                {__('incomes.form.manage_types_link')}
+                                                            </Link>
+                                                        </p>
+                                                    </div>
+                                                </HoverCardContent>
+                                            </HoverCard>
+                                        </div>
                                         <SelectWithCreate
                                             name="income_type_id"
                                             items={props.incomeTypes.data}
                                             defaultValue={incomeData.income_type_id}
-                                            createAction={route('incomes.types.store')}
+                                            createAction={route('settings.lists.income-types.store')}
                                             labels={{
                                                 addOption: __('incomes.form.add_type'),
                                                 modalTitle: __('incomes.form.add_type_title'),
                                                 modalDescription: __('incomes.form.add_type_desc'),
-                                                inputLabel: __('incomes.form.new_type_label'),
                                                 inputPlaceholder: __('incomes.form.new_type_placeholder'),
                                                 cancel: __('incomes.actions.cancel'),
                                                 save: __('incomes.actions.save'),
@@ -147,7 +197,7 @@ export default function IncomeDrawer({ open }) {
                                         <InputError message={errors.income_type_id} />
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 gap-3 items-start">
                                         <div className="grid gap-2">
                                             <Label htmlFor="amount">{__('incomes.form.amount')}</Label>
                                             <Input
@@ -236,7 +286,11 @@ export default function IncomeDrawer({ open }) {
                 confirmText={__('incomes.actions.discard')}
                 cancelText={__('incomes.actions.cancel')}
                 onConfirm={() => {
-                    incomeIndexRedirect();
+                    typeof pendingNav === 'function'
+                        ? pendingNav()
+                        : router.visit(pendingNav, { preserveScroll: true });
+
+                    setPendingNav(null);
                 }}
             />
         </>

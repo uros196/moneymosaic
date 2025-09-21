@@ -27,6 +27,12 @@ export default function SettingsLayout({ children }) {
             match: 'appearance',
             icon: null,
         },
+        {
+            title: __('settings.nav.lists'),
+            href: route('settings.lists'),
+            match: ['settings.lists', 'settings.lists.*'],
+            icon: null,
+        },
     ];
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {

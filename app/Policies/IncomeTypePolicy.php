@@ -25,7 +25,7 @@ class IncomeTypePolicy
      */
     public function view(User $user, IncomeType $type): bool
     {
-        return is_null($type->user_id) || $user->getKey() === $type->user_id;
+        return $type->is_system_type || $user->getKey() === $type->user_id;
     }
 
     /**
@@ -42,7 +42,7 @@ class IncomeTypePolicy
      */
     public function update(User $user, IncomeType $type): bool
     {
-        return ! is_null($type->user_id) && $user->getKey() === $type->user_id;
+        return ! $type->is_system_type && $user->getKey() === $type->user_id;
     }
 
     /**
@@ -51,7 +51,7 @@ class IncomeTypePolicy
      */
     public function delete(User $user, IncomeType $type): bool
     {
-        return ! is_null($type->user_id) && $user->getKey() === $type->user_id;
+        return ! $type->is_system_type && $user->getKey() === $type->user_id;
     }
 
     /**
@@ -59,7 +59,7 @@ class IncomeTypePolicy
      */
     public function restore(User $user, IncomeType $type): bool
     {
-        return ! is_null($type->user_id) && $user->getKey() === $type->user_id;
+        return ! $type->is_system_type && $user->getKey() === $type->user_id;
     }
 
     /**
@@ -67,6 +67,6 @@ class IncomeTypePolicy
      */
     public function forceDelete(User $user, IncomeType $type): bool
     {
-        return ! is_null($type->user_id) && $user->getKey() === $type->user_id;
+        return ! $type->is_system_type && $user->getKey() === $type->user_id;
     }
 }

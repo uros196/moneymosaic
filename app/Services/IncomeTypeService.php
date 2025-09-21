@@ -24,4 +24,20 @@ class IncomeTypeService
             'name' => $translations,
         ]);
     }
+
+    /**
+     * Update the translated name for an existing income type across all locales.
+     */
+    public function updateName(IncomeType $type, string $name): void
+    {
+        $name = trim($name);
+
+        $translations = [];
+        foreach (config('app.available_locales') as $locale) {
+            $translations[$locale] = $name;
+        }
+
+        $type->setTranslations('name', $translations);
+        $type->save();
+    }
 }

@@ -4,7 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\IncomeType;
 use App\Models\User;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * IncomeType repository contract.
@@ -17,4 +17,11 @@ interface IncomeTypeRepository
      * @return Collection<int, IncomeType>
      */
     public function visibleForUser(User $user): Collection;
+
+    /**
+     * Get income types created by the given user.
+     *
+     * @return Collection<int, IncomeType>
+     */
+    public function createdByUser(User $user): Collection;
 }

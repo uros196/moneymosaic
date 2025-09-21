@@ -6,20 +6,16 @@ use App\Enums\Currency;
 use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Incomes\StoreIncomeRequest;
-use App\Http\Requests\Incomes\StoreIncomeTypeRequest;
 use App\Http\Resources\CurrencyResource;
 use App\Http\Resources\IncomeResource;
 use App\Http\Resources\IncomeTypeResource;
 use App\Http\Resources\TagListResource;
 use App\Http\Resources\UserResource;
 use App\Models\Income;
-use App\Models\IncomeType;
-use App\Repositories\Contracts\IncomeRepository;
 use App\Repositories\Contracts\IncomeTypeRepository;
-use App\Repositories\Contracts\TagRepository;
 use App\Services\IncomeService;
-use App\Services\IncomeTypeService;
 use App\Services\TagService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,9 +28,7 @@ class IncomeController extends Controller
     public function __construct(
         protected TagService $tagService,
         protected IncomeService $incomeService,
-        protected TagRepository $tagRepository,
         protected IncomeTypeRepository $incomeTypes,
-        protected IncomeRepository $incomes
     ) {
         $this->authorizeResource(Income::class, 'income');
     }
@@ -67,7 +61,7 @@ class IncomeController extends Controller
     /**
      * Persist a newly created income.
      */
-    public function store(StoreIncomeRequest $request)
+    public function store(StoreIncomeRequest $request): RedirectResponse
     {
         $this->incomeService->save($request, Income::make());
 
@@ -76,24 +70,17 @@ class IncomeController extends Controller
     }
 
     /**
-     * Create a new income type for the current user.
+     * Display the income details page.
      */
-    public function storeType(StoreIncomeTypeRequest $request, IncomeTypeService $incomeTypeService)
+    public function show(Request $request, Income $income): Response
     {
-        $this->authorize('create', IncomeType::class);
-
         $user = $request->user();
-        $name = $request->validated('name');
+        $income->load(['tags', 'incomeType']);
 
-        $type = $incomeTypeService->create($user, $name);
-
-        if ($request->expectsJson()) {
-            return IncomeTypeResource::make($type)
-                ->response()
-                ->setStatusCode(201);
-        }
-
-        return back(303);
+        return Inertia::render('incomes/show', [
+            'user' => UserResource::make($user),
+            'income' => IncomeResource::make($income),
+        ]);
     }
 
     /**
@@ -118,7 +105,7 @@ class IncomeController extends Controller
     /**
      * Persist a newly created income.
      */
-    public function update(StoreIncomeRequest $request, Income $income)
+    public function update(StoreIncomeRequest $request, Income $income): RedirectResponse
     {
         $this->incomeService->save($request, $income);
 
@@ -129,7 +116,7 @@ class IncomeController extends Controller
     /**
      * Delete an income that belongs to the current user.
      */
-    public function destroy(Income $income)
+    public function destroy(Income $income): RedirectResponse
     {
         $income->delete();
 

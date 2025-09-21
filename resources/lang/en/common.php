@@ -2,6 +2,7 @@
 
 return [
     'back_to_profile' => 'Back to profile',
+    'back_to_lists' => 'Back to lists',
     'confirm_and_enable' => 'Confirm and enable',
     'begin_setup' => 'Begin setup',
     'open_setup' => 'Open setup',
@@ -33,6 +34,8 @@ return [
     'add_new_item_desc' => 'Create and select a new item.',
     'name' => 'Name',
     'name_placeholder' => 'Enter name',
+    'nothing_here_yet' => 'Nothing here yet',
+    'system' => 'System',
 
     'table' => [
         'empty' => 'No data available',

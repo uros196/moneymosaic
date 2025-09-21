@@ -16,7 +16,7 @@ class IncomeTypeTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $this->postJson(route('incomes.types.store'), [
+        $this->postJson(route('settings.lists.income-types.store'), [
             'name' => 'Custom Type',
         ]);
 
@@ -39,7 +39,7 @@ class IncomeTypeTest extends TestCase
         ]);
 
         // Attempt to create the same name should fail (conflicts with a system type)
-        $this->postJson(route('incomes.types.store'), [
+        $this->postJson(route('settings.lists.income-types.store'), [
             'name' => 'Salary',
         ])->assertStatus(422);
 
@@ -50,7 +50,7 @@ class IncomeTypeTest extends TestCase
         ]);
 
         // Duplicate for the same user should fail
-        $this->postJson(route('incomes.types.store'), [
+        $this->postJson(route('settings.lists.income-types.store'), [
             'name' => 'Side',
         ])->assertStatus(422);
     }
@@ -60,12 +60,35 @@ class IncomeTypeTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->postJson(route('incomes.types.store'), [
+        $response = $this->postJson(route('settings.lists.income-types.store'), [
             'name' => 'Freelance',
         ]);
 
         $response->assertStatus(201)
             ->assertJsonStructure(['data' => ['id', 'name', 'is_system']])
             ->assertJsonPath('data.name', 'Freelance');
+    }
+
+    public function test_cannot_delete_system_type_via_http(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $systemType = IncomeType::factory()->create(['user_id' => null]);
+
+        $this->delete(route('settings.lists.income-types.destroy', $systemType))
+            ->assertStatus(403);
+    }
+
+    public function test_cannot_delete_other_users_type_via_http(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+
+        $type = IncomeType::factory()->for($owner)->create();
+
+        $this->actingAs($other)
+            ->delete(route('settings.lists.income-types.destroy', $type))
+            ->assertStatus(403);
     }
 }
