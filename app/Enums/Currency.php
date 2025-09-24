@@ -13,13 +13,16 @@ enum Currency: string
     case USD = 'USD';
     case EUR = 'EUR';
     case RSD = 'RSD';
+    case GBP = 'GBP';
+    case CHF = 'CHF';
+    case CAD = 'CAD';
 
     /**
      * Default display / base currency for the app.
      */
     public static function default(): self
     {
-        return self::EUR;
+        return self::from(config('exchange.base_currency'));
     }
 
     /**
@@ -41,6 +44,9 @@ enum Currency: string
             self::USD => '$',
             self::EUR => '€',
             self::RSD => 'RSD',
+            self::GBP => '£',
+            self::CHF => 'CHF',
+            self::CAD => 'CA$',
         };
     }
 
@@ -50,8 +56,8 @@ enum Currency: string
     public function fractionDigits(): int
     {
         return match ($this) {
-            // All configured currencies use 2 decimals; amounts are stored in minor units (integers)
-            self::USD, self::EUR, self::RSD => 2,
+            // All configured currencies here use 2 decimals; amounts are stored in minor units (integers)
+            self::USD, self::EUR, self::RSD, self::GBP, self::CHF, self::CAD => 2,
         };
     }
 
@@ -64,7 +70,28 @@ enum Currency: string
     public function step(): string
     {
         return match ($this) {
-            self::USD, self::EUR, self::RSD => '0.01',
+            self::USD, self::EUR, self::RSD, self::GBP, self::CHF, self::CAD => '0.01',
+        };
+    }
+
+    /**
+     * Template describing how to place the currency symbol relative to the amount.
+     *
+     * Use placeholders:
+     * - {symbol} will be replaced with the currency symbol.
+     * - {amount} will be replaced with the major amount string.
+     *
+     * Examples for patterns:
+     * - USD: "{symbol}{amount}"
+     * - EUR: "{amount}{symbol}"
+     * - RSD: "{amount} {symbol}"
+     */
+    public function formatTemplate(): string
+    {
+        return match ($this) {
+            self::USD, self::GBP, self::CAD => '{symbol}{amount}',
+            self::EUR => '{amount}{symbol}',
+            self::RSD, self::CHF => '{amount} {symbol}',
         };
     }
 }

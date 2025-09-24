@@ -30,4 +30,21 @@ class EloquentExchangeRateRepository implements ExchangeRateRepository
             ->orderByDesc('date')
             ->first();
     }
+
+    /**
+     * Upsert a single exchange rate row for a given date and currency pair.
+     */
+    public function updateOrCreateRate(string $date, string $base, string $quote, float $multiplier): ExchangeRate
+    {
+        return $this->model->query()->updateOrCreate(
+            [
+                'date' => $date,
+                'base_currency_code' => strtoupper($base),
+                'quote_currency_code' => strtoupper($quote),
+            ],
+            [
+                'rate_multiplier' => (float) $multiplier,
+            ]
+        );
+    }
 }

@@ -6,10 +6,10 @@ use App\Models\ExchangeRate;
 use Carbon\CarbonInterface;
 
 /**
- * Contract for retrieving exchange rates.
+ * Contract for retrieving and persisting exchange rates.
  *
  * Defines operations to resolve the most recent rate for a currency pair
- * at or before a given date (supports rollback to the last available date).
+ * at or before a given date, and to upsert individual rate rows.
  */
 interface ExchangeRateRepository
 {
@@ -22,4 +22,9 @@ interface ExchangeRateRepository
      * @return ExchangeRate|null The latest matching rate or null if none exists.
      */
     public function findLatestOnOrBefore(string $baseCurrency, string $quoteCurrency, CarbonInterface $date): ?ExchangeRate;
+
+    /**
+     * Upsert a single exchange rate row for a given date and currency pair.
+     */
+    public function updateOrCreateRate(string $date, string $base, string $quote, float $multiplier): ExchangeRate;
 }

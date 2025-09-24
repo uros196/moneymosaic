@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Currency;
 use App\Repositories\Contracts\ExchangeRateRepository;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
@@ -39,7 +40,7 @@ class CurrencyConversionService
             return $amountMinor;
         }
 
-        $base = config('exchange.base_currency');
+        $base = Currency::default()->value;
 
         // If converting from base to target or from source to base, we need only one leg.
         if ($from === $base) {

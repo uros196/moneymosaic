@@ -78,6 +78,18 @@ class Income extends Model
     }
 
     /**
+     * Accessor that returns the formatted amount with a currency symbol.
+     *
+     * Example: USD => "$200", EUR => "200€", RSD => "200 RSD".
+     */
+    public function formattedAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Money::formatMinor($this->amount_minor, $this->currency_code)
+        );
+    }
+
+    /**
      * Resolve the tag type namespace for the given user.
      */
     public static function tagTypeForUser(User $user): string

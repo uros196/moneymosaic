@@ -21,7 +21,7 @@ class IncomeTest extends TestCase
         $this->assertInstanceOf(User::class, $income->user);
         $this->assertIsInt($income->amount_minor);
         $this->assertInstanceOf(Currency::class, $income->currency_code);
-        $this->assertContains($income->currency_code->value, ['USD', 'EUR', 'RSD']);
+        $this->assertContains($income->currency_code->value, Currency::values());
         $this->assertTrue($income->occurred_on instanceof \Illuminate\Support\Carbon);
         $this->assertNotNull($income->income_type_id);
         $this->assertNotNull($income->incomeType);
@@ -37,19 +37,18 @@ class IncomeTest extends TestCase
             'name' => 'Salary',
         ]);
 
-        $data = [
-            'user_id' => $user->id,
-            'amount_minor' => 123_456,
-            'currency_code' => Currency::EUR,
-            'income_type_id' => $salaryType->id,
-            'description' => 'Monthly salary',
-            'occurred_on' => '2025-08-01',
-        ];
-
-        $income = Income::create($data);
+        $income = Income::factory()
+            ->for($user)
+            ->for($salaryType)
+            ->create([
+                'amount_minor' => 123_456,
+                'currency_code' => Currency::EUR,
+                'description' => 'Monthly salary',
+                'occurred_on' => '2025-08-01',
+            ]);
 
         $this->assertInstanceOf(Currency::class, $income->currency_code);
-        $this->assertSame('EUR', $income->currency_code->value);
+        $this->assertSame(Currency::EUR->value, $income->currency_code->value);
 
         // Encrypted columns (name, description, amount_minor) cannot be asserted directly in the database
         $this->assertDatabaseHas('incomes', [

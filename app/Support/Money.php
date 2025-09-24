@@ -216,4 +216,34 @@ final class Money
         // Using sprintf with F to avoid locale and scientific notation issues
         return sprintf('%.'.$decimals.'F', $value);
     }
+
+    /**
+     * Format a major amount string with a currency symbol using the currency's template.
+     *
+     * Examples:
+     * - USD: "$200"; negative: "-$200"
+     * - EUR: "200€"; negative: "-200€"
+     * - RSD: "200 RSD"; negative: "-200 RSD"
+     */
+    public static function formatMajor(string $amountMajor, Currency $currency): string
+    {
+        $negative = str_starts_with($amountMajor, '-');
+        $abs = $negative ? substr($amountMajor, 1) : $amountMajor;
+
+        $pattern = $currency->formatTemplate();
+        $formatted = strtr($pattern, [
+            '{symbol}' => $currency->symbol(),
+            '{amount}' => $abs,
+        ]);
+
+        return $negative ? '-'.$formatted : $formatted;
+    }
+
+    /**
+     * Format a minor units integer with currency symbol according to the currency's template.
+     */
+    public static function formatMinor(int $minor, Currency $currency): string
+    {
+        return self::formatMajor(self::fromMinor($minor, $currency), $currency);
+    }
 }

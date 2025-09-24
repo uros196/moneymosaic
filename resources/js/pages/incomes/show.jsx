@@ -3,15 +3,6 @@ import { useI18n } from '@/i18n';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, usePage } from '@inertiajs/react';
 
-function formatAmountMajor(major, currency) {
-    try {
-        const n = Number(major ?? 0);
-        return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(n);
-    } catch (_) {
-        return `${major ?? '0'} ${currency}`;
-    }
-}
-
 export default function IncomeShow() {
     const { __ } = useI18n();
     const { props } = usePage();
@@ -47,7 +38,7 @@ export default function IncomeShow() {
                         </div>
                         <div className="flex items-center justify-between px-4 py-3">
                             <span className="text-sm text-muted-foreground">{__('incomes.table.amount')}</span>
-                            <span className="text-sm font-medium">{formatAmountMajor(item.amount, item.currency_code)}</span>
+                            <span className="text-sm font-medium">{item.amount_formatted}</span>
                         </div>
                         <div className="flex items-center justify-between px-4 py-3">
                             <span className="text-sm text-muted-foreground">{__('incomes.table.currency')}</span>

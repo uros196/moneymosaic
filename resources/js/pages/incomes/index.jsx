@@ -34,8 +34,11 @@ function toISO(dateLike) {
 // Simple client-side conversion via EUR as a base (UI-only; mock rates)
 const RATES_EUR = {
     EUR: 1,
-    USD: 1.1, // 1 EUR = 1.10 USD (example)
-    RSD: 117, // 1 EUR = 117.00 RSD (example)
+    USD: 1.1,   // 1 EUR = 1.10 USD (example)
+    RSD: 117,   // 1 EUR = 117.00 RSD (example)
+    GBP: 0.85,  // 1 EUR ≈ 0.85 GBP (example)
+    CHF: 0.95,  // 1 EUR ≈ 0.95 CHF (example)
+    CAD: 1.45,  // 1 EUR ≈ 1.45 CAD (example)
 };
 
 function convertMinor(amountMinor, fromCode, toCode) {
@@ -152,7 +155,7 @@ export default function IncomesIndex() {
             { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on_display },
             { id: 'description', header: __('incomes.table.name'), accessor: (r) => r.name || r.description },
             { id: 'income_type', header: __('incomes.table.type'), accessor: (r) => r.income_type.name },
-            { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount },
+            { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount_formatted },
             { id: 'currency_code', header: __('incomes.table.currency'), accessor: (r) => r.currency_code },
             {
                 id: 'actions',

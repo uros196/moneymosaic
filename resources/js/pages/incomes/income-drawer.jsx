@@ -43,7 +43,6 @@ export default function IncomeDrawer({ open }) {
     // Updates the isCreating state based on the modal type, setting it to true when the type is 'create'
     useEffect(() => { setIsCreating(props.modal.type === 'create') }, [props.modal.type]);
 
-
     // read the query params remembered by the useRemember hook on the income index page
     const [indexQuery] = useRemember({}, 'incomes.indexQuery');
 

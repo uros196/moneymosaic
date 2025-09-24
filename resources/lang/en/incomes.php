@@ -54,7 +54,7 @@ return [
     'form' => [
         'name' => 'Name',
         'name_placeholder' => 'e.g. Monthly salary',
-        'tags' => 'Tags',
+        'tags' => 'Tags (optional)',
         'tags_placeholder' => 'Type and press Enter to add a tag',
         'amount' => 'Amount',
         'description' => 'Description (optional)',

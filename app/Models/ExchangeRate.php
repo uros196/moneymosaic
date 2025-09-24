@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,12 +18,8 @@ class ExchangeRate extends Model
 {
     use HasFactory;
 
-    protected $table = 'exchange_rates';
-
     /**
      * The attributes that are mass assignable.
-     *
-     * @var list<string>
      */
     protected $fillable = [
         'date',
@@ -32,14 +29,14 @@ class ExchangeRate extends Model
     ];
 
     /**
-     * Attribute casts.
-     *
-     * @return array<string, string>
+     * Get the attributes that should be cast.
      */
     protected function casts(): array
     {
         return [
             'date' => 'date',
+            'base_currency_code' => Currency::class,
+            'quote_currency_code' => Currency::class,
             'rate_multiplier' => 'decimal:8',
         ];
     }

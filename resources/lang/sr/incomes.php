@@ -54,7 +54,7 @@ return [
     'form' => [
         'name' => 'Naziv',
         'name_placeholder' => 'npr. Mesečna plata',
-        'tags' => 'Tagovi',
+        'tags' => 'Tagovi (opciono)',
         'tags_placeholder' => 'Ukucajte i pritisnite Enter da dodate tag',
         'amount' => 'Iznos',
         'description' => 'Opis (opciono)',
