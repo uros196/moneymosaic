@@ -8,7 +8,7 @@ use Carbon\CarbonInterface;
 /**
  * Strategy contract for exchange rate providers.
  */
-interface RateProvider
+interface ExchangeRateProviderInterface
 {
     /**
      * Fetch daily rates for the given date.

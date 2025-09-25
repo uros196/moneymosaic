@@ -10,7 +10,7 @@ class RateProviderFactory
     /**
      * Create a provider instance using the configured default driver.
      */
-    public static function make(?string $driver = null): RateProvider
+    public static function make(?string $driver = null): ExchangeRateProviderInterface
     {
         return self::makeFor(! empty($driver)
             ? $driver
@@ -21,13 +21,13 @@ class RateProviderFactory
     /**
      * Create a provider instance for the given driver.
      */
-    public static function makeFor(string $driver): RateProvider
+    public static function makeFor(string $driver): ExchangeRateProviderInterface
     {
         $driver = strtolower($driver);
 
         // Init the requested provider
         if (! is_null($config = config("exchange.providers.{$driver}"))) {
-            /** @var RateProvider $instance */
+            /** @var ExchangeRateProviderInterface $instance */
             $instance = app(Arr::pull($config, 'driver'), $config);
 
             return $instance;

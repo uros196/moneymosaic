@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\ExchangeRates\RateProvider;
+use App\Services\ExchangeRates\ExchangeRateProviderInterface;
 use App\Services\ExchangeRates\RateProviderFactory;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Bind the exchange rates provider strategy via factory
-        $this->app->bind(RateProvider::class, function (): RateProvider {
+        $this->app->bind(ExchangeRateProviderInterface::class, function (): ExchangeRateProviderInterface {
             return RateProviderFactory::make();
         });
     }

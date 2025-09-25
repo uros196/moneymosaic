@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\Facades\ExchangeRateProvider;
 use App\Services\ExchangeRates\Providers\ExchangeRateHostProvider;
-use App\Services\ExchangeRates\RateProvider;
 use App\Services\ExchangeRates\RateProviderFactory;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
-class RateProviderFactoryTest extends TestCase
+class ExchangeRateHostProviderTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -19,9 +19,7 @@ class RateProviderFactoryTest extends TestCase
     {
         Config::set('exchange.default', 'exchangerate_host');
 
-        $provider = app(RateProvider::class);
-
-        $this->assertInstanceOf(ExchangeRateHostProvider::class, $provider);
+        $this->assertInstanceOf(ExchangeRateHostProvider::class, ExchangeRateProvider::getFacadeRoot());
     }
 
     public function test_exchange_rate_host_provider_parses_historical_response(): void
@@ -45,8 +43,7 @@ class RateProviderFactoryTest extends TestCase
             ], 200),
         ]);
 
-        $provider = app(RateProvider::class);
-        $daily = $provider->getRatesForDate($date, 'EUR', ['USD', 'RSD']);
+        $daily = ExchangeRateProvider::getRatesForDate($date, 'EUR', ['USD', 'RSD']);
 
         $this->assertSame('EUR', $daily->base);
         $this->assertSame('2025-08-13', $daily->date->toDateString());
@@ -80,8 +77,7 @@ class RateProviderFactoryTest extends TestCase
             ], 200),
         ]);
 
-        $provider = app(RateProvider::class);
-        $days = $provider->getRatesForRange($start, $end, 'EUR', ['USD']);
+        $days = ExchangeRateProvider::getRatesForRange($start, $end, 'EUR', ['USD']);
 
         $this->assertCount(3, $days);
         $this->assertContainsOnlyInstancesOf(\App\DTO\ExchangeRates\DailyRates::class, $days);

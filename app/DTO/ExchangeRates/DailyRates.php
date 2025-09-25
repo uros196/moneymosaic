@@ -29,7 +29,7 @@ final class DailyRates
     {
         $map = [];
         foreach ($this->quotes as $quote) {
-            $map[strtoupper($quote->quote)] = (float) $quote->multiplier;
+            $map[strtoupper($quote->quote)] = $quote->multiplier;
         }
 
         // Ensure base->base

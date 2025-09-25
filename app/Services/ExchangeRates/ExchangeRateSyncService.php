@@ -3,6 +3,7 @@
 namespace App\Services\ExchangeRates;
 
 use App\DTO\ExchangeRates\DailyRates;
+use App\Facades\ExchangeRateProvider;
 use App\Models\ExchangeRate;
 use App\Repositories\Contracts\ExchangeRateRepository;
 use App\Support\Concerns\ParsesExchangeSymbols;
@@ -20,7 +21,7 @@ class ExchangeRateSyncService
 {
     use ParsesExchangeSymbols;
 
-    public function __construct(public RateProvider $provider, public ExchangeRateRepository $repository)
+    public function __construct(public ExchangeRateRepository $repository)
     {
         // Provider is resolved from the container; tests can mock RateProvider::class
     }
@@ -33,7 +34,7 @@ class ExchangeRateSyncService
         $base = $this->configuredBaseCurrency();
         $currencies = $this->configuredSymbols();
 
-        $daily = $this->provider->getRatesForDate($date, $base, $currencies);
+        $daily = ExchangeRateProvider::getRatesForDate($date, $base, $currencies);
 
         $this->persistDaily($daily);
     }
@@ -50,7 +51,7 @@ class ExchangeRateSyncService
         $base = $this->configuredBaseCurrency();
         $currencies = $this->configuredSymbols();
 
-        $days = $this->provider->getRatesForRange($startDate, $endDate, $base, $currencies);
+        $days = ExchangeRateProvider::getRatesForRange($startDate, $endDate, $base, $currencies);
 
         foreach ($days as $daily) {
             $this->persistDaily($daily);
@@ -79,7 +80,7 @@ class ExchangeRateSyncService
                 continue;
             }
 
-            $this->create($date, $base, $quote, (float) $rate);
+            $this->create($date, $base, $quote, $rate);
         }
 
         // Enforce base->base = 1.0

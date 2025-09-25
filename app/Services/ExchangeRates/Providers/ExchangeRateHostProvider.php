@@ -4,7 +4,7 @@ namespace App\Services\ExchangeRates\Providers;
 
 use App\DTO\ExchangeRates\DailyRates;
 use App\DTO\ExchangeRates\RateQuote;
-use App\Services\ExchangeRates\RateProvider;
+use App\Services\ExchangeRates\ExchangeRateProviderInterface;
 use App\Support\Concerns\ParsesExchangeSymbols;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -22,7 +22,7 @@ use RuntimeException;
  * - Historical: GET /{date}
  * - Timeframe: GET /timeframe?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
  */
-class ExchangeRateHostProvider implements RateProvider
+class ExchangeRateHostProvider implements ExchangeRateProviderInterface
 {
     use ParsesExchangeSymbols;
 
