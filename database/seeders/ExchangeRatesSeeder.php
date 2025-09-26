@@ -15,7 +15,7 @@ class ExchangeRatesSeeder extends Seeder
      * Seed some sample exchange rates for development/testing using the factory.
      *
      * - Seeds the last 3 days (today and two previous days).
-     * - Uses global exchange.base_currency and exchange.symbols configuration.
+     * - Uses global 'exchange.base_currency' and 'exchange.symbols' configuration.
      * - Idempotent via upsert to avoid unique constraint violations on re-run.
      */
     public function run(): void
@@ -38,9 +38,9 @@ class ExchangeRatesSeeder extends Seeder
         foreach ($dates as $date) {
 
             // Base -> Base (1.0)
-            ExchangeRate::factory()
-                ->baseToBase($base)
-                ->create(['date' => $date]);
+            ExchangeRate::factory()->baseToBase($base)->create([
+                'date' => $date,
+            ]);
 
             // Base -> Quote for all configured symbols (excluding base to avoid duplicates)
             foreach ($symbols as $quote) {
@@ -49,9 +49,9 @@ class ExchangeRatesSeeder extends Seeder
                     continue;
                 }
 
-                ExchangeRate::factory()
-                    ->forPair($base, $quote)
-                    ->create(['date' => $date]);
+                ExchangeRate::factory()->forPair($base, $quote)->create([
+                    'date' => $date,
+                ]);
             }
         }
     }

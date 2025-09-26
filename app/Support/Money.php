@@ -63,7 +63,7 @@ final class Money
             $fracPart = substr($abs, -$fd);
         }
 
-        // Trim trailing zeros in fraction while keeping at least one zero if fraction is non-empty
+        // Trim trailing zeros in a fraction while keeping at least one zero if a fraction is non-empty
         $fracTrimmed = rtrim($fracPart, '0');
         if ($fracTrimmed === '') {
             // No fractional significance, return integer part only
@@ -230,10 +230,12 @@ final class Money
         $negative = str_starts_with($amountMajor, '-');
         $abs = $negative ? substr($amountMajor, 1) : $amountMajor;
 
+        $number = self::formatNumberForCurrency($abs, $currency);
+
         $pattern = $currency->formatTemplate();
         $formatted = strtr($pattern, [
             '{symbol}' => $currency->symbol(),
-            '{amount}' => $abs,
+            '{amount}' => $number,
         ]);
 
         return $negative ? '-'.$formatted : $formatted;
@@ -245,5 +247,51 @@ final class Money
     public static function formatMinor(int $minor, Currency $currency): string
     {
         return self::formatMajor(self::fromMinor($minor, $currency), $currency);
+    }
+
+    /**
+     * Format a plain major amount string (e.g. "12550.10" or "1000") with thousands and
+     * decimal separators according to the currency's display convention.
+     */
+    private static function formatNumberForCurrency(string $amountMajor, Currency $currency): string
+    {
+        // Split integer and fractional parts using '.' as produced by fromMinor()
+        $parts = explode('.', $amountMajor, 2);
+        $int = $parts[0] !== '' ? $parts[0] : '0';
+        $frac = $parts[1] ?? '';
+
+        // Group integer part with 'thousands' separator
+        $intGrouped = self::groupThousands($int, $currency->thousandsSeparator());
+
+        // If there is no fractional part, return grouped integer only
+        if ($frac === '') {
+            return $intGrouped;
+        }
+
+        return $intGrouped.$currency->decimalSeparator().$frac;
+    }
+
+    /**
+     * Insert 'thousands' separators into a non-negative integer string.
+     */
+    private static function groupThousands(string $intPart, string $sep): string
+    {
+        $len = strlen($intPart);
+        if ($len <= 3) {
+            return $intPart;
+        }
+
+        $out = '';
+        $count = 0;
+        for ($i = $len - 1; $i >= 0; $i--) {
+            $out = $intPart[$i].$out;
+            $count++;
+            if ($count === 3 && $i !== 0) {
+                $out = $sep.$out;
+                $count = 0;
+            }
+        }
+
+        return $out;
     }
 }

@@ -36,6 +36,8 @@ return [
     'name_placeholder' => 'Unesite naziv',
     'nothing_here_yet' => 'Još uvek nema stavki',
     'system' => 'Sistemski',
+    'convert' => 'Konvertuj',
+    'display_currency' => 'Valuta prikaza',
 
     'table' => [
         'empty' => 'Zapisi nisu dostupni',
@@ -51,5 +53,15 @@ return [
         'dark' => 'Tamna',
         'system' => 'Sistemska',
         'toggle_theme' => 'Promeni temu',
+    ],
+
+    // Nazivi valuta
+    'currencies' => [
+        'EUR' => 'Evro',
+        'RSD' => 'Dinar',
+        'USD' => 'Dolar',
+        'GBP' => 'Funta',
+        'CHF' => 'Švajcarski franak',
+        'CAD' => 'Kanadski dolar',
     ],
 ];

@@ -14,7 +14,7 @@ class IncomeFormattedAmountTest extends TestCase
             'amount_minor' => 12345,
             'currency_code' => Currency::EUR,
         ]);
-        $this->assertSame('123.45€', $incomeEur->formatted_amount);
+        $this->assertSame('123,45€', $incomeEur->formatted_amount);
 
         $incomeUsd = new Income([
             'amount_minor' => -990,

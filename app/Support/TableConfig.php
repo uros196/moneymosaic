@@ -29,7 +29,7 @@ final class TableConfig
     /**
      * Get the per-page configuration for a given table key.
      */
-    public static function perPage(?string $table = null): int
+    public static function defaultPerPage(?string $table = null): int
     {
         return data_get(self::paging($table), 'default');
     }

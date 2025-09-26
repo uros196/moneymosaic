@@ -36,6 +36,8 @@ return [
     'name_placeholder' => 'Enter name',
     'nothing_here_yet' => 'Nothing here yet',
     'system' => 'System',
+    'convert' => 'Convert',
+    'display_currency' => 'Display currency',
 
     'table' => [
         'empty' => 'No data available',
@@ -51,5 +53,15 @@ return [
         'dark' => 'Dark',
         'system' => 'System',
         'toggle_theme' => 'Toggle theme',
+    ],
+
+    // Currency names
+    'currencies' => [
+        'EUR' => 'Euro',
+        'RSD' => 'Dinar',
+        'USD' => 'US Dollar',
+        'GBP' => 'Pound',
+        'CHF' => 'Swiss Franc',
+        'CAD' => 'Canadian Dollar',
     ],
 ];

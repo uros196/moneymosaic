@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Currency;
 use App\Models\ExchangeRate;
 use App\Support\Concerns\ParsesExchangeSymbols;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -43,14 +44,11 @@ class ExchangeRateFactory extends Factory
     /**
      * State: specify an explicit currency pair.
      */
-    public function forPair(string $base, string $quote): self
+    public function forPair(Currency|string $base, Currency|string $quote): self
     {
-        $base = strtoupper($base);
-        $quote = strtoupper($quote);
-
         return $this->state(fn () => [
-            'base_currency_code' => $base,
-            'quote_currency_code' => $quote,
+            'base_currency_code' => $this->parseCurrency($base),
+            'quote_currency_code' => $this->parseCurrency($quote),
             'rate_multiplier' => $base === $quote ? 1.0 : $this->rateFor($base, $quote),
         ]);
     }
@@ -58,9 +56,11 @@ class ExchangeRateFactory extends Factory
     /**
      * State: base->base rate (multiplier 1.0).
      */
-    public function baseToBase(?string $base = null): self
+    public function baseToBase(Currency|string|null $base = null): self
     {
-        $base = strtoupper($base ?? $this->configuredBaseCurrency());
+        $base = ! is_null($base)
+            ? $this->parseCurrency($base)
+            : $this->configuredBaseCurrency();
 
         return $this->state(fn () => [
             'base_currency_code' => $base,
@@ -72,14 +72,11 @@ class ExchangeRateFactory extends Factory
     /**
      * Generate a reasonable rate multiplier for a base->quote pair.
      */
-    private function rateFor(string $base, string $quote): float
+    private function rateFor(Currency|string $base, Currency|string $quote): float
     {
         // Simple heuristics for EUR base to popular quotes; otherwise generic ranges
-        $base = strtoupper($base);
-        $quote = strtoupper($quote);
-
-        if ($base === 'EUR') {
-            return match ($quote) {
+        if ($this->parseCurrency($base) === 'EUR') {
+            return match ($this->parseCurrency($quote)) {
                 'USD' => fake()->randomFloat(6, 0.9, 1.3),
                 'GBP' => fake()->randomFloat(6, 0.7, 1.1),
                 'CHF' => fake()->randomFloat(6, 0.7, 1.2),
@@ -99,5 +96,13 @@ class ExchangeRateFactory extends Factory
     protected function getQuoteCurrencies(string $base): array
     {
         return array_diff($this->configuredSymbols(), [$base]);
+    }
+
+    /**
+     * Parse currency input into a standardized string format.
+     */
+    protected function parseCurrency(Currency|string $currency): string
+    {
+        return $currency instanceof Currency ? $currency->value : strtoupper($currency);
     }
 }

@@ -36,6 +36,14 @@ enum Currency: string
     }
 
     /**
+     * Human-friendly, translatable currency name.
+     */
+    public function label(): string
+    {
+        return __("common.currencies.{$this->value}");
+    }
+
+    /**
      * Common currency symbol for UI display.
      */
     public function symbol(): string
@@ -92,6 +100,30 @@ enum Currency: string
             self::USD, self::GBP, self::CAD => '{symbol}{amount}',
             self::EUR => '{amount}{symbol}',
             self::RSD, self::CHF => '{amount} {symbol}',
+        };
+    }
+
+    /**
+     * 'Decimal' separator to use when displaying amounts for this currency.
+     */
+    public function decimalSeparator(): string
+    {
+        return match ($this) {
+            self::USD, self::GBP, self::CAD, self::CHF => '.',
+            self::EUR, self::RSD => ',',
+        };
+    }
+
+    /**
+     * 'Thousands' separator to use when displaying amounts for this currency.
+     */
+    public function thousandsSeparator(): string
+    {
+        return match ($this) {
+            self::USD, self::GBP, self::CAD => ',',
+            self::EUR, self::RSD => '.',
+            // Switzerland commonly uses an apostrophe for grouping
+            self::CHF => "'",
         };
     }
 }

@@ -217,12 +217,12 @@ export default function IncomeDrawer({ open }) {
                                             <input type="hidden" name="currency_code" value={currencyCode} />
                                             <Select value={currencyCode} onValueChange={setCurrencyCode}>
                                                 <SelectTrigger id="currency_code" aria-invalid={!!errors.currency_code}>
-                                                    <SelectValue />
+                                                    {currencyCode}
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {props.currencies.data.map((c) => (
-                                                        <SelectItem value={c.value} key={c.value}>
-                                                            {c.value}
+                                                    {props.currencies.data.map((currency) => (
+                                                        <SelectItem value={currency.value} key={currency.value}>
+                                                            {currency.display_name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

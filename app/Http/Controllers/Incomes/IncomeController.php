@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Incomes;
 
+use App\DTO\Incomes\IncomeData;
 use App\Enums\Currency;
 use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Incomes\IndexIncomeRequest;
 use App\Http\Requests\Incomes\StoreIncomeRequest;
 use App\Http\Resources\CurrencyResource;
 use App\Http\Resources\IncomeResource;
@@ -36,7 +38,7 @@ class IncomeController extends Controller
     /**
      * Display the income index page.
      */
-    public function index(Request $request): Response
+    public function index(IndexIncomeRequest $request): Response
     {
         return $this->render($request);
     }
@@ -63,7 +65,7 @@ class IncomeController extends Controller
      */
     public function store(StoreIncomeRequest $request): RedirectResponse
     {
-        $this->incomeService->save($request, Income::make());
+        $this->incomeService->save(IncomeData::fromRequest($request), Income::make());
 
         return redirect()->route('incomes.index')
             ->with(ToastType::Success->message(__('incomes.toasts.created')));
@@ -107,7 +109,7 @@ class IncomeController extends Controller
      */
     public function update(StoreIncomeRequest $request, Income $income): RedirectResponse
     {
-        $this->incomeService->save($request, $income);
+        $this->incomeService->save(IncomeData::fromRequest($request), $income);
 
         return redirect()->route('incomes.index')
             ->with(ToastType::Success->message(__('incomes.toasts.updated')));

@@ -41,18 +41,12 @@ class IncomesPaginationConfigTest extends TestCase
 
     public function test_invalid_per_page_falls_back_to_default(): void
     {
-        $perPage = TableConfig::perPage('incomes');
-
         $user = User::factory()->create();
         Income::factory()->for($user)->count(5)->create();
 
+        // Invalid perPage (not in config options) should fail validation
         $this->actingAs($user)
             ->get(route('incomes.index', ['perPage' => 999]))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('incomes/index')
-                ->where('paging.perPage', $perPage)
-                ->missing('incomes')
-            );
+            ->assertInvalid(['perPage']);
     }
 }

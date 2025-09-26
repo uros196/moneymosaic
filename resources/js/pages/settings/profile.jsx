@@ -105,11 +105,13 @@ export default function Profile({ user, mustVerifyEmail, status, twoFactorSetupI
                                     <input type="hidden" name="default_currency_code" value={defaultCurrencyCode} />
                                     <Select value={defaultCurrencyCode} onValueChange={setDefaultCurrencyCode}>
                                         <SelectTrigger id="default_currency_code" aria-invalid={!!errors.default_currency_code}>
-                                            <SelectValue />
+                                            {defaultCurrencyCode}
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {currencies.data.map((c) => (
-                                                <SelectItem key={c.value} value={c.value}>{c.value}</SelectItem>
+                                            {currencies.data.map((currency) => (
+                                                <SelectItem key={currency.value} value={currency.value}>
+                                                    {currency.display_name}
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>

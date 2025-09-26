@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Incomes\StoreIncomeRequest;
+use App\DTO\Incomes\IncomeData;
 use App\Models\Income;
 use App\Models\User;
 use App\Repositories\Contracts\IncomeRepository;
@@ -36,13 +36,15 @@ class IncomeService
     /**
      * Save or update an income record with its associated tags.
      */
-    public function save(StoreIncomeRequest $request, Income $income): Income
+    public function save(IncomeData $data, Income $income): Income
     {
         // save the income
-        $income->fill($request->safe()->except('tags'))->save();
+        $income->fill($data->toModelAttributes())->save();
 
-        // update list of the tags
-        $request->safe()->whenFilled('tags', fn($tags) => $income->syncUserTags($tags));
+        // update the list of the tags (preserve previous behavior: only when provided and not empty)
+        if ($data->tags !== null) {
+            $income->syncUserTags($data->tags);
+        }
 
         return $income;
     }

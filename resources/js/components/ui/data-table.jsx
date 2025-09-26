@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useI18n } from '@/i18n'
 import PaginateLinks from '@/components/ui/paginate-links.jsx';
+import { usePage } from '@inertiajs/react';
 
 /**
  * DataTable - a reusable, easily configurable table component.
@@ -26,11 +27,17 @@ export default function DataTable({
   perPageLabel,
 }) {
   const { __ } = useI18n()
+    const pageProps = usePage().props || {};
+
   const rows = data?.data ?? []
   const hasRows = Array.isArray(rows) && rows.length > 0
   const getRowKey = (row) => row?.id ?? crypto.randomUUID?.() ?? Math.random()
 
   const tPerPage = perPageLabel ?? __('common.pagination.per_page')
+
+    // Define 'per page' data
+    const perPageValue = perPage.value ?? pageProps.paging.perPage ?? '';
+    const perPageOptions = perPage.options ?? pageProps.paging.options ?? {};
 
   const meta = data?.meta ?? {}
   const total = Number(meta?.total ?? (hasRows ? rows.length : 0))
@@ -93,24 +100,22 @@ export default function DataTable({
         <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm">
             {perPage && (
-              <label className="flex items-center gap-2 whitespace-nowrap">
-                <span>{tPerPage}</span>
                 <Select
-                  value={String(perPage.value)}
+                  value={String(perPageValue)}
                   onValueChange={(v) => perPage.onChange(Number(v))}
                 >
-                  <SelectTrigger id="per_page">
-                    <SelectValue />
+                  <SelectTrigger id="per_page" area-label={tPerPage}>
+                      <span className="text-muted-foreground">{tPerPage}:</span>
+                      <span className="font-medium">&nbsp;<SelectValue /></span>
                   </SelectTrigger>
                   <SelectContent>
-                    {perPage.options.map((opt) => (
+                    {perPageOptions.map((opt) => (
                       <SelectItem value={String(opt)} key={opt}>
                         {opt}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </label>
             )}
           </div>
 

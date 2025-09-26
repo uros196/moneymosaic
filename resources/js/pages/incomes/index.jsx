@@ -3,9 +3,11 @@ import { useLocaleRefreshOnly } from '@/components/language-switcher';
 import TableSkeleton from '@/components/skeletons/table-skeleton.jsx';
 import { Button } from '@/components/ui/button';
 import DataTable from '@/components/ui/data-table';
+import { Badge } from '@/components/ui/badge';
+import CurrencyConversion from '@/components/ui/currency-conversion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { DeleteAction, EditAction, ViewAction } from '@/components/ui/table-actions';
-import { Toggle } from '@/components/ui/toggle';
 import { useI18n } from '@/i18n';
 import AppLayout from '@/layouts/app-layout';
 import { Deferred, Head, router, usePage, useRemember } from '@inertiajs/react';
@@ -14,58 +16,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import IncomeDrawer from './income-drawer';
 
-function formatAmount(minor, currency) {
-    try {
-        return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format((minor || 0) / 100);
-    } catch (_) {
-        // Fallback: plain number + code
-        return `${((minor || 0) / 100).toFixed(2)} ${currency}`;
-    }
-}
-
-function toISO(dateLike) {
-    const d = new Date(dateLike);
-    if (Number.isNaN(d.getTime())) return '';
-    const m = `${d.getMonth() + 1}`.padStart(2, '0');
-    const day = `${d.getDate()}`.padStart(2, '0');
-    return `${d.getFullYear()}-${m}-${day}`;
-}
-
-// Simple client-side conversion via EUR as a base (UI-only; mock rates)
-const RATES_EUR = {
-    EUR: 1,
-    USD: 1.1,   // 1 EUR = 1.10 USD (example)
-    RSD: 117,   // 1 EUR = 117.00 RSD (example)
-    GBP: 0.85,  // 1 EUR ≈ 0.85 GBP (example)
-    CHF: 0.95,  // 1 EUR ≈ 0.95 CHF (example)
-    CAD: 1.45,  // 1 EUR ≈ 1.45 CAD (example)
-};
-
-function convertMinor(amountMinor, fromCode, toCode) {
-    const from = String(fromCode || 'EUR').toUpperCase();
-    const to = String(toCode || 'EUR').toUpperCase();
-    if (from === to) return amountMinor || 0;
-    const rFrom = RATES_EUR[from];
-    const rTo = RATES_EUR[to];
-    if (!rFrom || !rTo) {
-        return amountMinor || 0;
-    }
-    // Convert minor->main to compute, then back to minor; round to the nearest cent
-    const main = (amountMinor || 0) / 100;
-    const inEurMain = main / rFrom;
-    const inTargetMain = inEurMain * rTo;
-    return Math.round(inTargetMain * 100);
-}
-
 export default function IncomesIndex() {
     const { __ } = useI18n();
-
-  // Mock data for the UI (client-only)
-  const [items, setItems] = useState(() => [
-    { id: 1, occurred_on: '2025-08-01', name: 'Salary August', description: 'Monthly salary', income_type_key: 'salary', amount_minor: 250000, currency_code: 'EUR', tags: ['job'] },
-    { id: 2, occurred_on: '2025-07-15', name: 'Quarterly Bonus', description: 'Quarterly bonus', income_type_key: 'bonus', amount_minor: 75000, currency_code: 'USD', tags: ['bonus'] },
-    { id: 3, occurred_on: '2025-06-02', name: 'Freelance', description: 'Freelance gig', income_type_key: 'other', amount_minor: 42000, currency_code: 'RSD', tags: ['side'] },
-  ])
 
     const now = new Date();
     const [filters, setFilters] = useState({
@@ -77,8 +29,6 @@ export default function IncomesIndex() {
 
     // Conversion UI state (display-only)
     const pageProps = usePage().props || {};
-    const [convertEnabled, setConvertEnabled] = useState(false);
-    const [convertCurrency, setConvertCurrency] = useState(pageProps.user.default_currency_code);
     const hasModal = Boolean(pageProps.modal);
 
     const [filtersOpen, setFiltersOpen] = useState(false);
@@ -145,7 +95,7 @@ export default function IncomesIndex() {
     }
 
     // After a user changes language using a LanguageSwitcher, refresh additional props
-    useLocaleRefreshOnly(['incomeTypes']);
+    useLocaleRefreshOnly(['incomeTypes', 'currencies']);
 
     const breadcrumbs = [{ title: __('incomes.title'), href: route('incomes.index') }];
 
@@ -155,8 +105,33 @@ export default function IncomesIndex() {
             { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on_display },
             { id: 'description', header: __('incomes.table.name'), accessor: (r) => r.name || r.description },
             { id: 'income_type', header: __('incomes.table.type'), accessor: (r) => r.income_type.name },
-            { id: 'amount', header: __('incomes.table.amount'), className: 'text-right', accessor: (r) => r.amount_formatted },
-            { id: 'currency_code', header: __('incomes.table.currency'), accessor: (r) => r.currency_code },
+            {
+                id: 'amount',
+                header: __('incomes.table.amount'),
+                className: 'text-right',
+                cell: (row) => {
+                    if (row.converted_amount) {
+                        return (
+                            <div className="flex flex-col items-end gap-0.5">
+                                <div className="flex items-center gap-2">
+                                    <div className="font-medium">{row.converted_amount}</div>
+                                    <Badge variant="secondary" title="Converted">FX</Badge>
+                                </div>
+                                <div className="text-xs text-muted-foreground">{row.amount_formatted}</div>
+                            </div>
+                        );
+                    }
+                    return <span className="font-medium">{row.amount_formatted}</span>;
+                },
+            },
+            { id: 'currency_code', header: __('incomes.table.currency'), cell: (r) => (
+                <Tooltip>
+                    <TooltipTrigger>
+                        <span className="underline decoration-dotted underline-offset-2">{r.currency.value}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>{r.currency.label}</TooltipContent>
+                </Tooltip>
+            )},
             {
                 id: 'actions',
                 header: __('incomes.table.actions'),
@@ -191,30 +166,13 @@ export default function IncomesIndex() {
                             <Button type="button" variant="secondary" size="sm" onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen}>
                                 {__('incomes.filters.toggle')}
                             </Button>
-                            <Toggle
-                                pressed={convertEnabled}
-                                onPressedChange={(v) => setConvertEnabled(Boolean(v))}
-                                aria-label={__('incomes.filters.convert')}
-                            >
-                                {__('incomes.filters.convert')}
-                            </Toggle>
-                            {convertEnabled && (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm">{__('incomes.filters.display_currency')}</span>
-                                    <Select value={convertCurrency} onValueChange={setConvertCurrency}>
-                                        <SelectTrigger id="display_currency">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {pageProps.currencies.data.map((c) => (
-                                                <SelectItem value={c.value} key={c.value}>
-                                                    {c.value}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
+                            <CurrencyConversion
+                                routeName="incomes.index"
+                                currencies={pageProps.currencies.data}
+                                defaultCurrency={pageProps.user.data.default_currency_code}
+                                onlyKeys={['incomes']}
+                                labels={{ toggle: __('incomes.filters.convert'), select: __('incomes.filters.display_currency') }}
+                            />
                         </div>
                         <div className="flex items-center gap-3">
                             <Button type="button" title={__('incomes.actions.add')} onClick={openCreate} className="whitespace-nowrap">
@@ -309,8 +267,6 @@ export default function IncomesIndex() {
                         data={pageProps.incomes}
                         emptyText={__('incomes.table.empty')}
                         perPage={{
-                            value: pageProps.paging.perPage,
-                            options: pageProps.paging.options,
                             onChange: (v) => router.visit(route('incomes.index', { perPage: v, page: 1 }), { preserveScroll: true, replace: true }),
                         }}
                     />

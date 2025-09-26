@@ -19,7 +19,7 @@ use RuntimeException;
  * Strategy for fetching rates from https://api.exchangerate.host
  *
  * Implements:
- * - Historical: GET /{date}
+ * - Historical: GET /historical?date=YYYY-MM-DD
  * - Timeframe: GET /timeframe?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
  */
 class ExchangeRateHostProvider implements ExchangeRateProviderInterface

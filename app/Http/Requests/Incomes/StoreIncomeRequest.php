@@ -11,8 +11,6 @@ class StoreIncomeRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -28,7 +26,7 @@ class StoreIncomeRequest extends FormRequest
                 }),
             ],
             'amount_minor' => ['required', 'integer:', 'min:1'],
-            'currency_code' => ['required', Rule::in(Currency::values())],
+            'currency_code' => ['required', Rule::enum(Currency::class)],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -37,8 +35,6 @@ class StoreIncomeRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
      */
     public function messages(): array
     {

@@ -58,7 +58,7 @@ class CurrencyEnumTest extends TestCase
     public function test_format_minor_conversion_and_rules(): void
     {
         // Positive
-        $this->assertSame('123.45€', Money::formatMinor(12345, Currency::EUR));
+        $this->assertSame('123,45€', Money::formatMinor(12345, Currency::EUR));
         $this->assertSame('$0.99', Money::formatMinor(99, Currency::USD));
         $this->assertSame('200 RSD', Money::formatMinor(20000, Currency::RSD));
         $this->assertSame('£123.45', Money::formatMinor(12345, Currency::GBP));
@@ -66,11 +66,18 @@ class CurrencyEnumTest extends TestCase
         $this->assertSame('CA$123.45', Money::formatMinor(12345, Currency::CAD));
 
         // Negative
-        $this->assertSame('-123.45€', Money::formatMinor(-12345, Currency::EUR));
+        $this->assertSame('-123,45€', Money::formatMinor(-12345, Currency::EUR));
         $this->assertSame('-$0.99', Money::formatMinor(-99, Currency::USD));
         $this->assertSame('-200 RSD', Money::formatMinor(-20000, Currency::RSD));
         $this->assertSame('-£123.45', Money::formatMinor(-12345, Currency::GBP));
         $this->assertSame('-123.45 CHF', Money::formatMinor(-12345, Currency::CHF));
         $this->assertSame('-CA$123.45', Money::formatMinor(-12345, Currency::CAD));
+    }
+
+    public function test_label_translations_in_english(): void
+    {
+        $this->assertSame('Euro', Currency::EUR->label());
+        $this->assertSame('Dinar', Currency::RSD->label());
+        $this->assertSame('US Dollar', Currency::USD->label());
     }
 }
