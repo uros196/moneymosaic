@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\FilterChips;
+namespace App\Support\Filters\Chips;
 
 use App\Support\Concerns\ResolvesDisplayName;
 use Closure;

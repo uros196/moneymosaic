@@ -36,6 +36,16 @@ enum Currency: string
     }
 
     /**
+     * List of displayable currency names.
+     */
+    public static function displayList(): array
+    {
+        return collect(self::cases())
+            ->mapwithkeys(fn (self $currency) => [$currency->value => $currency->displayLabel()])
+            ->all();
+    }
+
+    /**
      * Human-friendly, translatable currency name.
      */
     public function label(): string

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\FilterChips;
+namespace App\Support\Filters\Chips;
 
 /**
  * MinMaxRangeChip represents a numeric (or comparable scalar) range chip.

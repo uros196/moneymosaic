@@ -74,18 +74,10 @@ class IndexIncomeRequest extends FormRequest
     protected function convertToMinor(string $key, string $new_key): void
     {
         if ($this->has($key)) {
-            // We need the currency so we can convert the amount to minor in the best way possible
-            $currency = $this->enum(
-                // First, try the 'currency_code' query parameter
-                'currency_code', Currency::class,
-                $this->enum(
-                    // If the 'currency_code' is not available (or not valid),
-                    // then try to get it from the 'currency' query parameter
-                    'currency', Currency::class,
-                    // If the 'currency' 'failed', then use the default currency from the user settings
-                    $this->user()->default_currency_code
-                )
-            );
+            // Resolve currency enum: prefer query params, then fall back to user's default
+            $currency = $this->enum('currency_code', Currency::class)
+                ?? $this->enum('currency', Currency::class)
+                ?? ($this->user()->default_currency_code ?: Currency::default());
 
             // Finally, convert the amount to minor units
             $this->merge([

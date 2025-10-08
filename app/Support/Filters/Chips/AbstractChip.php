@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\FilterChips;
+namespace App\Support\Filters\Chips;
 
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -52,6 +52,7 @@ abstract class AbstractChip implements Arrayable
 
     /**
      * Sets the keys to be removed from the query when the chip is deselected.
+     * Accepts either a single string, multiple string arguments, or an array of strings.
      */
     public function removeKeys(mixed $keys): self
     {

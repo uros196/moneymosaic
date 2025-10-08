@@ -94,10 +94,6 @@ export function visitCurrentPath(nextQuery, options = {}) {
     try {
         const urlObj = new URL(window.location.href);
         const href = buildUrl(urlObj.pathname, nextQuery);
-console.log(nextQuery);
-console.log(urlObj);
-console.log(href);
-console.log(options);
         router.visit(href, options);
     } catch {
         // ignore

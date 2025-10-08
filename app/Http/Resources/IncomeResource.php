@@ -50,8 +50,10 @@ class IncomeResource extends JsonResource
             'tags_list' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
 
             // currency converter
-            'converted_amount' => $this->when($hasConvertedCurrency, fn () => app(IncomeService::class)->convertIncomeToCurrency($this->resource, Currency::from($currency))
-            ),
+            'converted_amount' => $this->when($hasConvertedCurrency, function () use ($currency) {
+                return app(IncomeService::class)
+                    ->convertIncomeToCurrency($this->resource, Currency::from($currency));
+            }),
         ];
     }
 }

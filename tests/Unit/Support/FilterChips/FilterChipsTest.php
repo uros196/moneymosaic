@@ -4,11 +4,11 @@ namespace Tests\Unit\Support\FilterChips;
 
 use App\Enums\Currency;
 use App\Models\IncomeType;
-use App\Support\FilterChips\ArrayChip;
-use App\Support\FilterChips\CurrencyChip;
-use App\Support\FilterChips\MinMaxRangeChip;
-use App\Support\FilterChips\ModelChip;
-use App\Support\FilterChips\StringChip;
+use App\Support\Filters\Chips\ArrayChip;
+use App\Support\Filters\Chips\CurrencyChip;
+use App\Support\Filters\Chips\MinMaxRangeChip;
+use App\Support\Filters\Chips\ModelChip;
+use App\Support\Filters\Chips\StringChip;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

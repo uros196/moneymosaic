@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support\FilterChips;
+namespace App\Support\Filters\Chips;
 
 /**
  * ArrayChip represents a chip for an array of scalar values.

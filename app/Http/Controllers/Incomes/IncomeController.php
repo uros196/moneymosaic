@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Incomes;
 use App\DTO\Incomes\IncomeData;
 use App\Enums\Currency;
 use App\Enums\ToastType;
+use App\Filters\IncomeFiltersBuilder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Incomes\IndexIncomeRequest;
 use App\Http\Requests\Incomes\StoreIncomeRequest;
@@ -41,10 +42,14 @@ class IncomeController extends Controller
      */
     public function index(IndexIncomeRequest $request): Response
     {
+        $filterBuilder = IncomeFiltersBuilder::buildFrom($request);
+
         return $this->render($request, [
             'sortables' => $request->sortables(),
+            // Server-driven filters config
+            'filters' => fn () => $filterBuilder->buildFilter(),
             // Always include chips in the response so we don't have to re-fetch them on every page load
-            'filterChips' => Inertia::always(fn () => $request->filters()->chips()),
+            'filterChips' => Inertia::always(fn () => $filterBuilder->chips()),
         ]);
     }
 
@@ -54,8 +59,9 @@ class IncomeController extends Controller
     public function create(Request $request): Response
     {
         return $this->render($request, [
-            'modal' => Inertia::always(fn () => DrawerConfig::create()->action(route('incomes.store'))
-            ),
+            'modal' => Inertia::always(function () {
+                return DrawerConfig::create()->action(route('incomes.store'));
+            }),
         ]);
     }
 
@@ -92,7 +98,9 @@ class IncomeController extends Controller
         $income->load('tags');
 
         return $this->render($request, [
-            'modal' => Inertia::always(fn () => DrawerConfig::edit()->action(route('incomes.update', $income))),
+            'modal' => Inertia::always(function () use ($income) {
+                return DrawerConfig::edit()->action(route('incomes.update', $income));
+            }),
             'income' => IncomeResource::make($income),
         ]);
     }

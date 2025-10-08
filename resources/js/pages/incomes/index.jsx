@@ -23,7 +23,7 @@ export default function IncomesIndex() {
     const { __ } = useI18n();
 
     // After a user changes language using a LanguageSwitcher, refresh additional props
-    useLocaleRefreshOnly(['incomeTypes', 'currencies']);
+    useLocaleRefreshOnly(['incomeTypes', 'currencies', 'filters']);
 
     // Conversion UI state (display-only)
     const pageProps = usePage().props || {};
@@ -163,31 +163,7 @@ export default function IncomesIndex() {
                             <FilterSheet
                                 title={__('incomes.filters.toggle')}
                                 tooltip={__('incomes.filters.toggle')}
-                                fields={[
-                                    { key: 'query', label: __('common.search'), type: 'input', placeholder: __('common.search') },
-                                    { key: 'date', label: __('incomes.table.date'), type: 'date-range', fromKey: 'date_from', toKey: 'date_to' },
-                                    { key: 'amount', label: __('incomes.table.amount'), type: 'min-max', minKey: 'amount_min', maxKey: 'amount_max' },
-                                    {
-                                        key: 'tags',
-                                        label: __('incomes.table.tags'),
-                                        type: 'tags',
-                                        suggestions: (pageProps.tagSuggestions?.data ?? []).map((t) => t.name),
-                                    },
-                                    {
-                                        key: 'income_type',
-                                        label: __('incomes.filters.type'),
-                                        type: 'select',
-                                        allLabel: __('incomes.filters.all'),
-                                        options: (pageProps.incomeTypes?.data ?? []).map((t) => ({ value: t.id, label: t.name })),
-                                    },
-                                    {
-                                        key: 'currency_code',
-                                        label: __('incomes.filters.currency'),
-                                        type: 'select',
-                                        allLabel: __('incomes.filters.all'),
-                                        options: (pageProps.currencies?.data ?? []).map((c) => ({ value: c.value, label: c.display_name })),
-                                    },
-                                ]}
+                                filters={pageProps.filters ?? []}
                                 onlyKeys={['incomes']}
                             />
                             <CurrencyConversion

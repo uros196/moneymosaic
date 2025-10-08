@@ -65,7 +65,7 @@ export default function IncomeDrawer({ open }) {
             preserveScroll: true,
             preserveState: true,
             replace: true,
-            only: ['income', 'incomeTypes', 'flash'],
+            only: ['income', 'incomeTypes', 'flash', 'filters'],
         });
     }
 

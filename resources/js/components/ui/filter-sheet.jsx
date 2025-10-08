@@ -42,7 +42,7 @@ export default function FilterSheet({
   id = 'filters',
   title,
   tooltip,
-  fields = [],
+  filters,
   onApply,
   onClearAll,
   className,
@@ -59,25 +59,12 @@ export default function FilterSheet({
   const effTitle = title ?? __('common.filters')
   const effTooltip = tooltip ?? __('common.filters')
 
-  // Extract current URL query params and calculate available filter fields
+  // Extract current URL query params
   const query = useMemo(() => getQueryObject(), [url])
+  // Available filter keys come directly from server-provided meta
   const availableFields = useMemo(() => {
-    const keys = []
-    for (const f of fields ?? []) {
-      if (f?.type === 'date-range') {
-        const fromKey = f.fromKey ?? `${f.key}_from`
-        const toKey = f.toKey ?? `${f.key}_to`
-        keys.push(fromKey, toKey)
-      } else if (f?.type === 'min-max') {
-        const minKey = f.minKey ?? `${f.key}_min`
-        const maxKey = f.maxKey ?? `${f.key}_max`
-        keys.push(minKey, maxKey)
-      } else {
-        keys.push(f.key)
-      }
-    }
-    return keys
-  }, [fields])
+    return Array.isArray(filters?.meta?.keys) ? filters.meta.keys : []
+  }, [filters])
 
 
   // Internal state mirrors selected values (strings)
@@ -185,27 +172,25 @@ export default function FilterSheet({
 
           <div className="flex flex-col gap-4 p-4">
             {/* Render different filter types based on field configuration */}
-            {fields.map((field) => {
+            {(filters?.fields ?? []).map((field) => {
               const type = field.type || 'select' // Default to select type
 
               // Date range filter with from/to inputs
               if (type === 'date-range') {
-                const fromKey = field.fromKey ?? `${field.key}_from`
-                const toKey = field.toKey ?? `${field.key}_to`
                 return (
                   <div className="flex flex-col gap-2" key={field.key}>
                     <span className="text-sm text-muted-foreground">{field.label}</span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <DateInput
-                        id={`${id}_${fromKey}`}
-                        value={selected[fromKey] ?? ''}
-                        onChange={(e) => changeValue(fromKey, e.target.value)}
+                        id={`${id}_${field.fromKey}`}
+                        value={selected[field.fromKey] ?? ''}
+                        onChange={(e) => changeValue(field.fromKey, e.target.value)}
                         placeholder={field.fromPlaceholder ?? __('common.from')}
                       />
                       <DateInput
-                        id={`${id}_${toKey}`}
-                        value={selected[toKey] ?? ''}
-                        onChange={(e) => changeValue(toKey, e.target.value)}
+                        id={`${id}_${field.toKey}`}
+                        value={selected[field.toKey] ?? ''}
+                        onChange={(e) => changeValue(field.toKey, e.target.value)}
                         placeholder={field.toPlaceholder ?? __('common.to')}
                       />
                     </div>
@@ -214,28 +199,26 @@ export default function FilterSheet({
               }
 
               if (type === 'min-max') {
-                const minKey = field.minKey ?? `${field.key}_min`
-                const maxKey = field.maxKey ?? `${field.key}_max`
                 return (
                   <div className="flex flex-col gap-2" key={field.key}>
                     <span className="text-sm text-muted-foreground">{field.label}</span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <Input
-                        id={`${id}_${minKey}`}
+                        id={`${id}_${field.minKey}`}
                         type="number"
                         inputMode="decimal"
                         step="any"
-                        value={selected[minKey] ?? ''}
-                        onChange={(e) => changeValue(minKey, e.target.value)}
+                        value={selected[field.minKey] ?? ''}
+                        onChange={(e) => changeValue(field.minKey, e.target.value)}
                         placeholder={field.minPlaceholder ?? __('common.min')}
                       />
                       <Input
-                        id={`${id}_${maxKey}`}
+                        id={`${id}_${field.maxKey}`}
                         type="number"
                         inputMode="decimal"
                         step="any"
-                        value={selected[maxKey] ?? ''}
-                        onChange={(e) => changeValue(maxKey, e.target.value)}
+                        value={selected[field.maxKey] ?? ''}
+                        onChange={(e) => changeValue(field.maxKey, e.target.value)}
                         placeholder={field.maxPlaceholder ?? __('common.max')}
                       />
                     </div>
