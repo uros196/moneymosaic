@@ -3,9 +3,13 @@
 namespace App\Services;
 
 use App\DTO\Incomes\IncomeData;
+use App\DTO\Incomes\IncomeFiltersData;
+use App\Enums\Currency;
+use App\Http\Requests\Incomes\IndexIncomeRequest;
 use App\Models\Income;
 use App\Models\User;
 use App\Repositories\Contracts\IncomeRepository;
+use App\Support\Money;
 use App\Support\TableConfig;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -16,21 +20,21 @@ use Illuminate\Http\Request;
 class IncomeService
 {
     /**
-     * IncomeService constructor.
-     */
-    public function __construct(protected Request $request) {}
-
-    /**
      * Paginate incomes for a specific user.
      */
-    public function paginate(User $user): LengthAwarePaginator
+    public function paginate(Request $request, User $user): LengthAwarePaginator
     {
         $repository = app(IncomeRepository::class);
 
         // Resolve per-page configuration
-        $perPage = TableConfig::resolvePerPage($this->request, 'incomes');
+        $perPage = TableConfig::resolvePerPage($request, 'incomes');
 
-        return $repository->paginateForUser($user, $perPage);
+        // Build filters from the current request when available
+        $filters = $request instanceof IndexIncomeRequest
+            ? $request->filters()
+            : new IncomeFiltersData;
+
+        return $repository->paginateForUser($user, $filters, $perPage);
     }
 
     /**
@@ -47,5 +51,21 @@ class IncomeService
         }
 
         return $income;
+    }
+
+    /**
+     * Convert income amount to specified currency and format it as string.
+     */
+    public function convertIncomeToCurrency(Income $income, Currency $currency): string
+    {
+        $converted_amount = app(CurrencyConversionService::class)
+            ->convertMinor(
+                minor: $income->amount_minor,
+                fromCurrency: $income->currency_code->value,
+                toCurrency: $currency,
+                date: $income->occurred_on
+            );
+
+        return Money::formatMajor($converted_amount, $currency);
     }
 }

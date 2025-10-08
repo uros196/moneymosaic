@@ -16,9 +16,14 @@ return [
     'log_out_other_sessions' => 'Log out other sessions',
     'log_out_all_sessions' => 'Log out all sessions',
 
+    'from_value' => 'from :value',
+    'to_value' => 'to :value',
+
     // Common UI actions
     'save' => 'Save',
     'saved' => 'Saved',
+    'apply' => 'Apply',
+    'clear_all' => 'Clear all',
     'manage' => 'Manage',
     'back' => 'Back',
     'view' => 'View',
@@ -39,12 +44,27 @@ return [
     'convert' => 'Convert',
     'display_currency' => 'Display currency',
 
+    // Common generic labels used across components
+    'filters' => 'Filters',
+    'from' => 'From',
+    'to' => 'To',
+    'min' => 'Min',
+    'max' => 'Max',
+    'search' => 'Search',
+    'all' => 'All',
+    'remove_filter' => 'Remove filter',
+
     'table' => [
         'empty' => 'No data available',
     ],
     'pagination' => [
         'per_page' => 'Per page',
         'showing' => 'Showing :from–:to of :total',
+    ],
+
+    // Common form labels
+    'form' => [
+        'tag_input_placeholder' => 'Type and press Enter to add a tag',
     ],
 
     // Appearance common labels

@@ -29,7 +29,8 @@ class PreparePagingPropMiddleware
         $prop = $propName !== '' ? $propName : 'paging';
 
         Inertia::share([
-            $prop => TableConfig::pagingData($request, $tableKey),
+            // Always share the paging data
+            $prop => Inertia::always(fn () => TableConfig::pagingData($request, $tableKey)),
         ]);
 
         return $next($request);

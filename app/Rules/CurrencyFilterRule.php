@@ -1,15 +1,19 @@
 <?php
 
-namespace App\Rules\Pagination;
+namespace App\Rules;
 
+use App\Enums\Currency;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 /**
- * Validates an optional page number (>= 1).
+ * Validates an optional currency filter value.
+ *
+ * Accepts null or a valid ISO code backed by the Currency enum.
  */
-class Page implements ValidationRule
+class CurrencyFilterRule implements ValidationRule
 {
     /**
      * Validate the attribute.
@@ -20,7 +24,7 @@ class Page implements ValidationRule
         $validator = Validator::make(
             [$attribute => $value],
             [$attribute => [
-                'nullable', 'integer', 'min:1',
+                'sometimes', 'string', Rule::enum(Currency::class),
             ]]
         );
 

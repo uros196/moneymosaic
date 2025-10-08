@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Incomes;
 
 use App\Enums\Currency;
+use App\Rules\IncomeTypeRule;
 use App\Support\Money;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -18,14 +19,8 @@ class StoreIncomeRequest extends FormRequest
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'name' => ['required', 'string', 'max:120'],
             'occurred_on' => ['required', 'date'],
-            'income_type_id' => [
-                'required',
-                'integer',
-                Rule::exists('income_types', 'id')->where(function ($q) {
-                    $q->whereNull('user_id')->orWhere('user_id', $this->user()->getKey());
-                }),
-            ],
-            'amount_minor' => ['required', 'integer:', 'min:1'],
+            'income_type_id' => ['required', new IncomeTypeRule($this->user())],
+            'amount_minor' => ['required', 'integer', 'min:1'],
             'currency_code' => ['required', Rule::enum(Currency::class)],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
@@ -53,7 +48,7 @@ class StoreIncomeRequest extends FormRequest
 
         // Convert amount to minor units when possible
         $amount = $this->string('amount');
-        $currency = Currency::tryFrom($this->input('currency_code'));
+        $currency = $this->enum('currency_code', Currency::class);
 
         if (! is_null($amount) && ! is_null($currency)) {
             try {

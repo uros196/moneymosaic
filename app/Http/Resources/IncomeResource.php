@@ -4,8 +4,7 @@ namespace App\Http\Resources;
 
 use App\Enums\Currency;
 use App\Models\Income;
-use App\Services\CurrencyConversionService;
-use App\Support\Money;
+use App\Services\IncomeService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
@@ -51,17 +50,8 @@ class IncomeResource extends JsonResource
             'tags_list' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
 
             // currency converter
-            'converted_amount' => $this->when($hasConvertedCurrency, function () use ($currency) {
-                $converted_amount = app(CurrencyConversionService::class)
-                    ->convertMinor(
-                        minor: $this->amount_minor,
-                        fromCurrency: $this->currency_code->value,
-                        toCurrency: $currency,
-                        date: $this->occurred_on
-                    );
-
-                return Money::formatMajor($converted_amount, Currency::from($currency));
-            }),
+            'converted_amount' => $this->when($hasConvertedCurrency, fn () => app(IncomeService::class)->convertIncomeToCurrency($this->resource, Currency::from($currency))
+            ),
         ];
     }
 }

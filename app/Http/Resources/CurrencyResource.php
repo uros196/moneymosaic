@@ -18,12 +18,10 @@ class CurrencyResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $label = $this->label();
-
         return [
             'value' => $this->value,
-            'label' => $label,
-            'display_name' => "{$label} ({$this->value})",
+            'label' => $this->label(),
+            'display_name' => $this->displayLabel(),
             'step' => $this->step(),
         ];
     }

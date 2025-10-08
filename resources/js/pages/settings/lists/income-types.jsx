@@ -174,7 +174,7 @@ function TypeRow({ type }) {
                             __('settings.lists.delete_disabled_hint')
                         )}
                         <Link
-                            href={route('incomes.index') + `?type=${type.id}`}
+                            href={route('incomes.index', {income_type: type.id})}
                             className="underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
                         >
                             {__('settings.lists.view_incomes_with_type')}

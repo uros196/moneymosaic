@@ -47,6 +47,7 @@ return [
         'type' => 'Tip',
         'amount' => 'Iznos',
         'currency' => 'Valuta',
+        'tags' => 'Tagovi',
         'actions' => 'Akcije',
         'empty' => 'Nema prihoda za izabrane filtere. Dodajte svoj prvi prihod da počnete.',
     ],

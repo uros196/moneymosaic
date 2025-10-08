@@ -47,6 +47,7 @@ return [
         'type' => 'Type',
         'amount' => 'Amount',
         'currency' => 'Currency',
+        'tags' => 'Tags',
         'actions' => 'Actions',
         'empty' => 'No incomes for the selected filters. Add your first income to get started.',
     ],

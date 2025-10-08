@@ -17,6 +17,7 @@ use App\Models\Income;
 use App\Repositories\Contracts\IncomeTypeRepository;
 use App\Services\IncomeService;
 use App\Services\TagService;
+use App\Support\DrawerConfig;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -40,7 +41,11 @@ class IncomeController extends Controller
      */
     public function index(IndexIncomeRequest $request): Response
     {
-        return $this->render($request);
+        return $this->render($request, [
+            'sortables' => $request->sortables(),
+            // Always include chips in the response so we don't have to re-fetch them on every page load
+            'filterChips' => Inertia::always(fn () => $request->filters()->chips()),
+        ]);
     }
 
     /**
@@ -48,15 +53,9 @@ class IncomeController extends Controller
      */
     public function create(Request $request): Response
     {
-        $user = $request->user();
-
         return $this->render($request, [
-            'modal' => [
-                'type' => 'create',
-                'action' => route('incomes.store'),
-                'method' => 'post',
-            ],
-            'tagSuggestions' => TagListResource::collection($this->tagService->getSuggestions($user)),
+            'modal' => Inertia::always(fn () => DrawerConfig::create()->action(route('incomes.store'))
+            ),
         ]);
     }
 
@@ -90,17 +89,11 @@ class IncomeController extends Controller
      */
     public function edit(Request $request, Income $income): Response
     {
-        $user = $request->user();
         $income->load('tags');
 
         return $this->render($request, [
-            'modal' => [
-                'type' => 'edit',
-                'action' => route('incomes.update', $income),
-                'method' => 'put',
-            ],
+            'modal' => Inertia::always(fn () => DrawerConfig::edit()->action(route('incomes.update', $income))),
             'income' => IncomeResource::make($income),
-            'tagSuggestions' => TagListResource::collection($this->tagService->getSuggestions($user)),
         ]);
     }
 
@@ -127,13 +120,7 @@ class IncomeController extends Controller
     }
 
     /**
-     * Render the income index page with the given data.
-     *
-     * Merges the provided data with default props including:
-     * - Pagination configuration
-     * - Income list (lazy loaded)
-     * - Available currencies
-     * - Income types visible to the user
+     * Render the 'income index' page with required data and UI props.
      */
     protected function render(Request $request, array $data = []): Response
     {
@@ -143,11 +130,17 @@ class IncomeController extends Controller
 
             // Additional props used by the UI
             'user' => UserResource::make($request->user()),
+            'currencies' => CurrencyResource::collection(Currency::cases()),
+
+            // Always set the modal default to null so React can rely on it
+            'modal' => Inertia::always(fn () => null),
 
             // Load the table lazily on modal route to keep drawer snappy, but still show the table when landing directly
-            'incomes' => Inertia::defer(fn () => IncomeResource::collection($this->incomeService->paginate($user))),
-            'currencies' => CurrencyResource::collection(Currency::cases()),
+            'incomes' => Inertia::defer(fn () => IncomeResource::collection($this->incomeService->paginate($request, $user))),
+
+            // Always include in a standard visit but only evaluated when needed
             'incomeTypes' => fn () => IncomeTypeResource::collection($this->incomeTypes->visibleForUser($user)),
+            'tagSuggestions' => fn () => TagListResource::collection($this->tagService->getSuggestions($user)),
 
         ], $data));
     }

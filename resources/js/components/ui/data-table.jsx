@@ -2,6 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useI18n } from '@/i18n'
 import PaginateLinks from '@/components/ui/paginate-links.jsx';
 import { usePage } from '@inertiajs/react';
+import { setCurrentParam } from '@/lib/url-query'
 
 /**
  * DataTable - a reusable, easily configurable table component.
@@ -36,8 +37,18 @@ export default function DataTable({
   const tPerPage = perPageLabel ?? __('common.pagination.per_page')
 
     // Define 'per page' data
-    const perPageValue = perPage.value ?? pageProps.paging.perPage ?? '';
-    const perPageOptions = perPage.options ?? pageProps.paging.options ?? {};
+    const perPageValue = perPage?.value ?? pageProps.paging.perPage ?? '';
+    const perPageOptions = perPage?.options ?? pageProps.paging.options ?? [];
+
+    // Default handler for perPage change: preserve existing query, append perPage, reload with preserveScroll
+    const handlePerPageChange = (v) => {
+      const next = Number(v);
+      if (perPage?.onChange) {
+        perPage.onChange(next);
+      } else {
+        setCurrentParam('perPage', next, { preserveScroll: true });
+      }
+    };
 
   const meta = data?.meta ?? {}
   const total = Number(meta?.total ?? (hasRows ? rows.length : 0))
@@ -99,24 +110,22 @@ export default function DataTable({
       {showFooter && (
         <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm">
-            {perPage && (
-                <Select
-                  value={String(perPageValue)}
-                  onValueChange={(v) => perPage.onChange(Number(v))}
-                >
-                  <SelectTrigger id="per_page" area-label={tPerPage}>
-                      <span className="text-muted-foreground">{tPerPage}:</span>
-                      <span className="font-medium">&nbsp;<SelectValue /></span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {perPageOptions.map((opt) => (
-                      <SelectItem value={String(opt)} key={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-            )}
+            <Select
+              value={String(perPageValue)}
+              onValueChange={handlePerPageChange}
+            >
+              <SelectTrigger id="per_page" area-label={tPerPage}>
+                  <span className="text-muted-foreground">{tPerPage}:</span>
+                  <span className="font-medium">&nbsp;<SelectValue /></span>
+              </SelectTrigger>
+              <SelectContent>
+                {perPageOptions.map((opt) => (
+                  <SelectItem value={String(opt)} key={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-center justify-end gap-3">

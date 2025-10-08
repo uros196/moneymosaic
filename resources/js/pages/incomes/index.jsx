@@ -5,81 +5,71 @@ import { Button } from '@/components/ui/button';
 import DataTable from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import CurrencyConversion from '@/components/ui/currency-conversion';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { DeleteAction, EditAction, ViewAction } from '@/components/ui/table-actions';
 import { useI18n } from '@/i18n';
 import AppLayout from '@/layouts/app-layout';
 import { Deferred, Head, router, usePage, useRemember } from '@inertiajs/react';
 import { PlusIcon } from 'lucide-react';
+import { TableActionsMenu, ViewAction, EditAction, DeleteAction } from '@/components/ui/table-actions';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import IncomeDrawer from './income-drawer';
+import TagsOverflow from '@/components/ui/tags-overflow';
+import FilterSheet from '@/components/ui/filter-sheet';
+import { getQueryObject } from '@/lib/url-query';
+import { Separator } from '@/components/ui/separator.jsx';
 
 export default function IncomesIndex() {
     const { __ } = useI18n();
 
-    const now = new Date();
-    const [filters, setFilters] = useState({
-        month: `${now.getMonth() + 1}`.padStart(2, '0'),
-        year: `${now.getFullYear()}`,
-        type: 'all',
-        currency: 'all',
-    });
+    // After a user changes language using a LanguageSwitcher, refresh additional props
+    useLocaleRefreshOnly(['incomeTypes', 'currencies']);
 
     // Conversion UI state (display-only)
     const pageProps = usePage().props || {};
     const hasModal = Boolean(pageProps.modal);
 
-    const [filtersOpen, setFiltersOpen] = useState(false);
-    const years = useMemo(() => {
-        const rowsLocal = pageProps.incomes?.data ?? [];
-        const ys = new Set(rowsLocal.map((i) => String(i.occurred_on).slice(0, 4)));
-        ys.add(`${now.getFullYear()}`);
-        return Array.from(ys).sort((a, b) => Number(b) - Number(a));
-    }, [pageProps.incomes]);
-
-    /**
-     * Parses the query parameters from the current window's URL and returns them as an object.
-     *
-     * @return {Object} An object where each key-value pair corresponds to a query parameter and its value.
-     */
-    function getQuery() {
-        return Object.fromEntries(new URL(window.location.href).searchParams.entries());
-    }
-
     // Updates the indexQuery state when the URL changes.
     // This effect ensures the stored query parameters stay in sync with the URL.
     // It runs whenever the page URL changes, updating the remembered query state.
-    const [indexQuery, setIndexQuery] = useRemember(getQuery(), 'incomes.indexQuery');
-    useEffect(() => {
-        setIndexQuery(getQuery());
-    }, [usePage().url]);
+    const [indexQuery, setIndexQuery] = useRemember(getQueryObject(), 'incomes.indexQuery');
+    useEffect(() => { setIndexQuery(getQueryObject()) }, [usePage().url]);
 
     // Modal state
     const [open, setOpen] = useState(false);
 
     // Open the drawer based on modal props (URL-driven)
-    useEffect(() => {
-        setOpen(hasModal);
-    }, [pageProps.modal]);
+    useEffect(() => { setOpen(hasModal) }, [pageProps.modal]);
 
+    /**
+     * Opens the income creation drawer by navigating to the 'create' route
+     * while preserving scroll position and state
+     */
     function openCreate() {
         router.visit(route('incomes.create'), {
             preserveScroll: true,
             preserveState: true,
-            only: ['modal', 'paging', 'tagSuggestions'],
+            only: ['tagSuggestions'],
         });
     }
 
+    /**
+     * Opens the income editing drawer for a specific income item
+     * @param {Object} item - The income item to edit
+     */
     function openEdit(item) {
         router.visit(route('incomes.edit', item.id), {
             preserveScroll: true,
             preserveState: true,
-            only: ['modal', 'income', 'paging', 'tagSuggestions'],
+            only: ['income', 'tagSuggestions'],
         });
     }
 
+    /**
+     * Deletes an income entry with the specified ID
+     * Shows error toast on failure and reloads data on success
+     * @param {number} id - The ID of the income to delete
+     */
     function performDelete(id) {
         if (id == null) return;
         router.delete(route('incomes.destroy', id), {
@@ -94,12 +84,10 @@ export default function IncomesIndex() {
         });
     }
 
-    // After a user changes language using a LanguageSwitcher, refresh additional props
-    useLocaleRefreshOnly(['incomeTypes', 'currencies']);
-
+    // Define breadcrumbs
     const breadcrumbs = [{ title: __('incomes.title'), href: route('incomes.index') }];
 
-    // define incomes table columns
+    // Define incomes table columns
     const columns = useMemo(
         () => [
             { id: 'occurred_on', header: __('incomes.table.date'), accessor: (r) => r.occurred_on_display },
@@ -124,27 +112,36 @@ export default function IncomesIndex() {
                     return <span className="font-medium">{row.amount_formatted}</span>;
                 },
             },
-            { id: 'currency_code', header: __('incomes.table.currency'), cell: (r) => (
-                <Tooltip>
-                    <TooltipTrigger>
-                        <span className="underline decoration-dotted underline-offset-2">{r.currency.value}</span>
-                    </TooltipTrigger>
-                    <TooltipContent>{r.currency.label}</TooltipContent>
-                </Tooltip>
-            )},
+            {
+                id: 'currency_code',
+                header: __('incomes.table.currency'),
+                cell: (r) => (
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <span className="underline decoration-dotted underline-offset-2">{r.currency.value}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{r.currency.label}</TooltipContent>
+                    </Tooltip>
+                ),
+            },
+            { id: 'tags', header: __('incomes.table.tags'), className: 'max-w-[240px]', cell: (r) => <TagsOverflow tags={r.tags_list ?? []} /> },
             {
                 id: 'actions',
                 header: __('incomes.table.actions'),
                 cell: (income) => (
-                    <div className="flex items-center gap-2">
-                        <ViewAction href={route('incomes.show', income.id)} label={__('incomes.actions.view')} />
-                        <EditAction onClick={() => openEdit(income)} label={__('incomes.actions.edit')} />
-                        <DeleteAction
-                            onConfirm={() => performDelete(income.id)}
-                            label={__('incomes.actions.delete')}
-                            confirmTitle={__('incomes.confirm.delete_title')}
-                            confirmDescription={__('incomes.confirm.delete_description')}
-                        />
+                    <div className="flex items-center justify-end">
+                        <TableActionsMenu label={__('incomes.table.actions')}>
+                            <ViewAction inMenu href={route('incomes.show', income.id)} label={__('incomes.actions.view')} />
+                            <EditAction inMenu onClick={() => openEdit(income)} label={__('incomes.actions.edit')} />
+                            <Separator className="my-1" />
+                            <DeleteAction
+                                inMenu
+                                label={__('incomes.actions.delete')}
+                                confirmTitle={__('incomes.confirm.delete_title')}
+                                confirmDescription={__('incomes.confirm.delete_description')}
+                                onConfirm={() => performDelete(income.id)}
+                            />
+                        </TableActionsMenu>
                     </div>
                 ),
             },
@@ -163,9 +160,36 @@ export default function IncomesIndex() {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <Button type="button" variant="secondary" size="sm" onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen}>
-                                {__('incomes.filters.toggle')}
-                            </Button>
+                            <FilterSheet
+                                title={__('incomes.filters.toggle')}
+                                tooltip={__('incomes.filters.toggle')}
+                                fields={[
+                                    { key: 'query', label: __('common.search'), type: 'input', placeholder: __('common.search') },
+                                    { key: 'date', label: __('incomes.table.date'), type: 'date-range', fromKey: 'date_from', toKey: 'date_to' },
+                                    { key: 'amount', label: __('incomes.table.amount'), type: 'min-max', minKey: 'amount_min', maxKey: 'amount_max' },
+                                    {
+                                        key: 'tags',
+                                        label: __('incomes.table.tags'),
+                                        type: 'tags',
+                                        suggestions: (pageProps.tagSuggestions?.data ?? []).map((t) => t.name),
+                                    },
+                                    {
+                                        key: 'income_type',
+                                        label: __('incomes.filters.type'),
+                                        type: 'select',
+                                        allLabel: __('incomes.filters.all'),
+                                        options: (pageProps.incomeTypes?.data ?? []).map((t) => ({ value: t.id, label: t.name })),
+                                    },
+                                    {
+                                        key: 'currency_code',
+                                        label: __('incomes.filters.currency'),
+                                        type: 'select',
+                                        allLabel: __('incomes.filters.all'),
+                                        options: (pageProps.currencies?.data ?? []).map((c) => ({ value: c.value, label: c.display_name })),
+                                    },
+                                ]}
+                                onlyKeys={['incomes']}
+                            />
                             <CurrencyConversion
                                 routeName="incomes.index"
                                 currencies={pageProps.currencies.data}
@@ -181,84 +205,7 @@ export default function IncomesIndex() {
                         </div>
                     </div>
 
-                    {filtersOpen && (
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                            {/* Month */}
-                            <label className="flex flex-col gap-1">
-                                <span className="text-sm">{__('incomes.filters.month')}</span>
-                                <Select value={filters.month} onValueChange={(v) => setFilters((f) => ({ ...f, month: v }))}>
-                                    <SelectTrigger id="filter_month">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">{__('incomes.filters.all')}</SelectItem>
-                                        {Array.from({ length: 12 }).map((_, idx) => {
-                                            const v = `${idx + 1}`.padStart(2, '0');
-                                            return (
-                                                <SelectItem value={v} key={v}>
-                                                    {v}
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </SelectContent>
-                                </Select>
-                            </label>
-
-                            {/* Year */}
-                            <label className="flex flex-col gap-1">
-                                <span className="text-sm">{__('incomes.filters.year')}</span>
-                                <Select value={filters.year} onValueChange={(v) => setFilters((f) => ({ ...f, year: v }))}>
-                                    <SelectTrigger id="filter_year">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">{__('incomes.filters.all')}</SelectItem>
-                                        {years.map((y) => (
-                                            <SelectItem value={String(y)} key={y}>
-                                                {y}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </label>
-
-                            {/* Type */}
-                            <label className="flex flex-col gap-1">
-                                <span className="text-sm">{__('incomes.filters.type')}</span>
-                                <Select value={filters.type} onValueChange={(v) => setFilters((f) => ({ ...f, type: v }))}>
-                                    <SelectTrigger id="filter_type">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">{__('incomes.filters.all')}</SelectItem>
-                                        {pageProps.incomeTypes.data.map((type) => (
-                                            <SelectItem value={type.id} key={type.id}>
-                                                {type.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </label>
-
-                            {/* Currency */}
-                            <label className="flex flex-col gap-1">
-                                <span className="text-sm">{__('incomes.filters.currency')}</span>
-                                <Select value={filters.currency} onValueChange={(v) => setFilters((f) => ({ ...f, currency: v }))}>
-                                    <SelectTrigger id="filter_currency">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">{__('incomes.filters.all')}</SelectItem>
-                                        {pageProps.currencies.data.map((c) => (
-                                            <SelectItem value={c.value} key={c.value}>
-                                                {c.value}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </label>
-                        </div>
-                    )}
+                    <FilterSheet.Chips chips={pageProps.filterChips ?? []} onlyKeys={['incomes']} />
                 </div>
 
                 <Deferred fallback={<TableSkeleton columns={columns} />} data="incomes">
@@ -266,9 +213,6 @@ export default function IncomesIndex() {
                         columns={columns}
                         data={pageProps.incomes}
                         emptyText={__('incomes.table.empty')}
-                        perPage={{
-                            onChange: (v) => router.visit(route('incomes.index', { perPage: v, page: 1 }), { preserveScroll: true, replace: true }),
-                        }}
                     />
                 </Deferred>
             </div>

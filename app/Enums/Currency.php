@@ -44,6 +44,25 @@ enum Currency: string
     }
 
     /**
+     * Human-friendly, translatable currency name with its code.
+     */
+    public function displayLabel(): string
+    {
+        return $this->label()." ({$this->value})";
+    }
+
+    /**
+     * Returns a formatted label suitable for display in UI chip components.
+     *
+     * Provides the same output as displayLabel(), maintaining consistency
+     * across UI components that need to show currency information.
+     */
+    public function toChipLabel(): string
+    {
+        return $this->displayLabel();
+    }
+
+    /**
      * Common currency symbol for UI display.
      */
     public function symbol(): string

@@ -65,7 +65,7 @@ export default function IncomeDrawer({ open }) {
             preserveScroll: true,
             preserveState: true,
             replace: true,
-            only: ['modal', 'income', 'paging', 'incomeTypes', 'flash'],
+            only: ['income', 'incomeTypes', 'flash'],
         });
     }
 
@@ -114,7 +114,7 @@ export default function IncomeDrawer({ open }) {
                             preserveScroll: true,
                             // in case of errors, preserve the state of the form fields and do not render the whole page
                             preserveState: (page) => Boolean(page?.props?.errors),
-                            only: ['modal', 'flash'],
+                            only: ['flash'],
                         }}
                         onSuccess={() => {
                             // if the form was successful, redirect to the income index page (require full page render)

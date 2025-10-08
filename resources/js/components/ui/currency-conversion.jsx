@@ -1,9 +1,10 @@
 import { Toggle } from '@/components/ui/toggle';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils.js';
 import { useI18n } from '@/i18n';
+import { getQueryObject, visitRoute } from '@/lib/url-query';
 
 /**
  * CurrencyConversion
@@ -41,13 +42,7 @@ export default function CurrencyConversion({
     const [enabled, setEnabled] = useState(false);
     const [selected, setSelected] = useState(defaultCurrency);
 
-    const currentQuery = useMemo(() => {
-        try {
-            return Object.fromEntries(new URL(window.location.href).searchParams.entries());
-        } catch (_e) {
-            return {};
-        }
-    }, [url]);
+    const currentQuery = useMemo(() => getQueryObject(), [url]);
 
     // Sync from URL whenever it changes
     useEffect(() => {
@@ -73,7 +68,7 @@ export default function CurrencyConversion({
         if (Array.isArray(onlyKeys) && onlyKeys.length > 0) {
             options.only = onlyKeys;
         }
-        router.visit(route(routeName, query), options);
+        visitRoute(routeName, query, options);
     }
 
     function enableConversion(nextEnabled) {

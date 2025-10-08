@@ -6,5 +6,11 @@
     "Two-factor authentication disabled.": "Two-factor authentication disabled.",
     "A new authentication code has been sent to your email address.": "A new authentication code has been sent to your email address.",
     "A reset link will be sent if the account exists.": "A reset link will be sent if the account exists.",
-    "Name": "Name"
+    "Name": "Name",
+    "Date": "Date",
+    "Currency": "Currency",
+    "Model": "Model",
+    "Search": "Search",
+    "Range": "Range",
+    "Items": "Items"
 }

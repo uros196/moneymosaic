@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Incomes;
+namespace App\Http\Requests\IncomeTypes;
 
 use App\Models\IncomeType;
 use Illuminate\Foundation\Http\FormRequest;

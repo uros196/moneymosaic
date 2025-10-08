@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Settings;
 
 use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Incomes\DeleteIncomeTypeRequest;
-use App\Http\Requests\Incomes\StoreIncomeTypeRequest;
-use App\Http\Requests\Incomes\UpdateIncomeTypeRequest;
+use App\Http\Requests\IncomeTypes\DeleteIncomeTypeRequest;
+use App\Http\Requests\IncomeTypes\StoreIncomeTypeRequest;
+use App\Http\Requests\IncomeTypes\UpdateIncomeTypeRequest;
 use App\Http\Resources\IncomeTypeResource;
 use App\Models\IncomeType;
 use App\Repositories\Contracts\IncomeTypeRepository;

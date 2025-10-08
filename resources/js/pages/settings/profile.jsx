@@ -14,6 +14,9 @@ import { useI18n } from '@/i18n';
 import { useLocaleRefreshOnly } from '@/components/language-switcher.jsx';
 
 export default function Profile({ user, mustVerifyEmail, status, twoFactorSetupInProgress, currencies }) {
+    // Refresh the user data after the language is changed using a LanguageSwitcher component
+    useLocaleRefreshOnly(['user']);
+
     const { __ } = useI18n();
     const breadcrumbs = [
         {
@@ -27,9 +30,6 @@ export default function Profile({ user, mustVerifyEmail, status, twoFactorSetupI
     const [locale, setLocale] = useState(user.data.locale);
     const [passwordConfirmMinutes, setPasswordConfirmMinutes] = useState(String(user.data.password_confirm_minutes ?? '0'));
     const [defaultCurrencyCode, setDefaultCurrencyCode] = useState(user.data.default_currency_code);
-
-    // Refresh the user data after the language is changed using a LanguageSwitcher component
-    useLocaleRefreshOnly(['user']);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

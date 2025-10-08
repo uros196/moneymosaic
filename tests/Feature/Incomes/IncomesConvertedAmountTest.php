@@ -6,7 +6,7 @@ use App\Enums\Currency;
 use App\Models\ExchangeRate;
 use App\Models\Income;
 use App\Models\User;
-use App\Services\CurrencyConversionService;
+use App\Services\IncomeService;
 use App\Support\Money;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,14 +42,8 @@ class IncomesConvertedAmountTest extends TestCase
             ]);
 
         // Prepare expectation value
-        $converted_amount = app(CurrencyConversionService::class)
-            ->convertMinor(
-                minor: $income->amount_minor,
-                fromCurrency: $income->currency_code->value,
-                toCurrency: $convertTo,
-                date: $income->occurred_on
-            );
-        $expected = Money::formatMajor($converted_amount, $convertTo);
+        $expected = app(IncomeService::class)
+            ->convertIncomeToCurrency($income, $convertTo);
 
         // Perform a partial reload request for only the 'incomes' prop with the currency param
         $this->actingAs($user)

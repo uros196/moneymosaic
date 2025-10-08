@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Contracts;
 
+use App\DTO\Incomes\IncomeFiltersData;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -11,7 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 interface IncomeRepository
 {
     /**
-     * Paginate incomes for the given user with default ordering.
+     * Paginate incomes for the given user with applied filters.
      */
-    public function paginateForUser(User $user, int $perPage): LengthAwarePaginator;
+    public function paginateForUser(User $user, IncomeFiltersData $filters, int $perPage): LengthAwarePaginator;
 }

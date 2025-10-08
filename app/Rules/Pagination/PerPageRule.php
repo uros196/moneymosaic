@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 /**
  * Validates an optional perPage parameter against configured options.
  */
-class PerPage implements ValidationRule
+class PerPageRule implements ValidationRule
 {
     public function __construct(protected ?string $tableKey = null) {}
 

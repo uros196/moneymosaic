@@ -106,4 +106,12 @@ class Income extends Model
     {
         $this->syncTagsWithType($tags, self::tagTypeForUser($this->user));
     }
+
+    /**
+     * Get the label text to be displayed in a chip component.
+     */
+    public function toChipLabel(): string
+    {
+        return $this->name;
+    }
 }

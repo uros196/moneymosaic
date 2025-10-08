@@ -16,9 +16,14 @@ return [
     'log_out_other_sessions' => 'Odjavi ostale sesije',
     'log_out_all_sessions' => 'Odjavi sve sesije',
 
+    'from_value' => 'od :value',
+    'to_value' => 'do :value',
+
     // Common UI actions
     'save' => 'Sačuvaj',
     'saved' => 'Sačuvano',
+    'apply' => 'Primeni',
+    'clear_all' => 'Obriši sve',
     'manage' => 'Upravljaj',
     'back' => 'Nazad',
     'view' => 'Pregled',
@@ -39,12 +44,27 @@ return [
     'convert' => 'Konvertuj',
     'display_currency' => 'Valuta prikaza',
 
+    // Opšte oznake korišćene kroz komponente
+    'filters' => 'Filteri',
+    'from' => 'Od',
+    'to' => 'Do',
+    'min' => 'Min',
+    'max' => 'Maks',
+    'search' => 'Pretraga',
+    'all' => 'Sve',
+    'remove_filter' => 'Ukloni filter',
+
     'table' => [
         'empty' => 'Zapisi nisu dostupni',
     ],
     'pagination' => [
         'per_page' => 'Po strani',
         'showing' => 'Prikazano :from–:to od ukupno :total',
+    ],
+
+    // Common form labels
+    'form' => [
+        'tag_input_placeholder' => 'Ukucajte i pritisnite Enter da dodate tag',
     ],
 
     // Opšti prevodi za izgled
