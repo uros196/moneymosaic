@@ -52,6 +52,11 @@ class MinMaxField extends AbstractField
         $this->minKey = $minKey;
         $this->maxKey = $maxKey;
 
+        // If error keys were not explicitly overridden, default them to both range keys
+        if ($this->errorKeys === null) {
+            $this->errorKeys($minKey, $maxKey);
+        }
+
         return $this;
     }
 

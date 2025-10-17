@@ -49,6 +49,39 @@ class IndexIncomeRequest extends FormRequest
     }
 
     /**
+     * Custom validation messages.
+     */
+    public function messages(): array
+    {
+        // When max is required to be greater than min, show the original major-unit value
+        // the user typed for min (amount_min), not the converted minor value.
+        $originalMin = (string) $this->input('amount_min');
+
+        return [
+            'amount_minor_max.gt' => trans('validation.gt.numeric', [
+                'attribute' => $this->displayableAttribute('amount_minor_max'),
+                'value' => $originalMin,
+            ]),
+        ];
+    }
+
+    /**
+     * Define human-readable attribute names for this request.
+     */
+    public function attributes(): array
+    {
+        return [
+            // Date range
+            'date_from' => __('Date from'),
+            'date_to' => __('Date to'),
+
+            // Amount range (filters)
+            'amount_minor_min' => __('Amount form'),
+            'amount_minor_max' => __('Amount to'),
+        ];
+    }
+
+    /**
      * Prepare the data for validation.
      */
     protected function prepareForValidation(): void
@@ -73,7 +106,7 @@ class IndexIncomeRequest extends FormRequest
      */
     protected function convertToMinor(string $key, string $new_key): void
     {
-        if ($this->has($key)) {
+        if ($this->filled($key)) {
             // Resolve currency enum: prefer query params, then fall back to user's default
             $currency = $this->enum('currency_code', Currency::class)
                 ?? $this->enum('currency', Currency::class)
@@ -100,5 +133,13 @@ class IndexIncomeRequest extends FormRequest
     public function sortables(): array
     {
         return $this->sortable;
+    }
+
+    /**
+     * Resolve a displayable attribute name using this request's attributes() map.
+     */
+    protected function displayableAttribute(string $key): string
+    {
+        return $this->attributes()[$key] ?? $key;
     }
 }

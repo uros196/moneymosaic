@@ -16,6 +16,12 @@ abstract class AbstractField implements Arrayable
      */
     public const string TYPE = 'input';
 
+    /**
+     * Optional list of error keys that should be used on the frontend to read validation errors
+     * associated with this field. If not defined, defaults to the primary $key.
+     */
+    protected ?array $errorKeys = null;
+
     public function __construct(protected string $key, protected string $label) {}
 
     /**
@@ -27,6 +33,26 @@ abstract class AbstractField implements Arrayable
     }
 
     /**
+     * Define which request error keys the frontend should check for this field.
+     */
+    public function errorKeys(string ...$keys): self
+    {
+        $this->errorKeys = array_values($keys);
+
+        return $this;
+    }
+
+    /**
+     * Get the effective error keys (defaults to base key if not overridden).
+     *
+     * @return array<string>
+     */
+    protected function getErrorKeys(): array
+    {
+        return $this->errorKeys ?? [$this->key];
+    }
+
+    /**
      * Serialize common props for all fields.
      */
     protected function base(): array
@@ -35,6 +61,7 @@ abstract class AbstractField implements Arrayable
             'key' => $this->key,
             'label' => $this->label,
             'type' => static::TYPE,
+            'errorKeys' => $this->getErrorKeys(),
         ];
     }
 

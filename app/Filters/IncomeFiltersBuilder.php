@@ -58,7 +58,11 @@ class IncomeFiltersBuilder implements DataFilterBuilder
             // Date range
             ->add(DateRangeField::make('date', __('incomes.table.date'))->keys('date_from', 'date_to'))
             // Amount range (major units, front will convert to minor by request prepared)
-            ->add(MinMaxField::make('amount', __('incomes.table.amount'))->keys('amount_min', 'amount_max'))
+            ->add(
+                MinMaxField::make('amount', __('incomes.table.amount'))
+                    ->keys('amount_min', 'amount_max')
+                    ->errorKeys('amount_minor_min', 'amount_minor_max')
+            )
             // Tags with suggestions
             ->add(
                 TagsField::make('tags', __('incomes.table.tags'))

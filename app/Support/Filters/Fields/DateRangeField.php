@@ -54,6 +54,11 @@ class DateRangeField extends AbstractField
         $this->fromKey = $fromKey;
         $this->toKey = $toKey;
 
+        // If error keys were not explicitly overridden, default them to both range keys
+        if ($this->errorKeys === null) {
+            $this->errorKeys($fromKey, $toKey);
+        }
+
         return $this;
     }
 

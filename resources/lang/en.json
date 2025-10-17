@@ -12,5 +12,9 @@
     "Model": "Model",
     "Search": "Search",
     "Range": "Range",
-    "Items": "Items"
+    "Items": "Items",
+    "Date from": "Date from",
+    "Date to": "Date to",
+    "Amount form": "Amount from",
+    "Amount to": "Amount to"
 }

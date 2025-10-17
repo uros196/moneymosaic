@@ -12,5 +12,9 @@
     "Model": "Model",
     "Search": "Pretraga",
     "Range": "Opseg",
-    "Items": "Stavke"
+    "Items": "Stavke",
+    "Date from": "Datum od",
+    "Date to": "Datum do",
+    "Amount form": "Iznos od",
+    "Amount to": "Iznos do"
 }

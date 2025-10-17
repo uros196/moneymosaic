@@ -15,9 +15,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import IncomeDrawer from './income-drawer';
 import TagsOverflow from '@/components/ui/tags-overflow';
-import FilterSheet from '@/components/ui/filter-sheet';
 import { getQueryObject } from '@/lib/url-query';
 import { Separator } from '@/components/ui/separator.jsx';
+import FilterSheet from '@/components/ui/filter-sheet/index.jsx';
 
 export default function IncomesIndex() {
     const { __ } = useI18n();
@@ -160,12 +160,7 @@ export default function IncomesIndex() {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <FilterSheet
-                                title={__('incomes.filters.toggle')}
-                                tooltip={__('incomes.filters.toggle')}
-                                filters={pageProps.filters ?? []}
-                                onlyKeys={['incomes']}
-                            />
+                            <FilterSheet filters={pageProps.filters ?? []} onlyKeys={['incomes']} />
                             <CurrencyConversion
                                 routeName="incomes.index"
                                 currencies={pageProps.currencies.data}

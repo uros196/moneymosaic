@@ -3,12 +3,12 @@ import { DateInput } from '@/components/ui/date-input';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, router, usePage, useRemember, Link } from '@inertiajs/react';
 import { useI18n } from '@/i18n/index.js';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import SelectWithCreate from '@/components/ui/select-with-create.jsx';
@@ -19,6 +19,9 @@ export default function IncomeDrawer({ open }) {
     const { __ } = useI18n();
     const props = usePage().props;
 
+    // Define a ref for the form to be able to access its methods and state
+    const formRef = useRef(null);
+
     // define props and adjust them for later use
     const incomeData = props.income?.data ?? {};
     const tagSuggestions = props.tagSuggestions.data.map((t) => t.name);
@@ -26,7 +29,6 @@ export default function IncomeDrawer({ open }) {
 
     // define states for the drawer
     const [discardOpen, setDiscardOpen] = useState(false);
-    const [isDirtyDrawer, setDirtyDrawer] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [pendingNav, setPendingNav] = useState(null);
 
@@ -47,16 +49,6 @@ export default function IncomeDrawer({ open }) {
     const [indexQuery] = useRemember({}, 'incomes.indexQuery');
 
     /**
-     * Synchronizes the drawer's dirty state with the form's dirty state
-     * @param {boolean} isDirty - Indicates if the form has unsaved changes
-     * @returns {boolean} Always returns true to satisfy React's rendering requirements
-     */
-    function dirtySync(isDirty) {
-        useEffect(() => { setDirtyDrawer(isDirty) }, [isDirty]);
-        return true;
-    }
-
-    /**
      * Redirects to the income index page while preserving scroll position and state.
      * Uses 'router.visit' with specific options to ensure smooth navigation.
      */
@@ -75,7 +67,8 @@ export default function IncomeDrawer({ open }) {
      * @param {string | Function} target - URL to visit or a callback to execute
      */
     function leavePage(target) {
-        if (isDirtyDrawer) {
+        // Watch the form dirty state
+        if (formRef.current.isDirty) {
             // If the target is a function, wrap it to store as a state value, otherwise store the URL string
             setPendingNav((typeof target === 'function'
                 ? () => target
@@ -108,6 +101,7 @@ export default function IncomeDrawer({ open }) {
 
                     <Form
                         className="flex min-h-0 flex-1 flex-col"
+                        ref={formRef}
                         method={props.modal.method}
                         action={props.modal.action}
                         options={{
@@ -122,12 +116,8 @@ export default function IncomeDrawer({ open }) {
                             router.visit(route('incomes.index', isCreating ? {} : {...indexQuery}), { preserveScroll: true });
                         }}
                     >
-                        {({ processing, errors, isDirty }) => (
+                        {({ processing, errors }) => (
                             <>
-                                {(() => {
-                                    return dirtySync(isDirty);
-                                })()}
-
                                 <div className="grid content-start gap-4 px-6 py-4 flex-1 overflow-y-auto min-h-0">
                                     <div className="grid gap-2">
                                         <Label htmlFor="name">{__('incomes.form.name')}</Label>
