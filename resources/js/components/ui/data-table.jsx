@@ -114,7 +114,7 @@ export default function DataTable({
               value={String(perPageValue)}
               onValueChange={handlePerPageChange}
             >
-              <SelectTrigger id="per_page" area-label={tPerPage}>
+              <SelectTrigger id="per_page" aria-label={tPerPage}>
                   <span className="text-muted-foreground">{tPerPage}:</span>
                   <span className="font-medium">&nbsp;<SelectValue /></span>
               </SelectTrigger>
@@ -128,13 +128,15 @@ export default function DataTable({
             </Select>
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+            <div className="order-1 sm:order-2">
+              <PaginateLinks links={data?.meta?.links ?? []} />
+            </div>
             {total > 0 && (
-              <div className="text-sm text-muted-foreground">
+              <div className="order-2 text-right text-sm text-muted-foreground sm:order-1 sm:text-left">
                 {__('common.pagination.showing', { from, to, total })}
               </div>
             )}
-            <PaginateLinks links={data?.meta?.links ?? []} />
           </div>
         </div>
       )}

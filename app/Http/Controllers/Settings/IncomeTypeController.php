@@ -35,7 +35,9 @@ class IncomeTypeController extends Controller
         $user = $request->user();
 
         $incomeTypes = $this->incomeTypes->visibleForUser($user)
-            ->loadCount('incomes');
+            ->loadCount([
+                'incomes' => fn ($q) => $q->where('user_id', $user->id),
+            ]);
 
         return Inertia::render('settings/lists/income-types', [
             'incomeTypes' => fn () => IncomeTypeResource::collection($incomeTypes),

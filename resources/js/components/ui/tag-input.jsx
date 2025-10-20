@@ -101,8 +101,8 @@ export function TagInput({ name, defaultValue = [], onChange, suggestions = [], 
       return
     }
 
-    if (e.key === "Enter" || e.key === " ") {
-      // Space or Enter: confirm selection or create a new tag
+    if (e.key === "Enter") {
+      // Enter: confirm selection or create a new tag
       e.preventDefault()
       if (open && filtered.length > 0) {
         const chosen = filtered[highlight] ?? filtered[0]
@@ -114,6 +114,16 @@ export function TagInput({ name, defaultValue = [], onChange, suggestions = [], 
       if (allowNew) {
         addTag(input)
       }
+      return
+    }
+
+    if (e.key === " ") {
+      // Space: create a new tag from current input, do not select from suggestions
+      if (allowNew) {
+        e.preventDefault()
+        addTag(input)
+      }
+      return
     }
   }
 

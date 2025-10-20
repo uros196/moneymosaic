@@ -30,9 +30,9 @@ class IncomeFactory extends Factory
 
         // Slightly different typical ranges by type
         $amount = match ($incomeType->name) {
-            'salary' => fake()->numberBetween(80_000, 800_000), // 800.00 - 8,000.00
-            'bonus' => fake()->numberBetween(10_000, 300_000),  // 100.00 - 3,000.00
-            default => fake()->numberBetween(1_000, 200_000),   // 10.00 - 2,000.00
+            'salary' => fake()->numberBetween(8000, 80000), // 800.00 - 8,000.00
+            'bonus' => fake()->numberBetween(1000, 30000),  // 100.00 - 3,000.00
+            default => fake()->numberBetween(100, 20000),   // 10.00 - 2,000.00
         };
 
         return [

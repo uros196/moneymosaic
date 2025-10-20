@@ -111,52 +111,55 @@ export default function FilterSheet({
       </Tooltip>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right">
-          <SheetHeader>
-            <SheetTitle>{effTitle}</SheetTitle>
-          </SheetHeader>
-            <div className="flex flex-col gap-4 p-4">
-              {(filters?.fields ?? []).map((field) => {
-                const type = field.type || 'select'
+        <SheetContent side="right" className="p-0">
+          <div className="flex h-full flex-col">
+            <SheetHeader className="px-4 py-4">
+              <SheetTitle>{effTitle}</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto px-4 pb-24">
+              <div className="flex flex-col gap-4">
+                {(filters?.fields ?? []).map((field) => {
+                  const type = field.type || 'select'
 
-                if (type === 'date-range') {
+                  if (type === 'date-range') {
+                    return (
+                      <DateRangeField key={field.key} field={field} form={form} />
+                    )
+                  }
+
+                  if (type === 'min-max') {
+                    return (
+                      <MinMaxField key={field.key} field={field} form={form} />
+                    )
+                  }
+
+                  if (type === 'input') {
+                    return (
+                      <InputField key={field.key} field={field} form={form} />
+                    )
+                  }
+
+                  if (type === 'tags') {
+                    return (
+                      <TagsField key={field.key} field={field} form={form} />
+                    )
+                  }
+
+                  if (type === 'search-select') {
+                    return (
+                      <SearchSelectField key={field.key} field={field} form={form} />
+                    )
+                  }
+
+                  // default select
                   return (
-                    <DateRangeField key={field.key} field={field} form={form} />
+                    <SelectField key={field.key} field={field} form={form} />
                   )
-                }
-
-                if (type === 'min-max') {
-                  return (
-                    <MinMaxField key={field.key} field={field} form={form} />
-                  )
-                }
-
-                if (type === 'input') {
-                  return (
-                    <InputField key={field.key} field={field} form={form} />
-                  )
-                }
-
-                if (type === 'tags') {
-                  return (
-                    <TagsField key={field.key} field={field} form={form} />
-                  )
-                }
-
-                if (type === 'search-select') {
-                  return (
-                    <SearchSelectField key={field.key} field={field} form={form} />
-                  )
-                }
-
-                // default select
-                return (
-                  <SelectField key={field.key} field={field} form={form} />
-                )
-              })}
+                })}
+              </div>
             </div>
 
-            <SheetFooter>
+            <SheetFooter className="sticky bottom-0 bg-background px-4 py-4 border-t">
               <div className="flex items-center justify-between gap-2">
                 <Button
                   type="button"
@@ -175,6 +178,7 @@ export default function FilterSheet({
                 </div>
               </div>
             </SheetFooter>
+          </div>
         </SheetContent>
       </Sheet>
     </div>

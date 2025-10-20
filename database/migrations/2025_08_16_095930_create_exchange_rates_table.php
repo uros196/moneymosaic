@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('exchange_rates', function (Blueprint $table) {
             $table->id();
             $table->date('date')->index();
-            $table->enum('base_currency_code', ['USD', 'EUR', 'RSD'])->default('EUR');
-            $table->enum('quote_currency_code', ['USD', 'EUR', 'RSD']);
+            $table->string('base_currency_code', 3)->default('EUR');
+            $table->string('quote_currency_code', 3);
             $table->decimal('rate_multiplier', 20, 8);
             $table->timestamps();
 

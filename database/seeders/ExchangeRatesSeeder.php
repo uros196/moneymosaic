@@ -14,9 +14,9 @@ class ExchangeRatesSeeder extends Seeder
     /**
      * Seed some sample exchange rates for development/testing using the factory.
      *
-     * - Seeds the last 3 days (today and two previous days).
+     * - Seeds the last 30 days (today and previous days).
      * - Uses global 'exchange.base_currency' and 'exchange.symbols' configuration.
-     * - Idempotent via upsert to avoid unique constraint violations on re-run.
+     * - Idempotent: skips a date entirely if any rate for that date already exists.
      */
     public function run(): void
     {
@@ -28,14 +28,19 @@ class ExchangeRatesSeeder extends Seeder
             $symbols[] = $base;
         }
 
-        // Last 3 dates including today
-        $dates = [
-            Carbon::today()->subDays(2)->toDateString(),
-            Carbon::today()->subDays(1)->toDateString(),
-            Carbon::today()->toDateString(),
-        ];
+        // Last N dates including today
+        $days = 30;
+        $dates = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $dates[] = Carbon::today()->subDays($i)->toDateString();
+        }
 
         foreach ($dates as $date) {
+
+            // Skip seeding if any rate already exists for this date to keep seeder idempotent
+            if (ExchangeRate::query()->whereDate('date', $date)->exists()) {
+                continue;
+            }
 
             // Base -> Base (1.0)
             ExchangeRate::factory()->baseToBase($base)->create([
