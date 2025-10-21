@@ -18,7 +18,7 @@ use App\Services\TwoFactor\Strategies\TotpTwoFactorStrategy;
 class TwoFactorStrategyFactory
 {
     /** @var array<string, class-string<TwoFactorStrategy>> */
-    private const MAP = [
+    private const array MAP = [
         'email' => EmailTwoFactorStrategy::class,
         'totp' => TotpTwoFactorStrategy::class,
     ];
@@ -28,11 +28,7 @@ class TwoFactorStrategyFactory
      */
     public function forUser(User $user): ?TwoFactorStrategy
     {
-        if (! $type = TwoFactorType::tryFrom($user->two_factor_type)) {
-            return null;
-        }
-
-        return $this->forEnum($type);
+        return $user->two_factor_type ? $this->forEnum($user->two_factor_type) : null;
     }
 
     /**
@@ -46,21 +42,5 @@ class TwoFactorStrategyFactory
         $strategy = app($class);
 
         return $strategy;
-    }
-
-    /**
-     * Backward-compatibility: resolve by legacy string type.
-     *
-     * @param  'email'|'totp'|null  $type
-     *
-     * @deprecated Use forEnum(TwoFactorType) or the enum helper TwoFactorType::...->strategy().
-     */
-    public function forType(?string $type): ?TwoFactorStrategy
-    {
-        if (! $type = TwoFactorType::tryFrom($type)) {
-            return null;
-        }
-
-        return $this->forEnum($type);
     }
 }

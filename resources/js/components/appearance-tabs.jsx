@@ -8,9 +8,9 @@ export default function AppearanceToggleTab({ className = '', ...props }) {
     const { __ } = useI18n();
 
     const tabs = [
-        { value: 'light', icon: Sun, label: __('appearance.light') },
-        { value: 'dark', icon: Moon, label: __('appearance.dark') },
-        { value: 'system', icon: Monitor, label: __('appearance.system') },
+        { value: 'light', icon: Sun, label: __('common.appearance.light') },
+        { value: 'dark', icon: Moon, label: __('common.appearance.dark') },
+        { value: 'system', icon: Monitor, label: __('common.appearance.system') },
     ];
 
     return (

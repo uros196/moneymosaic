@@ -3,7 +3,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, CircleDollarSign } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useI18n } from '@/i18n';
 
@@ -13,7 +13,14 @@ export function AppSidebar() {
         {
             title: __('nav.dashboard'),
             href: route('dashboard'),
+            match: 'dashboard',
             icon: LayoutGrid,
+        },
+        {
+            title: __('nav.incomes'),
+            href: route('incomes.index'),
+            match: 'incomes.*',
+            icon: CircleDollarSign,
         },
     ];
 

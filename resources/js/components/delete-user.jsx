@@ -14,21 +14,21 @@ export default function DeleteUser() {
 
     return (
         <div className="space-y-6">
-            <HeadingSmall title={__('profile.delete_account')} description={__('profile.delete_account_desc')} />
+            <HeadingSmall title={__('settings.profile.delete_account')} description={__('settings.profile.delete_account_desc')} />
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                    <p className="font-medium">{__('profile.delete_warning')}</p>
-                    <p className="text-sm">{__('profile.delete_warning_desc')}</p>
+                    <p className="font-medium">{__('settings.profile.delete_warning')}</p>
+                    <p className="text-sm">{__('settings.profile.delete_warning_desc')}</p>
                 </div>
 
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button variant="destructive">{__('profile.delete_account')}</Button>
+                        <Button variant="destructive">{__('settings.profile.delete_account')}</Button>
                     </DialogTrigger>
                     <DialogContent>
-                        <DialogTitle>{__('profile.delete_confirm_title')}</DialogTitle>
+                        <DialogTitle>{__('settings.profile.delete_confirm_title')}</DialogTitle>
                         <DialogDescription>
-                            {__('profile.delete_confirm_desc')}
+                            {__('settings.profile.delete_confirm_desc')}
                         </DialogDescription>
 
                         <Form
@@ -68,7 +68,7 @@ export default function DeleteUser() {
                                         </DialogClose>
 
                                         <Button variant="destructive" disabled={processing} isLoading={processing} type="submit">
-                                            {__('profile.delete_account')}
+                                            {__('settings.profile.delete_account')}
                                         </Button>
                                     </DialogFooter>
                                 </>

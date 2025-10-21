@@ -11,7 +11,6 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -22,11 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             '2fa' => EnsureTwoFactorVerified::class,
             'password.recent' => EnsureRecentPasswordMiddleware::class,
+            'paging' => \App\Http\Middleware\PreparePagingPropMiddleware::class,
+            'translations' => \App\Http\Middleware\LoadTranslationsMiddleware::class,
         ]);
 
         $middleware->web(append: [
             HandleAppearance::class,
-            \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\SetLocaleMiddleware::class,
             HandleInertiaRequests::class,
             \App\Http\Middleware\UpdateSessionMetadata::class,
             AddLinkHeadersForPreloadedAssets::class,

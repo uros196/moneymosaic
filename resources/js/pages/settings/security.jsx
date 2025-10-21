@@ -22,7 +22,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
   const { __ } = useI18n()
 
   const breadcrumbs = [
-    { title: __('security.title'), href: route('settings.security') },
+    { title: __('settings.security.title'), href: route('settings.security') },
   ]
 
   const [open, setOpen] = useState(Boolean(setupJustBegan || qrUrl))
@@ -63,28 +63,28 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
         document.execCommand('copy')
         document.body.removeChild(ta)
       }
-      toast.success(__('security.copied_recovery_codes'))
+      toast.success(__('settings.security.copied_recovery_codes'))
     } catch (e) {
       console.error(e)
-      toast.error(__('security.copy_failed'))
+      toast.error(__('settings.security.copy_failed'))
     }
   }
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={__('security.title')} />
+      <Head title={__('settings.security.title')} />
 
       <SettingsLayout>
         <div className="space-y-8">
           <div className="flex items-start justify-between gap-4">
-            <HeadingSmall title={__('security.two_factor')} description={__('security.two_factor_desc')} />
+            <HeadingSmall title={__('settings.security.two_factor')} description={__('settings.security.two_factor_desc')} />
             <TextLink href={route('profile.edit')} className="mt-1 text-sm">{__('common.back_to_profile')}</TextLink>
           </div>
 
           <div className="space-y-4">
             {enabled ? (
               <div className="rounded-lg border p-4">
-                <p className="mb-2 text-sm text-muted-foreground">{__('security.enabled_using', { type: typeUpper })}</p>
+                <p className="mb-2 text-sm text-muted-foreground">{__('settings.security.enabled_using', { type: typeUpper })}</p>
                 <Form method="post" action={route('settings.security.disable')}>
                   {({ processing }) => (
                     <Button type="submit" variant="secondary" disabled={processing} isLoading={processing}>{__('common.disable_2fa')}</Button>
@@ -94,8 +94,8 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-lg border p-4">
-                  <h3 className="mb-2 font-medium">{__('security.email_code_title')}</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">{__('security.email_code_desc')}</p>
+                  <h3 className="mb-2 font-medium">{__('settings.security.email_code_title')}</h3>
+                  <p className="mb-4 text-sm text-muted-foreground">{__('settings.security.email_code_desc')}</p>
                   <Form method="post" action={route('settings.security.email.enable')}>
                     {({ processing }) => (
                       <Button type="submit" disabled={processing} isLoading={processing}>{__('common.enable_email_2fa')}</Button>
@@ -103,8 +103,8 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                   </Form>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <h3 className="mb-2 font-medium">{__('security.totp_title')}</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">{__('security.totp_desc')}</p>
+                  <h3 className="mb-2 font-medium">{__('settings.security.totp_title')}</h3>
+                  <p className="mb-4 text-sm text-muted-foreground">{__('settings.security.totp_desc')}</p>
                   {qrUrl ? (
                     <div className="flex items-center gap-3">
                       <Button type="button" onClick={() => setOpen(true)}>{__('common.open_setup')}</Button>
@@ -124,17 +124,17 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
           {recoveryCodes && recoveryCodes.length > 0 && (
             <div className="rounded-lg border p-4">
               <div className="mb-2 flex items-center justify-between">
-                <h3 className="font-medium">{__('security.recovery_codes_title')}</h3>
+                <h3 className="font-medium">{__('settings.security.recovery_codes_title')}</h3>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button type="button" variant="ghost" size="icon" onClick={handleCopyRecoveryCodes} aria-label={__('security.copy_codes')}>
+                    <Button type="button" variant="ghost" size="icon" onClick={handleCopyRecoveryCodes} aria-label={__('settings.security.copy_codes')}>
                       <Copy className="size-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>{__('security.copy_codes')}</TooltipContent>
+                  <TooltipContent>{__('settings.security.copy_codes')}</TooltipContent>
                 </Tooltip>
               </div>
-              <p className="mb-3 text-sm text-muted-foreground">{__('security.recovery_codes_desc')}</p>
+              <p className="mb-3 text-sm text-muted-foreground">{__('settings.security.recovery_codes_desc')}</p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {recoveryCodes.map((code, i) => (
                   <code key={i} className="rounded bg-muted px-2 py-1 font-mono text-sm">{code}</code>
@@ -144,7 +144,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
           )}
 
           <div className="text-sm text-muted-foreground">
-            {__('security.tip_lost_access')}
+            {__('settings.security.tip_lost_access')}
           </div>
         </div>
       </SettingsLayout>
@@ -175,14 +175,14 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-background p-6 text-left align-middle shadow-lg">
-                  <Dialog.Title className="text-lg font-medium">{__('security.email_confirm_title')}</Dialog.Title>
+                  <Dialog.Title className="text-lg font-medium">{__('settings.security.email_confirm_title')}</Dialog.Title>
                   <div className="mt-3 space-y-3">
-                    <p className="text-sm text-muted-foreground">{__('security.email_confirm_desc')}</p>
+                    <p className="text-sm text-muted-foreground">{__('settings.security.email_confirm_desc')}</p>
                     <Form method="post" action={route('settings.security.email.confirm')} className="space-y-3">
                       {({ processing, errors }) => (
                         <>
                           <div className="grid gap-2">
-                            <Label htmlFor="email_code">{__('security.authentication_code')}</Label>
+                            <Label htmlFor="email_code">{__('settings.security.authentication_code')}</Label>
                             <Input id="email_code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} ref={emailInputRef} autoFocus />
                             <InputError message={errors.code} />
                           </div>
@@ -236,17 +236,17 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-md transform rounded-xl bg-background p-6 text-left align-middle shadow-lg">
-                  <Dialog.Title className="text-lg font-medium">{__('security.totp_setup_title')}</Dialog.Title>
+                  <Dialog.Title className="text-lg font-medium">{__('settings.security.totp_setup_title')}</Dialog.Title>
                   <div className="mt-3 space-y-3">
                     {qrUrl ? (
                       <div className="space-y-3">
-                        <img src={qrUrl} alt={__('security.totp_scan_alt')} className="h-40 w-40" />
+                        <img src={qrUrl} alt={__('settings.security.totp_scan_alt')} className="h-40 w-40" />
                         <p className="text-xs text-muted-foreground break-all">{otpAuthUrl}</p>
                         <Form method="post" action={route('settings.security.totp.confirm')} className="space-y-3">
                           {({ processing, errors }) => (
                             <>
                               <div className="grid gap-2">
-                                <Label htmlFor="code">{__('security.enter_code_to_confirm')}</Label>
+                                <Label htmlFor="code">{__('settings.security.enter_code_to_confirm')}</Label>
                                 <Input id="code" name="code" inputMode="numeric" pattern="[0-9]*" maxLength={6} aria-invalid={!!errors.code} ref={totpInputRef} autoFocus />
                                 <InputError message={errors.code} />
                               </div>
@@ -269,7 +269,7 @@ export default function Security({ otpAuthUrl, qrUrl, recoveryCodes, setupJustBe
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <p className="text-sm text-muted-foreground">{__('security.begin_setup_desc')}</p>
+                        <p className="text-sm text-muted-foreground">{__('settings.security.begin_setup_desc')}</p>
                         <Form method="post" action={route('settings.security.totp.begin')}>
                           {({ processing }) => (
                             <Button type="submit" disabled={processing} isLoading={processing}>{__('common.begin_setup')}</Button>

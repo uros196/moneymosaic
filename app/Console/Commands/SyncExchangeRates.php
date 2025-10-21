@@ -2,8 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ExchangeRate;
-use App\Services\ExchangeRates\RateProvider;
+use App\Services\ExchangeRates\ExchangeRateSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Throwable;
@@ -29,57 +28,20 @@ class SyncExchangeRates extends Command
      */
     public function handle(): int
     {
+        $syncService = app(ExchangeRateSyncService::class);
+
         $dateOption = (string) $this->option('date');
         $date = $dateOption !== '' ? Carbon::parse($dateOption) : Carbon::today();
 
         $this->info(sprintf('Rates sync job started for %s.', $date->toDateString()));
 
-        $provider = app(RateProvider::class);
-
         try {
-            $rates = $provider->getRatesForDate($date);
+            $syncService->syncForDate($date);
         } catch (Throwable $e) {
-            $this->error('Failed to fetch rates: '.$e->getMessage());
+            $this->error('Failed to sync rates: '.$e->getMessage());
 
             return self::FAILURE;
         }
-
-        $base = strtoupper((string) config('exchange.base_currency', 'EUR'));
-
-        foreach ($rates as $quote => $rate) {
-            $quote = strtoupper($quote);
-
-            // Skip base->base here; we'll enforce it once below to avoid duplicates
-            if ($quote === $base) {
-                continue;
-            }
-
-            // Persist only configured symbols to avoid accidental writes
-            if (! in_array($quote, array_map('strtoupper', (array) config('exchange.provider.symbols')), true)) {
-                continue;
-            }
-
-            ExchangeRate::query()->updateOrCreate(
-                [
-                    'date' => $date->toDateString(),
-                    'base_currency_code' => $base,
-                    'quote_currency_code' => $quote,
-                ],
-                [
-                    'rate_multiplier' => (float) $rate,
-                ]
-            );
-        }
-
-        // Ensure base->base = 1.0 exists even if provider omitted it
-        ExchangeRate::query()->updateOrCreate(
-            [
-                'date' => $date->toDateString(),
-                'base_currency_code' => $base,
-                'quote_currency_code' => $base,
-            ],
-            ['rate_multiplier' => 1.0]
-        );
 
         $this->info('Rates sync job finished.');
 

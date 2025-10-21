@@ -10,16 +10,14 @@ return new class extends Migration
     {
         $table = config('session.table', 'sessions');
 
-        if (! Schema::hasTable($table)) {
-            Schema::create($table, function (Blueprint $table): void {
-                $table->string('id')->primary();
-                $table->foreignId('user_id')->nullable()->index();
-                $table->string('ip_address', 45)->nullable();
-                $table->text('user_agent')->nullable();
-                $table->longText('payload');
-                $table->integer('last_activity')->index();
-            });
-        }
+        Schema::create($table, function (Blueprint $table): void {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
     }
 
     public function down(): void

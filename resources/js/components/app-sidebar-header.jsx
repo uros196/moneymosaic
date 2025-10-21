@@ -1,5 +1,7 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import LanguageSwitcher from '@/components/language-switcher';
+import AppearanceToggleDropdown from '@/components/appearance-dropdown';
 
 export function AppSidebarHeader({ breadcrumbs = [] }) {
     return (
@@ -7,6 +9,10 @@ export function AppSidebarHeader({ breadcrumbs = [] }) {
             <div className="flex items-center gap-2">
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+                <AppearanceToggleDropdown />
+                <LanguageSwitcher />
             </div>
         </header>
     );

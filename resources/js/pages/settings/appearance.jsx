@@ -11,17 +11,17 @@ export default function Appearance() {
     const { __ } = useI18n();
     const breadcrumbs = [
         {
-            title: __('appearance.title'),
+            title: __('settings.appearance.title'),
             href: route('appearance'),
         },
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={__('appearance.title')} />
+            <Head title={__('settings.appearance.title')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title={__('appearance.title')} description={__('appearance.description')} />
+                    <HeadingSmall title={__('settings.appearance.title')} description={__('settings.appearance.description')} />
                     <AppearanceTabs />
                 </div>
             </SettingsLayout>

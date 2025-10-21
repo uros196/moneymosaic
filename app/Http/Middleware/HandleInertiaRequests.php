@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\ToastType;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -52,37 +53,34 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => function () use ($request) {
-                $success = $request->session()->get('success');
-                $error = $request->session()->get('error');
-                $warning = $request->session()->get('warning');
-                $info = $request->session()->get('info');
+                $success = $request->session()->get(ToastType::Success->value);
+                $error = $request->session()->get(ToastType::Error->value);
+                $warning = $request->session()->get(ToastType::Warning->value);
+                $info = $request->session()->get(ToastType::Info->value);
                 $status = $request->session()->get('status');
 
                 $hasFlash = $success !== null || $error !== null || $warning !== null || $info !== null || $status !== null;
 
                 return [
-                    'success' => $success,
-                    'error' => $error,
-                    'warning' => $warning,
-                    'info' => $info,
+                    ToastType::Success->value => $success,
+                    ToastType::Error->value => $error,
+                    ToastType::Warning->value => $warning,
+                    ToastType::Info->value => $info,
                     'status' => $status,
                     // Unique key so the frontend effect runs even when text is identical across submits
                     'key' => $hasFlash ? (string) microtime(true) : null,
                 ];
             },
             'locale' => app()->getLocale(),
-            'translations' => function () {
-                return [
+            'availableLocales' => config('app.available_locales'),
+            'translations' => function () use ($request) {
+                return array_merge([
+
+                    // base translations that are always available
                     'common' => trans('common'),
-                    'security' => trans('security'),
-                    'sessions' => trans('sessions'),
-                    'appearance' => trans('appearance'),
-                    'password' => trans('password'),
-                    'profile' => trans('profile'),
-                    'auth' => trans('auth'),
-                    'settings' => trans('settings'),
                     'nav' => trans('nav'),
-                ];
+
+                ], $request->attributes->get('translations.extra', []));
             },
         ];
     }

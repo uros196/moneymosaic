@@ -5,6 +5,7 @@ import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { useEffect, useRef } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import ToastManager from '@/components/toast-manager';
+import { ConfirmDeleteProvider } from '@/components/ui/confirm-delete-provider';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }) {
     const { auth } = usePage().props;
@@ -57,7 +58,11 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }) {
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 <ToastManager />
-                {children}
+                <ConfirmDeleteProvider>
+                    <div className="px-4 py-6">
+                        {children}
+                    </div>
+                </ConfirmDeleteProvider>
             </AppContent>
         </AppShell>
     );

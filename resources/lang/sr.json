@@ -1,9 +1,20 @@
 {
-  "Profile information updated.": "Podaci profila su ažurirani.",
-  "No TOTP secret to confirm. Please start setup again.": "Nema TOTP tajne za potvrdu. Molimo započnite podešavanje ponovo.",
-  "Invalid code. Try again.": "Nevažeći kod. Pokušajte ponovo.",
-  "Two-factor authentication enabled.": "Dvofaktorska autentifikacija je omogućena.",
-  "Two-factor authentication disabled.": "Dvofaktorska autentifikacija je onemogućena.",
-  "A new authentication code has been sent to your email address.": "Novi autentikacioni kod je poslat na vašu email adresu.",
-  "A reset link will be sent if the account exists.": "Link za reset lozinke će biti poslat ako nalog postoji."
+    "Profile information updated.": "Podaci profila su ažurirani.",
+    "No TOTP secret to confirm. Please start setup again.": "Nema TOTP tajne za potvrdu. Molimo započnite podešavanje ponovo.",
+    "Invalid code. Try again.": "Nevažeći kod. Pokušajte ponovo.",
+    "Two-factor authentication enabled.": "Dvofaktorska autentifikacija je omogućena.",
+    "Two-factor authentication disabled.": "Dvofaktorska autentifikacija je onemogućena.",
+    "A new authentication code has been sent to your email address.": "Novi autentikacioni kod je poslat na vašu email adresu.",
+    "A reset link will be sent if the account exists.": "Link za reset lozinke će biti poslat ako nalog postoji.",
+    "Name": "Ime",
+    "Date": "Datum",
+    "Currency": "Valuta",
+    "Model": "Model",
+    "Search": "Pretraga",
+    "Range": "Opseg",
+    "Items": "Stavke",
+    "Date from": "Datum od",
+    "Date to": "Datum do",
+    "Amount form": "Iznos od",
+    "Amount to": "Iznos do"
 }

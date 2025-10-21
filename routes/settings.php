@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Settings\IncomeTypeController;
+use App\Http\Controllers\Settings\ListsController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SessionsController;
@@ -7,12 +9,12 @@ use App\Http\Controllers\Settings\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::middleware(['auth', 'verified', '2fa', 'password.recent'])
-    ->prefix('settings')
+Route::middleware('translations:settings')
     ->group(function () {
         Route::redirect('', '/settings/profile');
 
-        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit')
+            ->middleware('translations:auth');
         Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
@@ -40,4 +42,13 @@ Route::middleware(['auth', 'verified', '2fa', 'password.recent'])
         Route::post('security/totp/confirm', [TwoFactorController::class, 'confirmTotp'])->name('settings.security.totp.confirm')
             ->middleware('throttle:6,1');
         Route::post('security/disable', [TwoFactorController::class, 'disable'])->name('settings.security.disable');
+
+        // Lists management
+        Route::get('lists', [ListsController::class, 'index'])->name('settings.lists');
+
+        // Income Types
+        Route::get('lists/income-types', [IncomeTypeController::class, 'index'])->name('settings.lists.income-types');
+        Route::post('lists/income-types', [IncomeTypeController::class, 'store'])->name('settings.lists.income-types.store');
+        Route::put('lists/income-types/{incomeType}', [IncomeTypeController::class, 'update'])->name('settings.lists.income-types.update');
+        Route::delete('lists/income-types/{incomeType}', [IncomeTypeController::class, 'destroy'])->name('settings.lists.income-types.destroy');
     });

@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Repositories\Contracts\SessionRepository as SessionRepositoryContract;
+use App\Repositories\Contracts\SessionRepository;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,9 +17,9 @@ use Symfony\Component\HttpFoundation\Response;
 class UpdateSessionMetadata
 {
     /**
-     * @param  SessionRepositoryContract  $sessions  Repository for persisting session metadata.
+     * @param  SessionRepository  $sessions  Repository for persisting session metadata.
      */
-    public function __construct(public SessionRepositoryContract $sessions)
+    public function __construct(public SessionRepository $sessions)
     {
         //
     }

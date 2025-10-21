@@ -21,7 +21,7 @@ class SessionsTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get('/settings/sessions')
+            ->get(route('settings.sessions'))
             ->assertOk();
     }
 
@@ -39,7 +39,7 @@ class SessionsTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->delete('/settings/sessions/sess1')
+            ->delete(route('settings.sessions.destroy', 'sess1'))
             ->assertStatus(302);
 
         $this->assertDatabaseMissing($this->sessionsTable(), [
@@ -72,7 +72,7 @@ class SessionsTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->post('/settings/sessions/others')
+            ->post(route('settings.sessions.others'))
             ->assertStatus(302);
 
         $this->assertDatabaseCount($this->sessionsTable(), 0);
@@ -92,8 +92,8 @@ class SessionsTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->post('/settings/sessions/all')
-            ->assertRedirect('/');
+            ->post(route('settings.sessions.all'))
+            ->assertRedirect(route('home'));
 
         $this->assertGuest();
         $this->assertDatabaseCount($this->sessionsTable(), 0);

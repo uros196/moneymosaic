@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
-use App\Repositories\Contracts\SessionRepository as SessionRepositoryContract;
+use App\Repositories\Contracts\SessionRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,37 +22,28 @@ use Inertia\Response;
 class SessionsController extends Controller
 {
     /**
-     * @param  SessionRepositoryContract  $sessions  Repository for session management.
+     * @param  SessionRepository  $sessions  Repository for session management.
      */
-    public function __construct(public SessionRepositoryContract $sessions)
+    public function __construct(public SessionRepository $sessions)
     {
         //
     }
 
     /**
      * List active sessions for the authenticated user.
-     *
-     * @param  Request  $request  Current request instance.
-     * @return Response Inertia response with sessions data.
      */
     public function index(Request $request): Response
     {
         $user = $request->user();
         $currentId = $request->session()->getId();
 
-        $rows = $this->sessions->listForUser($user, $currentId);
-
         return Inertia::render('settings/sessions', [
-            'sessions' => $rows,
+            'sessions' => $this->sessions->listForUser($user, $currentId),
         ]);
     }
 
     /**
      * Log out a specific session by ID for the current user.
-     *
-     * @param  Request  $request  Current request instance.
-     * @param  string  $id  Session identifier to terminate.
-     * @return RedirectResponse Redirects back or to home if current session was terminated.
      */
     public function destroy(Request $request, string $id): RedirectResponse
     {
@@ -68,14 +60,11 @@ class SessionsController extends Controller
             return redirect('/');
         }
 
-        return back()->with('status', __('Session logged out.'));
+        return back()->with(ToastType::Success->message(__('Session logged out.')));
     }
 
     /**
      * Log out all other sessions for the current user except the active one.
-     *
-     * @param  Request  $request  Current request instance.
-     * @return RedirectResponse Redirects back with a status message.
      */
     public function destroyOthers(Request $request): RedirectResponse
     {
@@ -84,14 +73,11 @@ class SessionsController extends Controller
 
         $this->sessions->deleteOthersForUserExcept($user, $currentId);
 
-        return back()->with('status', __('Other sessions have been logged out.'));
+        return back()->with(ToastType::Success->message(__('Other sessions have been logged out.')));
     }
 
     /**
      * Log out all sessions for the current user and end the current session.
-     *
-     * @param  Request  $request  Current request instance.
-     * @return RedirectResponse Redirects to home after logging out from all sessions.
      */
     public function destroyAll(Request $request): RedirectResponse
     {

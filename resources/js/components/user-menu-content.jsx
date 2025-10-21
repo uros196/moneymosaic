@@ -26,7 +26,7 @@ export function UserMenuContent({ user }) {
                 <DropdownMenuItem asChild>
                     <Link className="block w-full" href={route('profile.edit')} as="button" prefetch onClick={cleanup}>
                         <Settings className="mr-2" />
-                        {__('settings.title')}
+                        {__('nav.user_menu.settings')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>

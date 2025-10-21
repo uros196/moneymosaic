@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\Currency;
+use App\Enums\ToastType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\DeleteAccountRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Http\Resources\CurrencyResource;
+use App\Http\Resources\UserResource;
+use App\Services\ProfileService;
 use App\Services\TwoFactor\UserTwoFactorService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -21,34 +26,28 @@ class ProfileController extends Controller
     public function edit(Request $request, UserTwoFactorService $user2fa): Response
     {
         $user = $request->user();
-
-        $inProgress = $user2fa->isSetupInProgress($user, $request->session());
+        $this->authorize('view', $user);
 
         return Inertia::render('settings/profile', [
+            'user' => UserResource::make($user),
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
-            'twoFactorSetupInProgress' => $inProgress,
+            'currencies' => CurrencyResource::collection(Currency::cases()),
+            'twoFactorSetupInProgress' => $user2fa->isSetupInProgress($user, $request->session()),
         ]);
     }
 
     /**
      * Update the user's profile settings.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, ProfileService $profiles): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $this->authorize('update', $request->user());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        // instant update app locale
-        app()->setLocale($request->validated('locale'));
+        $profiles->updateProfile($request->user(), $request->validated());
 
         return to_route('profile.edit')
-            ->with('success', __('Profile information updated.'));
+            ->with(ToastType::Success->message(__('Profile information updated.')));
     }
 
     /**
@@ -57,6 +56,8 @@ class ProfileController extends Controller
     public function destroy(DeleteAccountRequest $request): RedirectResponse
     {
         $user = $request->user();
+
+        $this->authorize('delete', $user);
 
         Auth::logout();
 

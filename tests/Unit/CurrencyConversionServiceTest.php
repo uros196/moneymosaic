@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Enums\Currency;
 use App\Models\ExchangeRate;
 use App\Services\CurrencyConversionService;
 use Carbon\Carbon;
@@ -18,16 +19,16 @@ class CurrencyConversionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CurrencyConversionService;
+        $this->service = app(CurrencyConversionService::class);
         Cache::flush();
     }
 
     public function test_passthrough_same_currency(): void
     {
         $date = Carbon::parse('2025-08-10');
-        $amount = 12345;
+        $amount = 123;
 
-        $converted = $this->service->convert($amount, 'USD', 'USD', $date);
+        $converted = $this->service->convert($amount, Currency::USD, Currency::USD, $date);
 
         $this->assertSame($amount, $converted);
     }
@@ -35,59 +36,54 @@ class CurrencyConversionServiceTest extends TestCase
     public function test_convert_base_to_quote(): void
     {
         $date = Carbon::parse('2025-08-10');
-        ExchangeRate::create([
-            'date' => $date->toDateString(),
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'USD',
-            'rate_multiplier' => 1.10,
-        ]);
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
+                'date' => $date->toDateString(),
+                'rate_multiplier' => 1.10,
+            ]);
 
-        $amountEur = 10000; // 100.00 EUR in minor units
-        $converted = $this->service->convert($amountEur, 'EUR', 'USD', $date);
-        $this->assertSame(11000, $converted); // 110.00 USD
+        $amountEur = 100; // 100.00 EUR in major units
+        $converted = $this->service->convert($amountEur, Currency::EUR, Currency::USD, $date);
+        $this->assertSame(110, $converted); // 110.00 USD
     }
 
     public function test_convert_quote_to_base(): void
     {
         $date = Carbon::parse('2025-08-10');
-        ExchangeRate::create([
-            'date' => $date->toDateString(),
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'USD',
-            'rate_multiplier' => 1.10,
-        ]);
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
+                'date' => $date->toDateString(),
+                'rate_multiplier' => 1.10,
+            ]);
 
-        $amountUsd = 11000; // 110.00 USD
-        $converted = $this->service->convert($amountUsd, 'USD', 'EUR', $date);
-        $this->assertSame(10000, $converted); // 100.00 EUR
+        $amountUsd = 110; // 110.00 USD
+        $converted = $this->service->convert($amountUsd, Currency::USD, Currency::EUR, $date);
+        $this->assertSame(100, $converted); // 100.00 EUR
     }
 
     public function test_convert_cross_via_eur(): void
     {
         $date = Carbon::parse('2025-08-10');
-        ExchangeRate::insert([
-            [
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
                 'date' => $date->toDateString(),
-                'base_currency_code' => 'EUR',
-                'quote_currency_code' => 'USD',
                 'rate_multiplier' => 1.10,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
+            ]);
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::RSD)
+            ->create([
                 'date' => $date->toDateString(),
-                'base_currency_code' => 'EUR',
-                'quote_currency_code' => 'RSD',
                 'rate_multiplier' => 117.50,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+            ]);
 
-        $amountUsd = 10000; // 100.00 USD
-        $converted = $this->service->convert($amountUsd, 'USD', 'RSD', $date);
-        // 100 / 1.1 * 117.5 = 10681.818 RSD -> 1,068,182 minor units (rounded)
-        $this->assertSame(1068182, $converted);
+        $amountUsd = 100; // 100.00 USD
+        $converted = $this->service->convert($amountUsd, Currency::USD, Currency::RSD, $date);
+        // 100 / 1.1 * 117.5 = 10681.818 RSD -> 10,681.82 (rounded)
+        $this->assertIsFloat($converted);
+        $this->assertEquals(10681.82, $converted);
     }
 
     public function test_rollback_within_bound(): void
@@ -95,31 +91,68 @@ class CurrencyConversionServiceTest extends TestCase
         $rateDate = Carbon::parse('2025-08-10');
         $targetDate = Carbon::parse('2025-08-12'); // 2 days after
 
-        ExchangeRate::create([
-            'date' => $rateDate->toDateString(),
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'USD',
-            'rate_multiplier' => 1.20,
-        ]);
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
+                'date' => $rateDate->toDateString(),
+                'rate_multiplier' => 1.20,
+            ]);
 
-        $amountEur = 10000;
-        $converted = $this->service->convert($amountEur, 'EUR', 'USD', $targetDate, maxLookbackDays: 3);
-        $this->assertSame(12000, $converted);
+        $amountEur = 100;
+        $converted = $this->service->convert($amountEur, Currency::EUR, Currency::USD, $targetDate, fallback: true);
+        $this->assertSame(120, $converted);
     }
 
-    public function test_throws_when_beyond_lookback(): void
+    public function test_throws_when_exact_missing_and_fallback_disabled(): void
     {
         $rateDate = Carbon::parse('2025-08-10');
         $targetDate = Carbon::parse('2025-08-20'); // 10 days after
 
-        ExchangeRate::create([
-            'date' => $rateDate->toDateString(),
-            'base_currency_code' => 'EUR',
-            'quote_currency_code' => 'USD',
-            'rate_multiplier' => 1.20,
-        ]);
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
+                'date' => $rateDate->toDateString(),
+                'rate_multiplier' => 1.20,
+            ]);
 
         $this->expectException(\RuntimeException::class);
-        $this->service->convert(10000, 'EUR', 'USD', $targetDate, maxLookbackDays: 7);
+        $this->service->convert(100, Currency::EUR, Currency::USD, $targetDate, fallback: false);
+    }
+
+    public function test_convert_minor_base_to_quote(): void
+    {
+        $date = Carbon::parse('2025-08-10');
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
+                'date' => $date->toDateString(),
+                'rate_multiplier' => 1.10,
+            ]);
+
+        $minorEur = 10000; // 100.00 EUR
+        $converted = $this->service->convertMinor($minorEur, Currency::EUR, Currency::USD, $date);
+        $this->assertSame(110, $converted); // 110.00 USD
+    }
+
+    public function test_convert_minor_cross_via_eur(): void
+    {
+        $date = Carbon::parse('2025-08-10');
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::USD)
+            ->create([
+                'date' => $date->toDateString(),
+                'rate_multiplier' => 1.10,
+            ]);
+        ExchangeRate::factory()
+            ->forPair(Currency::EUR, Currency::RSD)
+            ->create([
+                'date' => $date->toDateString(),
+                'rate_multiplier' => 117.50,
+            ]);
+
+        $minorUsd = 10000; // 100.00 USD
+        $converted = $this->service->convertMinor($minorUsd, Currency::USD, Currency::RSD, $date);
+        $this->assertIsFloat($converted);
+        $this->assertEquals(10681.82, $converted);
     }
 }

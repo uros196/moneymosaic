@@ -3,6 +3,8 @@
 return [
     // Generic
     'email' => 'Email adresa',
+    'name' => 'Ime',
+    'full_name' => 'Puno ime',
     'password' => 'Lozinka',
     'confirm_password' => 'Potvrdi lozinku',
     'new_password' => 'Nova lozinka',
@@ -46,6 +48,7 @@ return [
     // Two-factor challenge
     'twofactor_title' => 'Dvofaktorska autentikacija',
     'twofactor_head' => 'Dvofaktorski izazov',
+    'twofactor_desc' => 'Dodajte dodatni sloj bezbednosti vašem nalogu.',
     'twofactor_desc_email' => 'Unesite šestocifreni kod poslat na vaš email.',
     'twofactor_desc_totp' => 'Unesite šestocifreni kod iz aplikacije autentifikatora.',
     'authentication_code' => 'Autentikacioni kod',

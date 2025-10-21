@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Enums\ToastType;
 use App\Enums\TwoFactorType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ConfirmEmailTwoFactorRequest;
@@ -82,7 +83,7 @@ class TwoFactorController extends Controller
 
         return to_route('settings.security')
             ->with('recoveryCodes', $codes)
-            ->with('success', __('Two-factor authentication enabled.'));
+            ->with(ToastType::Success->message(__('Two-factor authentication enabled.')));
     }
 
     /**
@@ -100,17 +101,17 @@ class TwoFactorController extends Controller
             return back()->withErrors(['code' => __('Invalid code. Try again.')]);
         }
 
-        return back()->with('success', __('Two-factor authentication enabled.'));
+        return back()->with(ToastType::Success->message(__('Two-factor authentication enabled.')));
     }
 
     /**
-     * Resend Email-based 2FA verification code during enable flow.
+     * Resend Email-based 2FA verification code during the 'enable' flow.
      */
     public function resendEmail(Request $request, UserTwoFactorService $user2fa): RedirectResponse
     {
         $user2fa->resendEmail($request->user(), $request->session());
 
-        return back()->with('status', __('A new authentication code has been sent to your email address.'));
+        return back()->with(ToastType::Success->message(__('A new authentication code has been sent to your email address.')));
     }
 
     /**
@@ -122,6 +123,6 @@ class TwoFactorController extends Controller
         // Ensure any in-progress TOTP setup is fully canceled
         $tfSession->clearTotpSetup($request->session());
 
-        return back()->with('success', __('Two-factor authentication disabled.'));
+        return back()->with(ToastType::Success->message(__('Two-factor authentication disabled.')));
     }
 }
