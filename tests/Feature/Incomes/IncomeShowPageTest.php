@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Incomes;
 
 use App\Models\Income;
 use App\Models\User;
